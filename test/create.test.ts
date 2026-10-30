@@ -43,7 +43,7 @@ vi.mock("@clack/prompts", () => ({
   text: vi.fn(),
 }));
 
-const nestCli = "nest-cli.json";
+const nestModule = "src/app.module.ts";
 const packageManifest = "package.json";
 const renameError = "EACCES: permission denied";
 const cancelled = "Cancelled.";
@@ -110,7 +110,7 @@ describe("create", () => {
 
     expect(packageJson.name).toBe("my-api");
     expect(existsSync(path.join(directory, ".husky", "pre-commit"))).toBe(true);
-    expect(existsSync(path.join(directory, nestCli))).toBe(true);
+    expect(existsSync(path.join(directory, nestModule))).toBe(true);
     expect(existsSync(path.join(directory, ".gitignore"))).toBe(true);
     expect(existsSync(path.join(directory, "_gitignore"))).toBe(false);
     expect(vi.mocked(initGit)).toHaveBeenCalledWith(directory);
@@ -133,7 +133,7 @@ describe("create", () => {
     );
 
     expect(existsSync(path.join(directory, "src", "server.ts"))).toBe(true);
-    expect(existsSync(path.join(directory, nestCli))).toBe(false);
+    expect(existsSync(path.join(directory, nestModule))).toBe(false);
     expect(process.exitCode).toBe(0);
   });
 
@@ -142,7 +142,7 @@ describe("create", () => {
     vi.mocked(select).mockResolvedValue("nextjs");
     await create([]);
     expect(existsSync(path.join(cwd, "my-web", "app", "page.tsx"))).toBe(true);
-    expect(existsSync(path.join(cwd, "my-web", nestCli))).toBe(false);
+    expect(existsSync(path.join(cwd, "my-web", nestModule))).toBe(false);
     expect(process.exitCode).toBe(0);
   });
 

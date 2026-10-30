@@ -2,7 +2,6 @@
 !package.json
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
-!nest-cli.json
 !tsconfig.json
 !tsconfig.build.json
 !src/

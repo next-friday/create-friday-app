@@ -44,7 +44,7 @@
     "@next-friday/commitlint-config-friday": "4.0.0",
     "@next-friday/eslint-config-friday": "5.1.0",
     "@next-friday/prettier-config-friday": "4.0.0",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.5",
     "@vitest/coverage-v8": "5.0.5",
     "dependency-cruiser": "18.7.0",
     "editorconfig-checker": "7.0.0",

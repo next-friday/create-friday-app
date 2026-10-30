@@ -1,0 +1,3 @@
+{
+  "Exclude": ["^templates/payload/src/migrations/", "^templates/payload/src/payload-types\\.ts$"]
+}

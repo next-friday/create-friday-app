@@ -1,0 +1,28 @@
+{
+  "extends": "dependency-cruiser/configs/recommended-strict",
+  "forbidden": [
+    {
+      "name": "no-orphans",
+      "to": {},
+      "from": {
+        "orphan": true,
+        "pathNot": [
+          "(^|/)tsconfig\\.json$",
+          "(^|/)eslint\\.config\\.ts$",
+          "(^|/)vitest[.]config[.]ts$",
+          "[.]test[.]ts$",
+          "^src/main[.]ts$"
+        ]
+      }
+    }
+  ],
+  "options": {
+    "skipAnalysisNotInRules": true,
+    "tsPreCompilationDeps": true,
+    "enhancedResolveOptions": {
+      "conditionNames": ["import", "require", "node", "default", "types"],
+      "exportsFields": ["exports"]
+    },
+    "exclude": "(^|/)(?:dist|coverage|node_modules)/"
+  }
+}

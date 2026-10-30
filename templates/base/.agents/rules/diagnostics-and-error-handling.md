@@ -1,0 +1,7 @@
+# Diagnostics
+
+Resolve runtime failures at the source with the language's standard narrowing, validation, and error types. For missing third-party types, take upstream definitions or a narrow adapter in the established location.
+
+Surface errors at the caller or process boundary with diagnostic context. Handle an error to add context, recover, or translate it at an application boundary. Retain the root cause through the language's exception mechanism.
+
+Report unresolved type, declaration, or rule conflicts to the user. Findings follow `no-suppression.md`.

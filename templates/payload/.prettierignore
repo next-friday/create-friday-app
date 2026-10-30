@@ -1,0 +1,5 @@
+.husky/_
+pnpm-lock.yaml
+src/app/(payload)/
+src/migrations/
+src/payload-types.ts

@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+set -e
+
+while read -r _ _ remote_ref _; do
+  if [ "$remote_ref" = refs/heads/main ]; then
+    echo "pre-push: do not push to main. Push your branch and open a pull request." >&2
+    exit 1
+  fi
+done
+
+pnpm verify

@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -e
+
+# The first commit of a new repository creates main, so it is the only commit allowed there.
+if [ "$(git branch --show-current)" = main ] && git rev-parse --quiet --verify HEAD > /dev/null; then
+  echo "pre-commit: do not commit on main. Create a branch: git switch --create <type>/<short-description>" >&2
+  exit 1
+fi
+
+command -v gitleaks > /dev/null 2>&1 || {
+  echo "pre-commit: gitleaks is required. Install it (see CONTRIBUTING.md), then commit again." >&2
+  exit 1
+}
+
+gitleaks git --pre-commit --redact --staged --no-banner --config .gitleaks.toml
+pnpm rules:check
+pnpm exec lint-staged

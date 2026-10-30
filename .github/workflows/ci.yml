@@ -1,0 +1,340 @@
+name: Verify
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # Needed by paths-filter to inspect pull request changes.
+    outputs:
+      heavy: ${{ steps.filter.outputs.heavy }}
+      ci_policy: ${{ steps.filter.outputs.ci_policy }}
+      release_pr: ${{ steps.mode.outputs.release_pr }}
+      full_verification: ${{ steps.mode.outputs.full_verification }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Detect relevant changes
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          predicate-quantifier: some-with-excludes
+          filters: .github/file-filters.yml
+      - name: Select verification mode
+        id: mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAVY: ${{ steps.filter.outputs.heavy }}
+          CI_POLICY: ${{ steps.filter.outputs.ci_policy }}
+        run: |
+          release_pr=false
+          if [[ "$EVENT_NAME" == "pull_request" && "$HEAD_REF" == "changeset-release/main" && "$PR_AUTHOR" == "github-actions[bot]" ]]; then
+            release_pr=true
+          fi
+
+          full_verification=false
+          if [[ "$EVENT_NAME" == "push" || ( "$EVENT_NAME" == "pull_request" && "$release_pr" != "true" && ( "$HEAVY" == "true" || "$CI_POLICY" == "true" ) ) ]]; then
+            full_verification=true
+          fi
+
+          echo "release_pr=$release_pr" >> "$GITHUB_OUTPUT"
+          echo "full_verification=$full_verification" >> "$GITHUB_OUTPUT"
+
+  lint:
+    name: Lint
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Check lint
+        run: pnpm lint:check
+
+  format:
+    name: Format & Manifests
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Check formatting
+        run: pnpm format:check
+      - name: Check package.json ordering
+        run: pnpm sort-package-json:check
+
+  test:
+    name: Test & Coverage
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # Needed for Codecov OIDC authentication on trusted runs.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          disable_search: true
+          fail_ci_if_error: false
+          use_oidc: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+          files: coverage/lcov.info
+
+  check-types:
+    name: Type Check
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Check types
+        run: pnpm typecheck
+
+  knip:
+    name: Knip
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Run Knip
+        run: pnpm knip
+
+  audit:
+    name: Dependency Audit
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Audit dependencies
+        run: pnpm audit
+
+  package-validation:
+    name: Package Validation
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Build package
+        run: pnpm build
+      - name: Validate package manifest and files
+        run: pnpm check:publint
+
+  consumer-smoke:
+    name: Consumer Smoke
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+        with:
+          runtime: node@24.20.0
+      - name: Build package
+        run: pnpm build
+      - name: Run the packed CLI in a clean npm consumer
+        shell: bash
+        run: | # zizmor: ignore[adhoc-packages] isolated consumer install
+          consumer_dir="$(mktemp -d)"
+          pnpm pack --pack-destination "$consumer_dir"
+          cd "$consumer_dir"
+          npm init --yes >/dev/null
+          npm install --ignore-scripts --no-audit --no-fund ./*.tgz
+
+          if output="$(npx --no-install create-friday-app my-app --stack unknown 2>&1)"; then
+            echo "Expected an unknown stack to fail." >&2
+            exit 1
+          fi
+          grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload.' <<<"$output"
+
+  templates:
+    name: Template (${{ matrix.stack }})
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        stack:
+          - nodejs
+          - nestjs
+          - nextjs
+          - payload
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Build package
+        run: pnpm build
+      - name: Generate the project from the packed CLI
+        env:
+          STACK: ${{ matrix.stack }}
+        run: |
+          tarball_dir="$(mktemp -d)"
+          pnpm pack --pack-destination "$tarball_dir"
+          npm exec --yes --package "$(ls "$tarball_dir"/*.tgz)" -- create-friday-app "ci-$STACK" --stack "$STACK" </dev/null
+          if grep --recursive --files-with-matches --exclude-dir=node_modules --exclude-dir=.git "next-friday-template-$STACK" "ci-$STACK"; then
+            echo "The template name was not replaced." >&2
+            exit 1
+          fi
+      - name: Verify the project
+        working-directory: ci-${{ matrix.stack }}
+        env:
+          # The payload stack's build loads its config, which requires these; the build never connects to the database.
+          DATABASE_URL: postgres://build-only@localhost/build-only
+          PAYLOAD_SECRET: build-only
+        run: |
+          git add --all
+          pnpm verify
+          pnpm build
+
+  compatibility:
+    name: Compatibility (${{ matrix.os }}, Node ${{ matrix.node }})
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 24.15.0
+          - os: ubuntu-latest
+            node: 24.21.0
+          - os: windows-latest
+            node: 24.21.0
+          - os: macos-latest
+            node: 24.21.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+        with:
+          runtime: node@${{ matrix.node }}
+      - name: Run package tests
+        run: pnpm test
+
+  release-integrity:
+    name: Release Integrity
+    needs: changes
+    if: needs.changes.outputs.release_pr == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: $/.github/actions/setup-pnpm
+      - name: Validate release metadata
+        run: |
+          pnpm format:check
+          pnpm sort-package-json:check
+      - name: Build package
+        run: pnpm build
+      - name: Validate package manifest and files
+        run: pnpm check:publint
+
+  ci:
+    name: All Checks
+    if: always()
+    timeout-minutes: 5
+    needs:
+      - changes
+      - release-integrity
+      - lint
+      - format
+      - test
+      - check-types
+      - package-validation
+      - consumer-smoke
+      - templates
+      - compatibility
+      - knip
+      - audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all verification jobs
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

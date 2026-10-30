@@ -1,0 +1,89 @@
+{
+  "name": "@next-friday/create-app",
+  "version": "0.0.0",
+  "description": "Create a Next Friday project from a template.",
+  "keywords": [
+    "create",
+    "scaffold",
+    "template",
+    "next-friday"
+  ],
+  "homepage": "https://github.com/next-friday/create-friday-app#readme",
+  "bugs": {
+    "url": "https://github.com/next-friday/create-friday-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/next-friday/create-friday-app.git"
+  },
+  "license": "MIT",
+  "author": "Next Friday",
+  "sideEffects": true,
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "create-friday-app": "./dist/main.mjs"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "audit": "pnpm audit",
+    "build": "tsdown",
+    "changeset": "changeset",
+    "changeset:status": "changeset status --since main",
+    "check:publint": "publint",
+    "clean": "rm -rf dist coverage *.tsbuildinfo .eslintcache node_modules/.cache",
+    "dev": "tsdown --watch",
+    "format": "prettier --write --cache .",
+    "format:check": "prettier --check --cache . && editorconfig-checker",
+    "knip": "knip",
+    "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
+    "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
+    "prepare": "husky",
+    "sort-package-json": "sort-package-json package.json",
+    "sort-package-json:check": "sort-package-json --check package.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "verify": "pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.8.1"
+  },
+  "devDependencies": {
+    "@changesets/cli": "3.0.3",
+    "@commitlint/cli": "21.2.4",
+    "@next-friday/commitlint-config-friday": "4.0.0",
+    "@next-friday/eslint-config-friday": "5.0.0",
+    "@next-friday/prettier-config-friday": "4.0.0",
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.0.5",
+    "editorconfig-checker": "7.0.0",
+    "eslint": "10.13.0",
+    "fast-check": "4.10.2",
+    "husky": "9.1.7",
+    "jiti": "2.7.0",
+    "knip": "6.43.0",
+    "lint-staged": "17.6.0",
+    "pkg-pr-new": "0.0.91",
+    "prettier": "3.9.10",
+    "publint": "0.3.25",
+    "sort-package-json": "4.1.0",
+    "tsdown": "0.23.1",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  },
+  "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

@@ -1,0 +1,124 @@
+name: Deploy
+run-name: Deploy ${{ inputs.commit_sha }} to ${{ inputs.environment }}
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      commit_sha:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Railway environment to promote to
+        required: true
+        type: choice
+        options:
+          - uat
+          - prod
+      commit_sha:
+        description: Full commit SHA on main that passed CI
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify the requested commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read # Needed to find the CI and deploy runs of the requested commit.
+    env:
+      COMMIT_SHA: ${{ inputs.commit_sha }}
+      TARGET: ${{ inputs.environment }}
+    steps:
+      - name: Checkout the requested revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require the commit on main with passing CI and a deployment to the previous environment
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Expected a full lowercase commit SHA"; exit 1; }
+          git merge-base --is-ancestor "$COMMIT_SHA" origin/main || { echo "::error::$COMMIT_SHA is not on main"; exit 1; }
+          ci_run="$(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$COMMIT_SHA&event=push&branch=main&status=success" --jq '.workflow_runs[0].id // empty')"
+          [[ -n "$ci_run" ]] || { echo "::error::No successful CI run on main for $COMMIT_SHA"; exit 1; }
+          case "$TARGET" in
+            uat)
+              previous=dev
+              deployed="$(gh api "repos/$REPOSITORY/actions/runs/$ci_run/jobs" --jq '[.jobs[] | select(.name == "Deploy to dev / Deploy to dev" and .conclusion == "success")] | length')"
+              ;;
+            prod)
+              previous=uat
+              export EXPECTED_TITLE="Deploy $COMMIT_SHA to uat"
+              deployed="$(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?event=workflow_dispatch&status=success&per_page=100" --jq '.workflow_runs[] | select(.display_title == env.EXPECTED_TITLE) | .id' | wc -l)"
+              ;;
+          esac
+          [[ "$deployed" -gt 0 ]] || { echo "::error::$COMMIT_SHA has no successful $previous deployment; promote through $previous first"; exit 1; }
+
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.APP_URL }}
+    permissions:
+      contents: read
+    env:
+      APP_URL: ${{ vars.APP_URL }}
+      RAILWAY_CLI_SHA256: 2e682fd2ddf8d6fdf9e46d9d99d99646ff0022a6abb0c2bca93011348a269fb9
+      RAILWAY_CLI_VERSION: 5.71.0
+      RAILWAY_ENVIRONMENT: ${{ inputs.environment }}
+      RAILWAY_SERVICE: ${{ vars.RAILWAY_SERVICE }}
+    steps:
+      - name: Require environment settings
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          [[ -n "$RAILWAY_TOKEN" ]] || { echo "::error::Set the RAILWAY_TOKEN secret in the $RAILWAY_ENVIRONMENT environment"; exit 1; }
+          [[ -n "$RAILWAY_SERVICE" ]] || { echo "::error::Set the RAILWAY_SERVICE variable in the $RAILWAY_ENVIRONMENT environment"; exit 1; }
+          [[ "$APP_URL" == https://* ]] || { echo "::error::Set the APP_URL variable to an https URL in the $RAILWAY_ENVIRONMENT environment"; exit 1; }
+      - name: Checkout the requested revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.commit_sha }}
+          persist-credentials: false
+      - name: Install verified Railway CLI
+        run: |
+          archive="railway-v${RAILWAY_CLI_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          curl --silent --show-error --fail --location --retry 3 --output "$RUNNER_TEMP/$archive" \
+            "https://github.com/railwayapp/cli/releases/download/v${RAILWAY_CLI_VERSION}/${archive}"
+          echo "${RAILWAY_CLI_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar --extract --gzip --file "$RUNNER_TEMP/$archive" --directory "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --ci --service "$RAILWAY_SERVICE" --environment "$RAILWAY_ENVIRONMENT"
+      - name: Require a healthy deployment
+        run: |
+          for _ in $(seq 30); do
+            if curl --silent --fail --output /dev/null "$APP_URL/health"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$APP_URL/health did not respond"
+          exit 1

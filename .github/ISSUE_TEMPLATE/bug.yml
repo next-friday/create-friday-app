@@ -1,0 +1,68 @@
+name: Bug report
+description: Report crashes, wrong generated files, or compatibility problems.
+labels: ["bug", "needs triage"]
+assignees:
+  - joetakara
+  - next-friday-engineer
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reproduce the issue with a Node.js version that `engines` in `package.json` supports.
+        Remove credentials, secrets, personal or customer data, and proprietary source code before submitting.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you submit
+      description: Confirm these items before submitting the report.
+      options:
+        - label: I searched existing issues and didn't find a matching report.
+          required: true
+        - label: I can reproduce this issue with the latest published version of `@next-friday/create-app`, or the current `main` commit if it is unreleased.
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: "@next-friday/create-app version"
+      placeholder: 0.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: List Node.js, operating system, and package manager versions.
+      placeholder: |
+        Node.js: 24.20.0
+        OS: Ubuntu 24.04 / macOS
+        Package manager: pnpm 12.6.0
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link to a minimal public reproduction or provide the sanitized command and output that reproduce the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe the behavior you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happened, including error output or the files that were wrong.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Sensitive information
+      options:
+        - label: I removed credentials, secrets, personal or customer data, and proprietary code from this report.
+          required: true

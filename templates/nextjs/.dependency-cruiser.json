@@ -1,0 +1,34 @@
+{
+  "extends": "dependency-cruiser/configs/recommended-strict",
+  "forbidden": [
+    {
+      "name": "no-orphans",
+      "to": {},
+      "from": {
+        "orphan": true,
+        "pathNot": [
+          "(^|/)tsconfig\\.json$",
+          "(^|/)eslint\\.config\\.ts$",
+          "(^|/)next\\.config\\.ts$",
+          "(^|/)postcss[.]config[.]mjs$",
+          "(^|/)vitest[.]config[.]ts$",
+          "(^|/)playwright[.]config[.]ts$",
+          "^test/.*[.]e2e[.]test[.]ts$",
+          "^app/.*(page|layout|template|loading|error|not-found|default|route)[.]tsx?$"
+        ]
+      }
+    }
+  ],
+  "options": {
+    "skipAnalysisNotInRules": true,
+    "tsPreCompilationDeps": true,
+    "enhancedResolveOptions": {
+      "conditionNames": ["import", "require", "node", "default", "types"],
+      "exportsFields": ["exports"]
+    },
+    "exclude": "(^|/)(?:\\.next|coverage|node_modules)/",
+    "tsConfig": {
+      "fileName": "tsconfig.json"
+    }
+  }
+}

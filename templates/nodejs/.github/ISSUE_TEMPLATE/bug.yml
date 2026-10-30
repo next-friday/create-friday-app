@@ -1,0 +1,66 @@
+name: Bug report
+description: Report crashes, incorrect behavior, or setup problems.
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reproduce the issue with the supported Node.js version.
+        Remove credentials, secrets, personal or customer data, and proprietary source code before submitting.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you submit
+      description: Confirm these items before submitting the report.
+      options:
+        - label: I searched existing issues and didn't find a matching report.
+          required: true
+        - label: I can reproduce this issue on the latest commit of the default branch.
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit
+      placeholder: 769e0ef
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: List Node.js, operating system, package manager, and the request that triggers the issue.
+      placeholder: |
+        Node.js: 24.22.1
+        OS: Ubuntu 24.04 / macOS
+        Package manager: pnpm 12.6.0
+        Request: curl -i http://localhost:3000/
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link to a minimal public reproduction or provide sanitized code and configuration that reproduce the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe the behavior you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happened, including the response status, response body, errors, and server logs.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Sensitive information
+      options:
+        - label: I removed credentials, secrets, personal or customer data, and proprietary code from this report.
+          required: true

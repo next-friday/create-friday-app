@@ -1,0 +1,11 @@
+engineStrict: true
+savePrefix: ""
+allowBuilds:
+  unrs-resolver: true
+overrides:
+  "katex@>=0.11.0 <0.18.2": ^0.18.2
+minimumReleaseAgeExclude:
+  - "@next-friday/commitlint-config-friday@4.0.0"
+  - "@next-friday/eslint-config-friday@5.0.0"
+  - "@next-friday/prettier-config-friday@4.0.0"
+  - "@next-friday/eslint-plugin-friday@1.1.3"

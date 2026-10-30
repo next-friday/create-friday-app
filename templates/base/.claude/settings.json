@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Edit(./.agents/rules/**)",
+      "Edit(./.claude/rules/**)",
+      "Edit(./.cursor/rules/**)",
+      "Edit(./.commitlintrc.json)",
+      "Edit(./.prettierrc.json)",
+      "Edit(./prettier.config.ts)",
+      "Edit(./eslint.config.ts)",
+      "Edit(./.agents/rules.json)",
+      "Edit(./.agents/hooks/**)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/settings.local.json)",
+      "Edit(./.cursor/hooks.json)",
+      "Edit(./.cursor/hooks/**)",
+      "Edit(./scripts/sync-agent-rules.ts)",
+      "Edit(./scripts/check-agent-gates.ts)",
+      "Edit(./.husky/**)",
+      "Edit(./.lintstagedrc.json)",
+      "Edit(./.gitleaks.toml)",
+      "Bash(gh repo delete *)",
+      "Bash(gh issue delete *)",
+      "Bash(gh release delete *)",
+      "Bash(git *--no-verify*)",
+      "Bash(git commit -n*)",
+      "Bash(git *core.hooksPath*)",
+      "Bash(git *core.hookspath*)",
+      "Bash(git commit-tree*)",
+      "Bash(git update-ref*)",
+      "Bash(*HUSKY=0*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-suppression-gate.sh",
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-shell-gate.sh",
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ]
+  }
+}

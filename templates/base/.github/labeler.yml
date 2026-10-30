@@ -1,0 +1,25 @@
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - ".github/file-filters.yml"
+          - ".github/dependabot.yml"
+          - ".github/labeler.yml"
+          - ".github/zizmor.yml"
+          - ".github/requirements/**"
+          - ".github/CODEOWNERS"
+          - ".husky/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "pnpm-lock.yaml"
+          - "pnpm-workspace.yaml"
+          - "Dockerfile"
+          - ".github/requirements/**"

@@ -42,7 +42,7 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
     "@next-friday/commitlint-config-friday": "4.0.0",
-    "@next-friday/eslint-config-friday": "5.0.0",
+    "@next-friday/eslint-config-friday": "5.1.0",
     "@next-friday/prettier-config-friday": "4.0.0",
     "@types/node": "26.6.5",
     "@vitest/coverage-v8": "5.0.5",
@@ -56,7 +56,7 @@
     "lint-staged": "17.6.0",
     "prettier": "3.9.10",
     "sort-package-json": "4.1.0",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vitest": "5.0.5"
   },
   "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec",

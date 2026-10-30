@@ -6,7 +6,7 @@ RUN npm install --global "pnpm@$(node --print 'require("./package.json").package
 
 FROM base AS build
 RUN pnpm install --frozen-lockfile --ignore-scripts
-COPY nest-cli.json tsconfig.json tsconfig.build.json ./
+COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN pnpm build
 

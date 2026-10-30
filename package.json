@@ -1,6 +1,6 @@
 {
   "name": "@next-friday/create-app",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Create a Next Friday project from a template.",
   "keywords": [
     "create",
@@ -61,7 +61,7 @@
     "@next-friday/commitlint-config-friday": "4.0.0",
     "@next-friday/eslint-config-friday": "5.0.0",
     "@next-friday/prettier-config-friday": "4.0.0",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.5",
     "@vitest/coverage-v8": "5.0.5",
     "editorconfig-checker": "7.0.0",
     "eslint": "10.13.0",

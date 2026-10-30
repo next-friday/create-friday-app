@@ -20,6 +20,9 @@ export default buildConfig({
   sharp,
   cors: [serverURL],
   collections: [Users, Media],
+  graphQL: {
+    disable: true,
+  },
   upload: {
     limits: {
       fileSize: maxUploadBytes,

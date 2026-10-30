@@ -1,0 +1,1 @@
+# create-friday-app

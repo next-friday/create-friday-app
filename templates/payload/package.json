@@ -62,7 +62,7 @@
     "@next-friday/prettier-config-friday": "4.0.0",
     "@next/eslint-plugin-next": "16.4.3",
     "@playwright/test": "1.64.1",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitest/coverage-v8": "5.0.5",

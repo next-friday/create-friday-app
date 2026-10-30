@@ -1,0 +1,10 @@
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!next.config.ts
+!postcss.config.mjs
+!tsconfig.json
+!app/
+app/**/*.test.ts
+app/**/*.test.tsx

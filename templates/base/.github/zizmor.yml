@@ -1,0 +1,4 @@
+# Owner: @your-org/your-team. Reason: Semgrep rejects the `$/` self-repository syntax, so local actions use `./`. Expires: 2027-04-29.
+rules:
+  self-repository:
+    disable: true

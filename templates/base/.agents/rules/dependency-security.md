@@ -1,0 +1,5 @@
+# Dependencies
+
+Add a dependency when active code, tests, build tooling, or a documented contract uses it, and native or existing project capabilities do not. Assess cadence, license, advisories, compatibility, and transitives first. Place it in the manifest of the project that imports it, in the ecosystem category that matches its role.
+
+Resolve a vulnerability that Dependabot or OSV-Scanner reports by upgrading the dependency. For a transitive dependency, add a pnpm override in `pnpm-workspace.yaml`. When no fix exists, record the accepted risk as `no-suppression.md` describes.

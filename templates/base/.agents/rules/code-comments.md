@@ -1,0 +1,3 @@
+# Required Comments
+
+Write a comment only where a configured tool requires or reads it, where `no-suppression.md` requires an accepted-risk record, or to give a reason the code cannot show, such as a platform constraint or a workaround. Names, types, tests, ADRs, issues, and pull requests carry intent. When you touch a file, remove comments no tool requires.

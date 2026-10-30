@@ -1,0 +1,50 @@
+name: Feature request
+description: Suggest a specific change to next-friday-template-payload.
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for changes that are ready to evaluate.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Affected area
+      description: Select the area this request affects.
+      options:
+        - Pages and routes
+        - Collections and admin panel
+        - Configuration and environment
+        - Tooling / CI
+        - Documentation
+        - Repository governance
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the problem or use case.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the smallest change that solves the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List existing options you considered.
+    validations:
+      required: false
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Breaking change
+      description: Indicate whether this request changes behavior for existing users.
+      options:
+        - label: This request changes an existing page route, collection, API, or public contract.

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -e
+
+if [ "$(git branch --show-current)" = main ]; then
+  echo "pre-merge-commit: do not merge into main locally. Merge through a pull request." >&2
+  exit 1
+fi

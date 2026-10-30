@@ -1,0 +1,19 @@
+heavy:
+  - "**"
+  - "!**/*.md"
+  - "!.gitignore"
+  - "!.gitattributes"
+  - "!.github/ISSUE_TEMPLATE/**"
+  - "!.github/pull_request_template.md"
+  - "!.github/dependabot.yml"
+  - "!AGENTS.md"
+
+ci_policy:
+  - ".github/file-filters.yml"
+  - ".github/workflows/**"
+  - ".agents/rules/**"
+  - ".agents/rules.json"
+  - ".agents/hooks/**"
+  - ".claude/**"
+  - ".cursor/**"
+  - "scripts/**"

@@ -1,0 +1,43 @@
+changes:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - ".github/actions/**"
+          - ".github/file-filters.yml"
+          - ".github/dependabot.yml"
+
+release:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".changeset/**"
+          - ".github/workflows/release.yml"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "pnpm-lock.yaml"
+          - "pnpm-workspace.yaml"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "test/**"
+
+cli:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "tsdown.config.ts"
+          - "tsconfig.json"
+          - "vitest.config.ts"

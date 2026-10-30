@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "primary-account-number"
+description = "Payment card PAN (Visa, Mastercard, Amex, Discover, JCB)"
+regex = '''\b(?:4\d{12}(?:\d{3})?|5[1-5]\d{14}|2(?:2[2-9]\d|[3-6]\d{2}|7[01]\d|720)\d{12}|3[47]\d{13}|6(?:011|5\d{2})\d{12}|35(?:2[89]|[3-8]\d)\d{12})\b'''
+keywords = ["2", "3", "4", "5", "6"]
+
+[[rules.allowlists]]
+description = "Published processor test PANs"
+regexes = [
+  '''\b(?:4111111111111111|4242424242424242|4000056655665556|5555555555554444|5105105105105100|2223003122003222|378282246310005|371449635398431|6011111111111117|3530111333300000)\b''',
+]

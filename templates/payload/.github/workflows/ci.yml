@@ -1,0 +1,204 @@
+name: Verify
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # Needed by paths-filter to inspect pull request changes.
+    outputs:
+      heavy: ${{ steps.filter.outputs.heavy }}
+      ci_policy: ${{ steps.filter.outputs.ci_policy }}
+      full_verification: ${{ steps.mode.outputs.full_verification }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Detect relevant changes
+        id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          predicate-quantifier: some-with-excludes
+          filters: .github/file-filters.yml
+      - name: Select verification mode
+        id: mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DRAFT: ${{ github.event.pull_request.draft }}
+          HEAVY: ${{ steps.filter.outputs.heavy }}
+          CI_POLICY: ${{ steps.filter.outputs.ci_policy }}
+        run: |
+          full_verification=false
+          if [[ "$EVENT_NAME" == "push" || ( "$EVENT_NAME" == "pull_request" && "$DRAFT" != "true" && ( "$HEAVY" == "true" || "$CI_POLICY" == "true" ) ) ]]; then
+            full_verification=true
+          fi
+
+          echo "full_verification=$full_verification" >> "$GITHUB_OUTPUT"
+
+  checks:
+    name: Static Checks, Tests & Build
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payload
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready --username postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/payload
+      PAYLOAD_SECRET: ci-only-secret
+      APP_URL: http://localhost:3000
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node.js and pnpm
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          cache: true
+          require-lockfile: true
+      - name: Reject suppression directives
+        run: pnpm suppressions:check
+      - name: Check Cursor rules match .agents/rules
+        run: pnpm rules:check
+      - name: Check agent gates
+        run: pnpm gates:check
+      - name: Check lint
+        run: pnpm lint:check
+      - name: Check formatting
+        run: pnpm format:check
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
+      - name: Check package.json ordering
+        run: pnpm sort-package-json:check
+      - name: Validate peer dependency contracts
+        run: pnpm peers:check
+      - name: Check types
+        run: pnpm typecheck
+      - name: Run Knip
+        run: pnpm knip
+      - name: Check dependency graph
+        run: pnpm depcruise
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run end-to-end tests
+        run: pnpm test:e2e
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Check patch coverage
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/diff-cover"
+          "$RUNNER_TEMP/diff-cover/bin/pip" install --quiet --require-hashes --only-binary=:all: -r .github/requirements/diff-cover.txt
+          "$RUNNER_TEMP/diff-cover/bin/diff-cover" coverage/cobertura-coverage.xml --compare-branch "origin/$BASE_REF" --fail-under 95 --branch-coverage
+
+  image:
+    name: Container Image
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HADOLINT_VERSION: 2.15.1
+      HADOLINT_SHA256: c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507
+      TRIVY_VERSION: 0.76.1
+      TRIVY_SHA256: c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Lint Dockerfile
+        run: |
+          curl --silent --show-error --fail --location --output hadolint \
+            "https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-linux-x86_64"
+          echo "${HADOLINT_SHA256}  hadolint" | sha256sum --check --strict
+          chmod +x hadolint
+          ./hadolint Dockerfile
+      - name: Build image
+        run: docker build --tag app:ci .
+      - name: Smoke test image
+        id: smoke
+        run: |
+          docker run --detach --name app --env PORT=3000 --publish 3000:3000 app:ci
+          curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3000/health
+      - name: Show container logs
+        if: failure() && steps.smoke.outcome == 'failure'
+        run: docker logs app
+      - name: Scan image for vulnerabilities
+        run: |
+          archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl --silent --show-error --fail --location --output "$archive" \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archive}"
+          echo "${TRIVY_SHA256}  ${archive}" | sha256sum --check --strict
+          tar --extract --gzip --file "$archive" trivy
+          ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress app:ci
+
+  deploy-dev:
+    name: Deploy to dev
+    needs:
+      - checks
+      - image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    permissions:
+      contents: read
+      actions: read # Needed by deploy.yml to find the CI run of the deployed commit.
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: dev
+      commit_sha: ${{ github.sha }}
+
+  ci:
+    name: All Checks
+    if: always()
+    timeout-minutes: 5
+    needs:
+      - changes
+      - checks
+      - image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all verification jobs
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

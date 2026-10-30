@@ -1,0 +1,10 @@
+{
+  "*.{ts,tsx,js,jsx,mjs,cjs}": [
+    "pnpm exec eslint --fix --cache --max-warnings=0 --no-warn-ignored --no-inline-config",
+    "prettier --write --cache"
+  ],
+  "!(package).json": ["prettier --write --cache"],
+  "*.{css,md,yml,yaml}": ["prettier --write --cache"],
+  "package.json": ["sort-package-json", "prettier --write --cache"],
+  ".husky/{commit-msg,pre-commit,pre-merge-commit,pre-push}": ["prettier --write --cache"]
+}

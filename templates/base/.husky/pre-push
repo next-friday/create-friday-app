@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+set -e
+
+# The first push of a new repository creates main on the remote, so it is the only push allowed there.
+while read -r _ _ remote_ref remote_oid; do
+  if [ "$remote_ref" = refs/heads/main ] && [ -n "$(printf '%s' "$remote_oid" | tr -d 0)" ]; then
+    echo "pre-push: do not push to main. Push your branch and open a pull request." >&2
+    exit 1
+  fi
+done
+
+pnpm check || {
+  echo "pre-push: pnpm check failed. Fix the failures above, commit, then push again." >&2
+  exit 1
+}

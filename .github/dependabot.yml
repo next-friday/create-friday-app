@@ -1,0 +1,113 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Bangkok
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      runtime:
+        applies-to: version-updates
+        patterns:
+          - "@clack/*"
+        update-types:
+          - minor
+          - patch
+      lint-format:
+        applies-to: version-updates
+        patterns:
+          - eslint
+          - "@next-friday/*"
+          - editorconfig-checker
+        update-types:
+          - minor
+          - patch
+      test-build-tooling:
+        applies-to: version-updates
+        patterns:
+          - "@types/*"
+          - "@vitest/*"
+          - tsdown
+          - typescript
+          - vite
+          - vitest
+        update-types:
+          - minor
+          - patch
+      repo-tooling:
+        applies-to: version-updates
+        patterns:
+          - "@changesets/*"
+          - "@commitlint/*"
+          - husky
+          - knip
+          - lint-staged
+          - pkg-pr-new
+          - prettier
+          - publint
+          - sort-package-json
+        update-types:
+          - minor
+          - patch
+      root-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directories:
+      - /templates/nodejs
+      - /templates/nestjs
+      - /templates/nextjs
+      - /templates/payload
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:15"
+      timezone: Asia/Bangkok
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      templates-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:30"
+      timezone: Asia/Bangkok
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      github-actions:
+        patterns:
+          - "*"

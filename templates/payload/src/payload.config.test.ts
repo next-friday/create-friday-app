@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 describe("payload config", () => {
-  it("disables GraphQL", async () => {
+  it("keeps the HTTP API on REST", async () => {
     vi.stubEnv("APP_URL", "http://localhost:3000");
     vi.stubEnv("PAYLOAD_SECRET", "test-secret");
     vi.stubEnv("DATABASE_URL", "postgres://postgres:postgres@127.0.0.1:5432/payload");
@@ -21,7 +21,7 @@ describe("payload config", () => {
     expect(resolved.graphQL.disable).toBe(true);
   });
 
-  it("does not depend on the graphql package", () => {
+  it("does not add an extra peer dependency", () => {
     const manifest = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8"),
     ) as PackageManifest;

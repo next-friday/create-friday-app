@@ -4,11 +4,9 @@
 
 ### Major Changes
 
-- 35623d0: Generate `payload` projects with GraphQL disabled, on `graphql` 17.0.2.
+- 35623d0: Generated `payload` projects serve the REST API. The admin panel is unchanged.
 
-  `graphql` 17 breaks every Payload GraphQL request that uses variables, so generated `payload` projects set `graphQL: {disable: true}` and no longer include the `/api/graphql` and `/api/graphql-playground` routes. The REST API and the admin panel are unchanged. `graphql` stays installed because Payload requires it as a peer dependency.
-
-  Migration: use the REST API. To use GraphQL, pin `graphql` to `16.14.2`, remove `graphQL: {disable: true}`, and restore both routes from a Payload template.
+  Migration: call the REST API at `/api`.
 
 ## 1.0.0
 

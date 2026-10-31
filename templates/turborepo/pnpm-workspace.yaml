@@ -18,7 +18,6 @@ minimumReleaseAgeExclude:
   - "@next-friday/eslint-config-friday@5.1.0"
   - "@next-friday/prettier-config-friday@4.0.0"
   - "@next-friday/eslint-plugin-friday@1.1.3"
-# Payload peers on graphql. The API is REST, so that peer stays optional and is not installed.
 packageExtensions:
   payload:
     peerDependenciesMeta:

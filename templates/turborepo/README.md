@@ -1,6 +1,6 @@
 # next-friday-template-turborepo
 
-Next Friday starter for a Turborepo workspace. `apps/app` is a Next.js site on port 3000. `apps/backoffice` is a Payload CMS on port 3001. The REST API is `/api` on the backoffice. GraphQL is disabled.
+Next Friday starter for a Turborepo workspace. `apps/app` is a Next.js site on port 3000. `apps/backoffice` is a Payload CMS on port 3001. The backoffice API is REST at `/api`.
 
 ## Getting started
 

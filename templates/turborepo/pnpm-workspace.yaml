@@ -12,6 +12,7 @@ overrides:
   "esbuild@<0.27.0": ^0.28.2
   "graphql-scalars@<2.0.1": ^2.0.1
   "happy-dom@<21.0.4": ^21.0.4
+  "minimatch@<11.0.1": ^11.0.1
 minimumReleaseAgeExclude:
   - "@next-friday/commitlint-config-friday@4.0.0"
   - "@next-friday/eslint-config-friday@5.0.0"

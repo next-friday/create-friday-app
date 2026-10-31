@@ -1,0 +1,9 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreDependencies": ["fast-check"],
+  "workspaces": {
+    "apps/app": {
+      "ignoreDependencies": ["fast-check"]
+    }
+  }
+}

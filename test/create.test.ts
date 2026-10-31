@@ -294,6 +294,19 @@ describe("create", () => {
     );
   });
 
+  it("writes .env with a random Payload secret for the turborepo stack", async () => {
+    await create(["my-workspace", "--stack", "turborepo"]);
+
+    const environment = readFileSync(path.join(cwd, "my-workspace", ".env"), "utf8");
+
+    expect(environment).toMatch(/^PAYLOAD_SECRET=[\da-f]{64}$/mu);
+    expect(environment).toContain("APP_URL=http://localhost:3001");
+
+    expect(vi.mocked(outro)).toHaveBeenCalledWith(
+      `Next steps:\n  cd my-workspace\n  pnpm dev\nSet DATABASE_URL in .env to your PostgreSQL database before pnpm dev.\nBefore the first commit, follow "After creating a project from this template" in my-workspace/README.md.`,
+    );
+  });
+
   it("leaves git init and pnpm install to the user with --skip-git and --skip-install", async () => {
     await create(["skipped-api", "--stack", "nestjs", "--skip-git", "--skip-install"]);
     expect(vi.mocked(initGit)).not.toHaveBeenCalled();

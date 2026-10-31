@@ -1,0 +1,5 @@
+.husky/_
+pnpm-lock.yaml
+apps/backoffice/src/app/(payload)/
+apps/backoffice/src/migrations/
+apps/backoffice/src/payload-types.ts

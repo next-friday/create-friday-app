@@ -1,0 +1,41 @@
+{
+  "automation-owned-checks": {
+    "description": "Owned checks: hooks and CI define what must pass; run checks by hand to verify"
+  },
+  "code-comments": {
+    "description": "Required comments: comment only where a tool or rule needs it, or for a reason the code cannot show"
+  },
+  "current-state-authority": {
+    "description": "Current state: implement from user requirements and the working tree"
+  },
+  "demand-driven-configuration": {
+    "description": "Demand-driven configuration: add a setting only for an active requirement"
+  },
+  "dependency-security": {
+    "description": "Dependencies: add a package only when code or a contract uses it",
+    "globs": ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"]
+  },
+  "deterministic-testing": {
+    "description": "Test admission: add a case only when it catches a defect current tests miss",
+    "globs": ["**/*.test.ts", "**/*.test.tsx"]
+  },
+  "diagnostics-and-error-handling": {
+    "description": "Diagnostics: fix runtime failures at the source and keep the root cause"
+  },
+  "git-workflow": {
+    "description": "Git workflow: trunk-based branches, commits, and pull requests"
+  },
+  "no-suppression": {
+    "description": "Findings: fix scanner and linter reports without inline suppressions"
+  },
+  "script-driven-changes": {
+    "description": "Scripts: apply a repeated edit across many files with a script"
+  },
+  "single-author-style": {
+    "description": "Sibling style: match layout, naming, and composition in the same project"
+  },
+  "typescript-first": {
+    "description": "TypeScript-first: write source, tests, and scripts as .ts or .tsx",
+    "globs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+  }
+}

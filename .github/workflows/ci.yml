@@ -217,7 +217,7 @@ jobs:
             echo "Expected an unknown stack to fail." >&2
             exit 1
           fi
-          grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload.' <<<"$output"
+          grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload, turborepo.' <<<"$output"
 
   templates:
     name: Template (${{ matrix.stack }})
@@ -233,6 +233,7 @@ jobs:
           - nestjs
           - nextjs
           - payload
+          - turborepo
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

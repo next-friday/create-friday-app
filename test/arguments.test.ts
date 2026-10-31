@@ -44,7 +44,7 @@ describe("parseCliArguments", () => {
 
   it("rejects an unknown stack", () => {
     expect(() => parseCliArguments(["--stack", "rails"])).toThrow(
-      'Unknown stack "rails". Use one of: nodejs, nestjs, nextjs, payload.',
+      'Unknown stack "rails". Use one of: nodejs, nestjs, nextjs, payload, turborepo.',
     );
   });
 });

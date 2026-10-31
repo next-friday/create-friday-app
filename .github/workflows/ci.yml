@@ -90,6 +90,8 @@ jobs:
       - name: Set up pnpm
         uses: $/.github/actions/setup-pnpm
       - name: Check formatting
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
         run: pnpm format:check
       - name: Check package.json ordering
         run: pnpm sort-package-json:check
@@ -260,6 +262,7 @@ jobs:
           # The payload stack's build loads its config, which requires these; the build never connects to the database.
           DATABASE_URL: postgres://build-only@localhost/build-only
           PAYLOAD_SECRET: build-only
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
         run: |
           git add --all
           pnpm verify
@@ -309,6 +312,8 @@ jobs:
       - name: Set up pnpm
         uses: $/.github/actions/setup-pnpm
       - name: Validate release metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
         run: |
           pnpm format:check
           pnpm sort-package-json:check

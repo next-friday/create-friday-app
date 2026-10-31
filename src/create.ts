@@ -261,10 +261,9 @@ function nextSteps(
     [`pnpm ${developmentScripts[stack]}`],
   ].flat();
 
-  const database =
-    stack === "payload"
-      ? `Set DATABASE_URL in .env to your PostgreSQL database before pnpm ${developmentScripts[stack]}.\n`
-      : "";
+  const database = stacks.find(item => item.id === stack)?.requiresDatabase
+    ? `Set DATABASE_URL in .env to your PostgreSQL database before pnpm ${developmentScripts[stack]}.\n`
+    : "";
 
   const readme = name === "." ? "README.md" : `${name}/README.md`;
   const lines = commands.map(command => `  ${command}`).join("\n");

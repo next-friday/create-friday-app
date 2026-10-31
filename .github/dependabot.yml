@@ -73,6 +73,7 @@ updates:
       - /templates/nestjs
       - /templates/nextjs
       - /templates/payload
+      - /templates/turborepo
     schedule:
       interval: weekly
       day: monday

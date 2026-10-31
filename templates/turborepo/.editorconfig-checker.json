@@ -1,0 +1,3 @@
+{
+  "Exclude": ["^apps/backoffice/src/migrations/", "^apps/backoffice/src/payload-types\\.ts$"]
+}

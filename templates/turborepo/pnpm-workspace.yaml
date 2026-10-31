@@ -1,0 +1,45 @@
+packages:
+  - "apps/*"
+engineStrict: true
+savePrefix: ""
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+overrides:
+  "katex@<0.18.2": ^0.18.2
+  "fast-uri@<3.1.9": ^3.1.9
+  "dompurify@<3.4.17": ^3.4.17
+  "esbuild@<0.27.0": ^0.28.2
+  "graphql-scalars@<2.0.1": ^2.0.1
+  "happy-dom@<21.0.4": ^21.0.4
+  "minimatch@<11.0.1": ^11.0.1
+minimumReleaseAgeExclude:
+  - "@next-friday/commitlint-config-friday@4.0.0"
+  - "@next-friday/eslint-config-friday@5.0.0"
+  - "@next-friday/eslint-config-friday@5.1.0"
+  - "@next-friday/prettier-config-friday@4.0.0"
+  - "@next-friday/eslint-plugin-friday@1.1.3"
+packageExtensions:
+  payload:
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+  "@payloadcms/next":
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+  "@payloadcms/graphql":
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+  graphql-http:
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+  graphql-scalars:
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+peerDependencyRules:
+  ignoreMissing:
+    - graphql

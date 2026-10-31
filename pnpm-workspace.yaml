@@ -4,6 +4,7 @@ allowBuilds:
   unrs-resolver: true
 overrides:
   "katex@>=0.11.0 <0.18.2": ^0.18.2
+  "minimatch@<11.0.1": ^11.0.1
 minimumReleaseAgeExclude:
   - "@next-friday/commitlint-config-friday@4.0.0"
   - "@next-friday/eslint-config-friday@5.0.0"

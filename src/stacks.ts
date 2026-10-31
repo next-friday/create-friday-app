@@ -3,21 +3,31 @@ export const stacks = [
     id: "nodejs",
     label: "Node.js",
     hint: "HTTP service without a framework",
+    requiresDatabase: false,
   },
   {
     id: "nestjs",
     label: "NestJS",
     hint: "HTTP API",
+    requiresDatabase: false,
   },
   {
     id: "nextjs",
     label: "Next.js",
     hint: "Web app",
+    requiresDatabase: false,
   },
   {
     id: "payload",
     label: "Payload",
     hint: "Headless CMS on Next.js and PostgreSQL",
+    requiresDatabase: true,
+  },
+  {
+    id: "turborepo",
+    label: "Turborepo",
+    hint: "Next.js app and Payload backoffice",
+    requiresDatabase: true,
   },
 ] as const;
 
@@ -28,6 +38,7 @@ export const developmentScripts: Record<StackId, string> = {
   nestjs: "start:dev",
   nextjs: "dev",
   payload: "dev",
+  turborepo: "dev",
 };
 
 /**

@@ -16,12 +16,13 @@ Without a terminal, as in CI or an agent, the name and `--stack` are required. P
 
 ## Stacks
 
-| `--stack` | Starts with                                                       |
-| :-------- | :---------------------------------------------------------------- |
-| `nodejs`  | A TypeScript HTTP server on `node:http` with a `/health` endpoint |
-| `nestjs`  | A NestJS app with a Terminus `/health` endpoint                   |
-| `nextjs`  | A Next.js App Router app with React and Tailwind CSS              |
-| `payload` | Payload CMS on Next.js with PostgreSQL                            |
+| `--stack`   | Starts with                                                       |
+| :---------- | :---------------------------------------------------------------- |
+| `nodejs`    | A TypeScript HTTP server on `node:http` with a `/health` endpoint |
+| `nestjs`    | A NestJS app with a Terminus `/health` endpoint                   |
+| `nextjs`    | A Next.js App Router app with React and Tailwind CSS              |
+| `payload`   | Payload CMS on Next.js with PostgreSQL                            |
+| `turborepo` | A Turborepo workspace with a Next.js app and a Payload backoffice |
 
 Every stack is built from [`templates/base`](templates/base), which holds the shared company setup, plus its own directory under [`templates/`](templates), which holds the stack-specific files.
 
@@ -43,17 +44,17 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 ## Options
 
 ```text
-pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload]
+pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turborepo]
 ```
 
-| Option           | Description                                                      |
-| :--------------- | :--------------------------------------------------------------- |
-| `name`           | Project directory and package name. Asked when left out.         |
-| `--stack`        | `nodejs`, `nestjs`, `nextjs`, or `payload`. Asked when left out. |
-| `--skip-git`     | Do not run `git init`.                                           |
-| `--skip-install` | Do not run `pnpm install`.                                       |
-| `-v, --version`  | Print the version.                                               |
-| `-h, --help`     | Print the usage.                                                 |
+| Option           | Description                                                                   |
+| :--------------- | :---------------------------------------------------------------------------- |
+| `name`           | Project directory and package name. Asked when left out.                      |
+| `--stack`        | `nodejs`, `nestjs`, `nextjs`, `payload`, or `turborepo`. Asked when left out. |
+| `--skip-git`     | Do not run `git init`.                                                        |
+| `--skip-install` | Do not run `pnpm install`.                                                    |
+| `-v, --version`  | Print the version.                                                            |
+| `-h, --help`     | Print the usage.                                                              |
 
 The name must:
 

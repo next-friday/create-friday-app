@@ -1,6 +1,6 @@
 # next-friday-template-payload
 
-Next Friday starter for Payload CMS on Next.js and PostgreSQL.
+Next Friday starter for Payload CMS on Next.js and PostgreSQL. The API is REST at `/api`.
 
 ## Getting started
 

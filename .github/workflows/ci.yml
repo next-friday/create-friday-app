@@ -90,6 +90,8 @@ jobs:
       - name: Set up pnpm
         uses: $/.github/actions/setup-pnpm
       - name: Check formatting
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
         run: pnpm format:check
       - name: Check package.json ordering
         run: pnpm sort-package-json:check
@@ -217,7 +219,7 @@ jobs:
             echo "Expected an unknown stack to fail." >&2
             exit 1
           fi
-          grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload.' <<<"$output"
+          grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload, turborepo.' <<<"$output"
 
   templates:
     name: Template (${{ matrix.stack }})
@@ -233,6 +235,7 @@ jobs:
           - nestjs
           - nextjs
           - payload
+          - turborepo
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -259,6 +262,7 @@ jobs:
           # The payload stack's build loads its config, which requires these; the build never connects to the database.
           DATABASE_URL: postgres://build-only@localhost/build-only
           PAYLOAD_SECRET: build-only
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
         run: |
           git add --all
           pnpm verify
@@ -308,6 +312,8 @@ jobs:
       - name: Set up pnpm
         uses: $/.github/actions/setup-pnpm
       - name: Validate release metadata
+        env:
+          GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
         run: |
           pnpm format:check
           pnpm sort-package-json:check

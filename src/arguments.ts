@@ -12,7 +12,7 @@ export interface CliOptions {
   version: boolean;
 }
 
-export const usage = `Usage: pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload]
+export const usage = `Usage: pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turborepo]
 
   name            Project directory and package name, or . for the current directory. Asked when left out.
   --stack         Template stack. Asked when left out.

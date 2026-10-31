@@ -76,19 +76,21 @@ On Vercel, deploy an app without its image. The Next.js preset takes precedence 
 
 ## Deploy
 
-`.github/workflows/deploy.yml` deploys the `Dockerfile` Railway finds for one service and promotes one commit through `dev`, `uat`, and `prod`. `railway.json` sets the Railway health check to `/health`. Create one Railway service per app, with that service's Dockerfile path set to `apps/app/Dockerfile` or `apps/backoffice/Dockerfile`. The workflow stays off until you configure it:
+`.github/workflows/deploy.yml` deploys both apps and promotes one commit through `dev`, `uat`, and `prod`. `railway.json` sets the Railway health check to `/health`. Create one Railway service per app, with that service's Dockerfile path set to `apps/app/Dockerfile` or `apps/backoffice/Dockerfile`. The workflow stays off until you configure it:
 
 1. In Railway, create a project with one service for each app, one PostgreSQL database for the backoffice, and the environments `dev`, `uat`, and `prod`. The workflow passes these names to `railway up --environment`. In each backoffice environment, set the service variables:
    - `DATABASE_URL` to `${{Postgres.DATABASE_URL}}`;
    - `PAYLOAD_SECRET` to a separate long random string;
-   - `APP_URL` to that environment's public `https://` URL.
+   - `APP_URL` to that environment's public backoffice `https://` URL.
 
    Create one project token per environment under **Project Settings → Tokens**. CI tests against PostgreSQL 17; change the image in `ci.yml` if the database runs another major version.
 
 2. In GitHub, create the `dev`, `uat`, and `prod` environments under **Settings → Environments**, and add to each:
    - the `RAILWAY_TOKEN` secret: that environment's project token;
-   - the `RAILWAY_SERVICE` variable: the service name;
-   - the `APP_URL` variable: the public `https://` URL.
+   - the `RAILWAY_SERVICE_APP` variable: the Next.js service name;
+   - the `RAILWAY_SERVICE_BACKOFFICE` variable: the Payload service name;
+   - the `APP_URL` variable: the public Next.js `https://` URL;
+   - the `BACKOFFICE_URL` variable: the public backoffice `https://` URL.
 
    Limit `prod` to the `main` branch and add required reviewers. Environment secrets and variables in a private repository need GitHub Pro, Team, or Enterprise; required reviewers in a private repository need GitHub Enterprise.
 

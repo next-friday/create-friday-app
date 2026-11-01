@@ -1,11 +1,11 @@
 {
-  "name": "friday-template-turborepo",
+  "name": "next-friday-template-turborepo",
   "version": "0.1.0",
   "private": true,
   "description": "Next Friday Turborepo template.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/next-friday/friday-template-turborepo.git"
+    "url": "git+https://github.com/next-friday/next-friday-template-turborepo.git"
   },
   "license": "UNLICENSED",
   "author": "Next Friday",

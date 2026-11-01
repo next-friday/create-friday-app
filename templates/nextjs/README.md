@@ -1,4 +1,4 @@
-# friday-template-nextjs
+# next-friday-template-nextjs
 
 Next Friday starter for Next.js applications.
 

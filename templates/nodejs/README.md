@@ -1,4 +1,4 @@
-# friday-template-nodejs
+# next-friday-template-nodejs
 
 Next Friday starter for Node.js HTTP services without a framework.
 

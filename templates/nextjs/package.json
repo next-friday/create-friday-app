@@ -1,11 +1,11 @@
 {
-  "name": "friday-template-nextjs",
+  "name": "next-friday-template-nextjs",
   "version": "0.1.0",
   "private": true,
   "description": "Next Friday Next.js template.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/next-friday/friday-template-nextjs.git"
+    "url": "git+https://github.com/next-friday/next-friday-template-nextjs.git"
   },
   "license": "UNLICENSED",
   "author": "Next Friday",

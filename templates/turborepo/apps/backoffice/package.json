@@ -1,5 +1,5 @@
 {
-  "name": "@friday-template-turborepo/backoffice",
+  "name": "@next-friday-template-turborepo/backoffice",
   "version": "0.1.0",
   "private": true,
   "description": "Next Friday Payload backoffice.",

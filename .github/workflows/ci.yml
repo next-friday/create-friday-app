@@ -252,7 +252,7 @@ jobs:
           tarball_dir="$(mktemp -d)"
           pnpm pack --pack-destination "$tarball_dir"
           npm exec --yes --package "$(ls "$tarball_dir"/*.tgz)" -- create-friday-app "ci-$STACK" --stack "$STACK" </dev/null
-          if grep --recursive --files-with-matches --exclude-dir=node_modules --exclude-dir=.git "friday-template-$STACK" "ci-$STACK"; then
+          if grep --recursive --files-with-matches --exclude-dir=node_modules --exclude-dir=.git "next-friday-template-$STACK" "ci-$STACK"; then
             echo "The template name was not replaced." >&2
             exit 1
           fi

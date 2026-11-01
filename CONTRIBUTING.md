@@ -43,8 +43,8 @@ The root lint, format, Knip, and test configs skip `templates/`. To change or ch
 ```sh
 pnpm build
 dir="$(mktemp -d)"
-(cd "$dir" && node "$OLDPWD/dist/main.mjs" friday-template-nestjs --stack nestjs < /dev/null)
-cd "$dir/friday-template-nestjs" && git add --all && pnpm verify
+(cd "$dir" && node "$OLDPWD/dist/main.mjs" next-friday-template-nestjs --stack nestjs < /dev/null)
+cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 ```
 
 Copy edited files back to `base` or the stack directory, and `.gitignore` back as `_gitignore`. Leave out `.env`, which the CLI writes from `.env.example`. Leave out `pnpm-lock.yaml`: `pnpm pack` drops nested lockfiles, so the generated project creates its own on the first `pnpm install`. The `Template` jobs in CI generates each stack from the packed CLI and runs `pnpm verify` and `pnpm build`.

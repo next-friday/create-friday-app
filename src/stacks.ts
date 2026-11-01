@@ -56,5 +56,5 @@ export function isStackId(value: string): value is StackId {
  * @returns Package name in the template's `package.json`.
  */
 export function templateName(stack: StackId): string {
-  return `friday-template-${stack}`;
+  return `next-friday-template-${stack}`;
 }

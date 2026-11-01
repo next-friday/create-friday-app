@@ -135,6 +135,14 @@ jobs:
               previous="$candidate"
             fi
           done < <(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?status=success&per_page=50" --jq '.workflow_runs[] | [.id, .display_title] | @tsv')
+          while IFS=$'\t' read -r run_id head_sha; do
+            [[ -z "$run_id" || "$head_sha" == "$COMMIT_SHA" ]] && continue
+            completed="$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs" | jq -r --arg env "$RAILWAY_ENVIRONMENT" '[.jobs[] | select(.conclusion == "success" and .name == "Deploy to \($env) / Deploy to \($env)") | .completed_at] | max // empty')"
+            if [[ -n "$completed" && ( -z "$latest" || "$completed" > "$latest" ) ]]; then
+              latest="$completed"
+              previous="$head_sha"
+            fi
+          done < <(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?event=push&branch=main&status=success&per_page=50" --jq '.workflow_runs[] | [.id, .head_sha] | @tsv')
           if [[ -n "$previous" ]]; then
             git cat-file -e "$previous^{commit}" 2>/dev/null || git fetch --no-tags origin "$previous"
             mapfile -t apps < <(bash .github/scripts/affected-apps.sh "$previous" "$COMMIT_SHA")

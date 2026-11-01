@@ -62,6 +62,9 @@ jobs:
     if: needs.changes.outputs.full_verification == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write # Needed to exchange GitHub OIDC for a Turborepo Remote Cache token.
     services:
       postgres:
         image: postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
@@ -79,17 +82,36 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/payload
       PAYLOAD_SECRET: ci-only-secret
       APP_URL: http://localhost:3001
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Fetch the pull request base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags origin "$BASE_REF"
       - name: Set up Node.js and pnpm
         uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
         with:
           cache: true
           require-lockfile: true
+      - name: Set up Turborepo Remote Cache
+        if: vars.TURBO_TEAM != ''
+        uses: vercel/setup-turborepo-remote-cache-action@49d7b1b46ba4c9251e1977986bfe18336feabc8f # v1.1.0
+        with:
+          team: ${{ vars.TURBO_TEAM }}
+      - name: Scope Turborepo to affected packages
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          echo "TURBO_FILTER=--affected" >> "$GITHUB_ENV"
+          echo "TURBO_SCM_BASE=origin/$BASE_REF" >> "$GITHUB_ENV"
       - name: Reject suppression directives
         run: pnpm suppressions:check
       - name: Check Cursor rules match .agents/rules
@@ -118,8 +140,16 @@ jobs:
         run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
-      - name: Install Playwright browser
-        run: pnpm --filter ./apps/app exec playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: |
+          if [[ -n "${TURBO_FILTER-}" ]]; then
+            mapfile -t apps < <(bash .github/scripts/affected-apps.sh "$TURBO_SCM_BASE" HEAD)
+          else
+            mapfile -t apps < <(bash .github/scripts/affected-apps.sh)
+          fi
+          for app in "${apps[@]}"; do
+            pnpm --filter "./apps/$app" exec playwright install --with-deps chromium
+          done
       - name: Run end-to-end tests
         run: pnpm test:e2e
         env:
@@ -131,15 +161,19 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/diff-cover"
           "$RUNNER_TEMP/diff-cover/bin/pip" install --quiet --require-hashes --only-binary=:all: -r .github/requirements/diff-cover.txt
-          "$RUNNER_TEMP/diff-cover/bin/diff-cover" apps/app/coverage/cobertura-coverage.xml --compare-branch "origin/$BASE_REF" --fail-under 95 --branch-coverage
-          "$RUNNER_TEMP/diff-cover/bin/diff-cover" apps/backoffice/coverage/cobertura-coverage.xml --compare-branch "origin/$BASE_REF" --fail-under 95 --branch-coverage
+          if [[ -f apps/app/coverage/cobertura-coverage.xml ]]; then
+            "$RUNNER_TEMP/diff-cover/bin/diff-cover" apps/app/coverage/cobertura-coverage.xml --compare-branch "origin/$BASE_REF" --fail-under 95 --branch-coverage
+          fi
+          if [[ -f apps/backoffice/coverage/cobertura-coverage.xml ]]; then
+            "$RUNNER_TEMP/diff-cover/bin/diff-cover" apps/backoffice/coverage/cobertura-coverage.xml --compare-branch "origin/$BASE_REF" --fail-under 95 --branch-coverage
+          fi
 
   image:
     name: Container Image
     needs: changes
     if: needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       HADOLINT_VERSION: 2.15.1
       HADOLINT_SHA256: c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507
@@ -149,30 +183,80 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          fetch-depth: 0
           persist-credentials: false
+      - name: Fetch the pull request base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags origin "$BASE_REF"
+      - name: Set up Node.js and pnpm
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          cache: true
+          require-lockfile: true
+      - name: List affected apps
+        id: affected
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            mapfile -t apps < <(bash .github/scripts/affected-apps.sh "origin/$BASE_REF" HEAD)
+          else
+            mapfile -t apps < <(bash .github/scripts/affected-apps.sh)
+          fi
+          {
+            echo "app=false"
+            echo "backoffice=false"
+            for app in "${apps[@]}"; do
+              echo "$app=true"
+            done
+          } >> "$GITHUB_OUTPUT"
       - name: Lint Dockerfile
         run: |
           curl --silent --show-error --fail --location --output hadolint \
             "https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-linux-x86_64"
           echo "${HADOLINT_SHA256}  hadolint" | sha256sum --check --strict
           chmod +x hadolint
-          ./hadolint apps/app/Dockerfile apps/backoffice/Dockerfile
+          files=()
+          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+            files+=(apps/app/Dockerfile)
+          fi
+          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+            files+=(apps/backoffice/Dockerfile)
+          fi
+          if [[ "${#files[@]}" -gt 0 ]]; then
+            ./hadolint "${files[@]}"
+          fi
       - name: Build images
         run: |
-          docker build --file apps/app/Dockerfile --tag app:ci .
-          docker build --file apps/backoffice/Dockerfile --tag backoffice:ci .
+          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+            docker build --file apps/app/Dockerfile --tag app:ci .
+          fi
+          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+            docker build --file apps/backoffice/Dockerfile --tag backoffice:ci .
+          fi
       - name: Smoke test images
         id: smoke
         run: |
-          docker run --detach --name app --env PORT=3000 --publish 3000:3000 app:ci
-          docker run --detach --name backoffice --env PORT=3001 --env DATABASE_URL=postgres://build-only@localhost/build-only --env PAYLOAD_SECRET=ci-only-secret --env APP_URL=http://localhost:3001 --publish 3001:3001 backoffice:ci
-          curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3000/health
-          curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3001/health
+          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+            docker run --detach --name app --env PORT=3000 --publish 3000:3000 app:ci
+            curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3000/health
+          fi
+          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+            docker run --detach --name backoffice --env PORT=3001 --env DATABASE_URL=postgres://build-only@localhost/build-only --env PAYLOAD_SECRET=ci-only-secret --env APP_URL=http://localhost:3001 --publish 3001:3001 backoffice:ci
+            curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3001/health
+          fi
       - name: Show container logs
         if: failure() && steps.smoke.outcome == 'failure'
         run: |
-          docker logs app
-          docker logs backoffice
+          if docker container inspect app >/dev/null 2>&1; then
+            docker logs app
+          fi
+          if docker container inspect backoffice >/dev/null 2>&1; then
+            docker logs backoffice
+          fi
       - name: Scan images for vulnerabilities
         run: |
           archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
@@ -180,8 +264,12 @@ jobs:
             "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archive}"
           echo "${TRIVY_SHA256}  ${archive}" | sha256sum --check --strict
           tar --extract --gzip --file "$archive" trivy
-          ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress app:ci
-          ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress backoffice:ci
+          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+            ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress app:ci
+          fi
+          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+            ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress backoffice:ci
+          fi
 
   deploy-dev:
     name: Deploy to dev

@@ -57,7 +57,9 @@ In development, Payload applies collection changes to the database directly. In 
 | `pnpm check`              | Run the static checks and the unit tests for changed code (the `pre-push` hook)                  |
 | `pnpm verify`             | Run the static checks and all unit tests with coverage                                           |
 
-CI also runs the build, the end-to-end tests, the container image scans, and the security scans.
+CI also runs the build, the end-to-end tests, the container image scans, and the security scans. Pull requests run Turborepo with `--affected` against the base branch, so only packages that changed are typed, tested, built, and scanned. Pushes to `main` and the weekly schedule still run every app. Patch coverage runs only for apps that produced a coverage file.
+
+To reuse task output across CI runs, create a Vercel team, add the repository variable `TURBO_TEAM`, and follow [Turborepo on GitHub Actions](https://turborepo.dev/docs/guides/ci-vendors/github-actions) to allow OIDC. The workflow exchanges GitHub OIDC for a short-lived Remote Cache token. If OIDC is unavailable, set the `TURBO_TOKEN` secret instead. Leave both unset to run without a Remote Cache.
 
 ## Container
 
@@ -94,9 +96,19 @@ On Vercel, deploy an app without its image. The Next.js preset takes precedence 
 
    Limit `prod` to the `main` branch and add required reviewers. Environment secrets and variables in a private repository need GitHub Pro, Team, or Enterprise; required reviewers in a private repository need GitHub Enterprise.
 
-3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`.
-4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health`.
+3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`. The workflow compares the commit with the last GitHub deployment to that environment and runs `railway up` only for services whose packages changed. A promotion through `uat` or `prod` uses the same comparison against the commit last deployed there, so several commits still ship every changed service. The first deploy to an environment ships both services.
+4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health` on each service it uploaded.
 
 Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
+
+## Mobile app
+
+The template does not ship an Expo app. Add one under `apps/mobile` when you need it:
+
+1. Create the app from the workspace root with `pnpm create expo-app@latest apps/mobile`, then add `packages/*` workspace packages as you share code. Keep `eas.json` and `credentials.json` inside `apps/mobile` and run the EAS CLI from that directory ([Expo: Build with monorepos](https://docs.expo.dev/build-reference/build-with-monorepos/)).
+2. Use `@expo/fingerprint` with `expo-github-action/fingerprint` so a pull request requests a native build only when the native layer changed ([Expo fingerprint](https://docs.expo.dev/versions/latest/sdk/fingerprint/)).
+3. Keep a single `react-native` version in the workspace. Duplicate React Native versions in one monorepo are not supported ([Expo: Monorepos](https://docs.expo.dev/guides/monorepos/)).
+
+EAS Build and Submit replace Railway for that app. CI `--affected` already includes `apps/*` and `packages/*`, so an Expo app is skipped when it did not change.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.

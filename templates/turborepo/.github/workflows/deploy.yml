@@ -81,6 +81,7 @@ jobs:
       url: ${{ vars.APP_URL }}
     permissions:
       contents: read
+      actions: read # Needed to find the last successful deploy of this environment.
     env:
       APP_URL: ${{ vars.APP_URL }}
       BACKOFFICE_URL: ${{ vars.BACKOFFICE_URL }}
@@ -103,7 +104,58 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Set up Node.js and pnpm
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          cache: true
+          require-lockfile: true
+      - name: List affected apps
+        id: affected
+        env:
+          COMMIT_SHA: ${{ inputs.commit_sha }}
+          GH_TOKEN: ${{ github.token }}
+          RAILWAY_ENVIRONMENT: ${{ inputs.environment }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          previous=""
+          latest=""
+          while IFS=$'\t' read -r run_id title; do
+            [[ -z "$run_id" ]] && continue
+            if [[ "$title" =~ ^Deploy\ ([0-9a-f]{40})\ to\ ${RAILWAY_ENVIRONMENT}$ ]]; then
+              candidate="${BASH_REMATCH[1]}"
+            else
+              continue
+            fi
+            [[ "$candidate" == "$COMMIT_SHA" ]] && continue
+            completed="$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs" | jq -r --arg env "$RAILWAY_ENVIRONMENT" '[.jobs[] | select(.conclusion == "success" and (.name == "Deploy to \($env)" or .name == "Deploy to \($env) / Deploy to \($env)")) | .completed_at] | max // empty')"
+            if [[ -n "$completed" && ( -z "$latest" || "$completed" > "$latest" ) ]]; then
+              latest="$completed"
+              previous="$candidate"
+            fi
+          done < <(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?status=success&per_page=50" --jq '.workflow_runs[] | [.id, .display_title] | @tsv')
+          while IFS=$'\t' read -r run_id head_sha; do
+            [[ -z "$run_id" || "$head_sha" == "$COMMIT_SHA" ]] && continue
+            completed="$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs" | jq -r --arg env "$RAILWAY_ENVIRONMENT" '[.jobs[] | select(.conclusion == "success" and .name == "Deploy to \($env) / Deploy to \($env)") | .completed_at] | max // empty')"
+            if [[ -n "$completed" && ( -z "$latest" || "$completed" > "$latest" ) ]]; then
+              latest="$completed"
+              previous="$head_sha"
+            fi
+          done < <(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?event=push&branch=main&status=success&per_page=50" --jq '.workflow_runs[] | [.id, .head_sha] | @tsv')
+          if [[ -n "$previous" ]]; then
+            git cat-file -e "$previous^{commit}" 2>/dev/null || git fetch --no-tags origin "$previous"
+            mapfile -t apps < <(bash .github/scripts/affected-apps.sh "$previous" "$COMMIT_SHA")
+          else
+            mapfile -t apps < <(bash .github/scripts/affected-apps.sh)
+          fi
+          {
+            echo "app=false"
+            echo "backoffice=false"
+            for app in "${apps[@]}"; do
+              echo "$app=true"
+            done
+          } >> "$GITHUB_OUTPUT"
       - name: Install verified Railway CLI
         run: |
           archive="railway-v${RAILWAY_CLI_VERSION}-x86_64-unknown-linux-musl.tar.gz"
@@ -115,10 +167,19 @@ jobs:
       - name: Deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          DEPLOY_APP: ${{ steps.affected.outputs.app }}
+          DEPLOY_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
         run: |
-          railway up --ci --service "$RAILWAY_SERVICE_APP" --environment "$RAILWAY_ENVIRONMENT"
-          railway up --ci --service "$RAILWAY_SERVICE_BACKOFFICE" --environment "$RAILWAY_ENVIRONMENT"
+          if [[ "$DEPLOY_APP" == "true" ]]; then
+            railway up --ci --service "$RAILWAY_SERVICE_APP" --environment "$RAILWAY_ENVIRONMENT"
+          fi
+          if [[ "$DEPLOY_BACKOFFICE" == "true" ]]; then
+            railway up --ci --service "$RAILWAY_SERVICE_BACKOFFICE" --environment "$RAILWAY_ENVIRONMENT"
+          fi
       - name: Require a healthy deployment
+        env:
+          DEPLOY_APP: ${{ steps.affected.outputs.app }}
+          DEPLOY_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
         run: |
           wait_health() {
             url="$1"
@@ -131,5 +192,9 @@ jobs:
             echo "::error::$url/health did not respond"
             return 1
           }
-          wait_health "$APP_URL"
-          wait_health "$BACKOFFICE_URL"
+          if [[ "$DEPLOY_APP" == "true" ]]; then
+            wait_health "$APP_URL"
+          fi
+          if [[ "$DEPLOY_BACKOFFICE" == "true" ]]; then
+            wait_health "$BACKOFFICE_URL"
+          fi

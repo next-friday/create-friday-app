@@ -5,7 +5,7 @@ import {developmentScripts, isStackId, stacks, templateName} from "../src/stacks
 
 describe("stacks", () => {
   it("names the template package of a stack", () => {
-    expect(templateName("nextjs")).toBe("next-friday-template-nextjs");
+    expect(templateName("nextjs")).toBe("friday-template-nextjs");
   });
 
   it("recognizes only known stacks", () => {
@@ -19,9 +19,11 @@ describe("stacks", () => {
       const manifest = JSON.parse(
         readFileSync(new URL(`../templates/${stack}/package.json`, import.meta.url), "utf8"),
       ) as {
+        name: string;
         scripts: Record<string, string>;
       };
 
+      expect(manifest.name).toBe(templateName(stack));
       expect(Object.keys(manifest.scripts)).toContain(developmentScripts[stack]);
     },
   );

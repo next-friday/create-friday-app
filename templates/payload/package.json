@@ -1,11 +1,11 @@
 {
-  "name": "next-friday-template-payload",
+  "name": "friday-template-payload",
   "version": "0.1.0",
   "private": true,
   "description": "Next Friday Payload CMS template.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/next-friday/next-friday-template-payload.git"
+    "url": "git+https://github.com/next-friday/friday-template-payload.git"
   },
   "license": "UNLICENSED",
   "author": "Next Friday",

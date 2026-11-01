@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a specific change to next-friday-template-nestjs.
+description: Suggest a specific change to friday-template-nestjs.
 labels: ["enhancement", "needs triage"]
 body:
   - type: markdown

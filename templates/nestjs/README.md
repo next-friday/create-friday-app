@@ -1,4 +1,4 @@
-# next-friday-template-nestjs
+# friday-template-nestjs
 
 Next Friday starter for NestJS services.
 

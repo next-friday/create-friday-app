@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a specific change to next-friday-template-turborepo.
+description: Suggest a specific change to friday-template-turborepo.
 labels: ["enhancement", "needs triage"]
 body:
   - type: markdown

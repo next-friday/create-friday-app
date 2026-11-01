@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.1
+
+### Patch Changes
+
+- 29ee3af: Generated `turborepo` projects run affected Turborepo tasks on pull requests, cache eligible tasks, deploy only Railway services whose packages changed, and document how to add an Expo app under `apps/mobile`.
+
 ## 2.1.0
 
 ### Minor Changes

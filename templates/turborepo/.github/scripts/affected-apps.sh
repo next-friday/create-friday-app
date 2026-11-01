@@ -20,7 +20,7 @@ while IFS= read -r path; do
     apps/app) app=true ;;
     apps/backoffice) backoffice=true ;;
   esac
-done <<<"$paths"
+done <<< "$paths"
 
 if [[ "$app" == true ]]; then
   printf '%s\n' app

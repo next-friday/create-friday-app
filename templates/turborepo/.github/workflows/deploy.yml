@@ -120,26 +120,21 @@ jobs:
           REPOSITORY: ${{ github.repository }}
         run: |
           previous=""
-          if [[ "$RAILWAY_ENVIRONMENT" == "dev" ]]; then
-            while IFS=$'\t' read -r run_id head_sha; do
-              [[ -z "$run_id" || "$head_sha" == "$COMMIT_SHA" ]] && continue
-              deployed="$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs" --jq '[.jobs[] | select(.name == "Deploy to dev / Deploy to dev" and .conclusion == "success")] | length')"
-              if [[ "$deployed" -gt 0 ]]; then
-                previous="$head_sha"
-                break
-              fi
-            done < <(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?event=push&branch=main&status=success&per_page=20" --jq '.workflow_runs[] | [.id, .head_sha] | @tsv')
-          else
-            while IFS= read -r title; do
-              if [[ "$title" =~ ^Deploy\ ([0-9a-f]{40})\ to\ ${RAILWAY_ENVIRONMENT}$ ]]; then
-                candidate="${BASH_REMATCH[1]}"
-                if [[ "$candidate" != "$COMMIT_SHA" ]]; then
-                  previous="$candidate"
-                  break
-                fi
-              fi
-            done < <(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?event=workflow_dispatch&status=success&per_page=100" --jq '.workflow_runs[].display_title')
-          fi
+          latest=""
+          while IFS=$'\t' read -r run_id title; do
+            [[ -z "$run_id" ]] && continue
+            if [[ "$title" =~ ^Deploy\ ([0-9a-f]{40})\ to\ ${RAILWAY_ENVIRONMENT}$ ]]; then
+              candidate="${BASH_REMATCH[1]}"
+            else
+              continue
+            fi
+            [[ "$candidate" == "$COMMIT_SHA" ]] && continue
+            completed="$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs" | jq -r --arg env "$RAILWAY_ENVIRONMENT" '[.jobs[] | select(.conclusion == "success" and (.name == "Deploy to \($env)" or .name == "Deploy to \($env) / Deploy to \($env)")) | .completed_at] | max // empty')"
+            if [[ -n "$completed" && ( -z "$latest" || "$completed" > "$latest" ) ]]; then
+              latest="$completed"
+              previous="$candidate"
+            fi
+          done < <(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?status=success&per_page=50" --jq '.workflow_runs[] | [.id, .display_title] | @tsv')
           if [[ -n "$previous" ]]; then
             git cat-file -e "$previous^{commit}" 2>/dev/null || git fetch --no-tags origin "$previous"
             mapfile -t apps < <(bash .github/scripts/affected-apps.sh "$previous" "$COMMIT_SHA")

@@ -70,7 +70,7 @@
     "jiti": "2.7.0",
     "knip": "6.43.0",
     "lint-staged": "17.6.0",
-    "pkg-pr-new": "0.0.91",
+    "pkg-pr-new": "0.0.92",
     "prettier": "3.9.10",
     "publint": "0.3.25",
     "sort-package-json": "4.1.0",

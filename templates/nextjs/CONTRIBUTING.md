@@ -28,11 +28,11 @@ pnpm install
 
 Run the narrowest check that covers the change while you work. Git hooks run these checks:
 
-| Hook               | Checks                                                                                                                                                |
-| :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pre-commit`       | blocks commits on `main` except the first commit of a new repository, gitleaks on staged changes, `pnpm rules:check`, and lint-staged on staged files |
-| `commit-msg`       | commitlint                                                                                                                                            |
-| `pre-merge-commit` | blocks merge commits on `main`                                                                                                                        |
+| Hook               | Checks                                                                                                                                                          |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit`       | blocks commits on `main` except the first commit of a new repository, gitleaks on staged changes, `pnpm rules:check`, and lint-staged on staged files           |
+| `commit-msg`       | commitlint                                                                                                                                                      |
+| `pre-merge-commit` | blocks merge commits on `main`                                                                                                                                  |
 | `pre-push`         | blocks pushes to `main` except the push that creates it, then `pnpm check`: the static checks, the unit tests related to your changes, and the production build |
 
 - **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, and OSV scans. Dependabot and OSV-Scanner report vulnerable dependencies.

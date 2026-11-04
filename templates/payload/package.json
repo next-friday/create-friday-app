@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "check": "pnpm verify:static && pnpm test:changed",
+    "check": "pnpm verify:static && pnpm test:changed && pnpm build",
     "clean": "rm -rf .next coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "depcruise": "depcruise --config .dependency-cruiser.json src test eslint.config.ts next.config.ts playwright.config.ts vitest.config.ts",
     "dev": "next dev",
@@ -41,7 +41,7 @@
     "test:e2e": "playwright test",
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.json",
-    "verify": "pnpm verify:static && pnpm test:coverage",
+    "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
     "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "dependencies": {

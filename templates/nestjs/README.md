@@ -42,8 +42,8 @@ The server listens on the port set by `PORT` in `.env`, which the CLI created fr
 | `pnpm start:prod`  | Run `dist/main.js`; the environment sets `PORT`                                 |
 | `pnpm test`        | Run unit tests (`src/**/*.test.ts`)                                             |
 | `pnpm test:e2e`    | Run end-to-end tests (`test/**/*.e2e.test.ts`)                                  |
-| `pnpm check`       | Run the static checks and the unit tests for changed code (the `pre-push` hook) |
-| `pnpm verify`      | Run the static checks and all unit tests with coverage                          |
+| `pnpm check`       | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook) |
+| `pnpm verify`      | Run the static checks, all unit tests with coverage, and the production build                          |
 
 CI also runs the build, the end-to-end tests, the container image scan, and the security scans.
 

@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "check": "pnpm verify:static && pnpm test:changed",
+    "check": "pnpm verify:static && pnpm test:changed && pnpm build",
     "clean": "rm -rf dist coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "debug:build": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "debug:serve": "node --env-file-if-exists=.env --inspect --watch dist/main",
@@ -42,7 +42,7 @@
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "verify": "pnpm verify:static && pnpm test:coverage",
+    "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
     "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "dependencies": {

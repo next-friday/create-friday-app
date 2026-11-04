@@ -3,7 +3,7 @@ name: Dependency Review
 on:
   pull_request: {}
 
-permissions: {}
+permissions: {} # No token beyond the job grants below.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: read # Needed to check out the repository.
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

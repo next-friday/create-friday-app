@@ -1,0 +1,47 @@
+name: CodeQL
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "18 4 * * 1"
+
+permissions: {} # No token beyond the job grants below.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    if: github.event.repository.visibility == 'public' || vars.CODE_SCANNING == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read # Needed to fetch CodeQL packs used by this workflow.
+      contents: read # Needed to check out the repository.
+      packages: read # Needed to fetch internal or private CodeQL packs.
+      security-events: write # Needed to upload SARIF results to GitHub code scanning.
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - actions
+          - javascript-typescript
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
+        with:
+          category: "/language:${{ matrix.language }}"

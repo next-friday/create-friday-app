@@ -35,7 +35,7 @@ Run the narrowest check that covers the change while you work. Git hooks run the
 | `pre-merge-commit` | blocks merge commits on `main`                                                                                                                                  |
 | `pre-push`         | blocks pushes to `main` except the push that creates it, then `pnpm check`: the static checks, the unit tests related to your changes, and the production build |
 
-- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, and OSV scans. Dependabot and OSV-Scanner report vulnerable dependencies.
+- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. Dependabot and OSV-Scanner report vulnerable dependencies.
 - **End-to-end tests:** run `pnpm test:e2e` when you change endpoints. CI runs it on every pull request that is ready for review and changes code.
 - **Coverage:** CI requires 95% line coverage on changed lines in `src/`, except `main.ts` and `*.module.ts`, which hold only wiring. Keep logic out of them, as `src/port.ts` does for `main.ts`. CI does not gate branch coverage, because NestJS decorators emit metadata branches that never run.
 

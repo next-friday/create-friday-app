@@ -1,0 +1,4 @@
+# Owner: @joetakara @next-friday-engineer. Reason: zizmor flags local composite actions as self-repository reuse. Local actions stay at ./.github/actions. Expires: 2027-11-04.
+rules:
+  self-repository:
+    disable: true

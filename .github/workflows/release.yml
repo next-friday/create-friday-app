@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up pnpm
-        uses: $/.github/actions/setup-pnpm
+        uses: ./.github/actions/setup-pnpm
       - name: Select Changesets mode
         id: select
         uses: changesets/action/select-mode@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
@@ -52,7 +52,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up pnpm
-        uses: $/.github/actions/setup-pnpm
+        uses: ./.github/actions/setup-pnpm
         with:
           install: false
       - name: Install dependencies without lifecycle scripts
@@ -79,7 +79,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up pnpm
-        uses: $/.github/actions/setup-pnpm
+        uses: ./.github/actions/setup-pnpm
       - name: Verify release commit
         run: pnpm verify
       - name: Pack publishable package
@@ -106,7 +106,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up pnpm
-        uses: $/.github/actions/setup-pnpm
+        uses: ./.github/actions/setup-pnpm
         with:
           install: false
       - name: Install dependencies without lifecycle scripts

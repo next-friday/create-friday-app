@@ -1,0 +1,42 @@
+name: Scorecard
+
+on:
+  branch_protection_rule: {}
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "27 4 * * 1"
+
+permissions: {} # No token beyond the job grants below.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    if: (github.event.repository.visibility == 'public' || vars.CODE_SCANNING == 'true') && (github.event.repository.default_branch == github.ref_name || github.event_name == 'branch_protection_rule')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read # Needed to inspect workflow history for Scorecard checks.
+      contents: read # Needed to check out the repository.
+      id-token: write # Needed to publish Scorecard results with OIDC.
+      security-events: write # Needed to upload SARIF results to GitHub code scanning.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Run analysis
+        uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - name: Upload to code scanning
+        uses: github/codeql-action/upload-sarif@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
+        with:
+          sarif_file: results.sarif

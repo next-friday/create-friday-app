@@ -5,6 +5,7 @@ Review pull requests against the project's agent guide and rules:
 - [Agent guide](../AGENTS.md)
 - [Owned Checks](../.agents/rules/automation-owned-checks.md)
 - [Required Comments](../.agents/rules/code-comments.md)
+- [Codebase Hygiene](../.agents/rules/codebase-hygiene.md)
 - [Current State](../.agents/rules/current-state-authority.md)
 - [Demand-Driven Configuration](../.agents/rules/demand-driven-configuration.md)
 - [Dependencies](../.agents/rules/dependency-security.md)

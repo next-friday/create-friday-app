@@ -1,0 +1,13 @@
+# Codebase Hygiene
+
+Keep the codebase clean. Modify existing code instead of accumulating new code. Git owns history, not source code.
+
+- **No duplication.** Do not add code that repeats an existing declaration or behavior.
+- **No dead code.** Do not keep code the current behavior does not run.
+- **No unnecessary versioning.** Do not store version history in source. Do not add a version constant or a versioned copy of a prompt, instruction, or behavior.
+- **No log accumulation.** Do not add a log that repeats one already recorded, and do not commit log output.
+- **Single source of truth.** One fact has one owning declaration.
+- **Minimal changes.** Change only what the current behavior requires.
+- **Remove before adding.** Change or delete the existing code before adding new code. When a declaration already exists, overwrite it. Do not keep the previous text as an example.
+
+_Completion criterion_: The diff changes or deletes current code when that meets the requirement. New code exists only when no current code can be changed to do the job. History stays in git.

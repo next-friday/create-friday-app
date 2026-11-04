@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": ".agents/hooks/agent-suppression-gate.sh",
+        "matcher": "Write|StrReplace",
+        "timeout": 10,
+        "failClosed": true
+      },
+      {
+        "command": ".cursor/hooks/agent-constitution-gate.sh",
+        "matcher": "Write|StrReplace|Delete",
+        "timeout": 10,
+        "failClosed": true
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": ".agents/hooks/agent-shell-gate.sh",
+        "timeout": 10,
+        "failClosed": true
+      }
+    ]
+  }
+}

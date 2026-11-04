@@ -11,6 +11,7 @@ Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 - Use the Node.js version declared by `.nvmrc` and `package.json#engines`.
 - Use the pnpm version declared by `package.json#packageManager` through Corepack.
 - Install [gitleaks](https://github.com/gitleaks/gitleaks#installing), for example `brew install gitleaks`. The pre-commit hook refuses to commit without it.
+- Install [jq](https://jqlang.org/download/). The agent hooks refuse to run without it.
 
 From the repository root:
 

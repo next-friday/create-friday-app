@@ -76,6 +76,26 @@ jobs:
       - name: Check lint
         run: pnpm lint:check
 
+  agent-gates:
+    name: Agent Gates
+    needs: changes
+    if: needs.changes.outputs.full_verification == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up pnpm
+        uses: ./.github/actions/setup-pnpm
+      - name: Reject suppression directives
+        run: pnpm suppressions:check
+      - name: Check Cursor rules match .agents/rules
+        run: pnpm rules:check
+      - name: Check agent gates
+        run: pnpm gates:check
+
   format:
     name: Format & Manifests
     needs: changes
@@ -208,7 +228,7 @@ jobs:
         run: pnpm build
       - name: Run the packed CLI in a clean npm consumer
         shell: bash
-        run: | # zizmor: ignore[adhoc-packages] isolated consumer install
+        run: |
           consumer_dir="$(mktemp -d)"
           pnpm pack --pack-destination "$consumer_dir"
           cd "$consumer_dir"
@@ -330,6 +350,7 @@ jobs:
       - changes
       - release-integrity
       - lint
+      - agent-gates
       - format
       - test
       - check-types

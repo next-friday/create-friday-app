@@ -75,6 +75,11 @@ const blockedCommands = [
   'echo "$(true&# )\ngit commit -n -m x)"',
   'echo "$(true|# )\ngit commit -n -m x)"',
   'echo "$( (true)# )\ngit commit -n -m x)"',
+  "{ git commit --no-verify -m x; }",
+  "if true; then git commit -n -m x; fi",
+  "while true; do git commit -n -m x; done",
+  "if git commit -n -m x; then true; fi",
+  "printf x > .git/config.worktree",
 ];
 
 const allowedCommands = [
@@ -115,6 +120,9 @@ const protectedPaths = [
   ".husky/pre-commit",
   ".lintstagedrc.json",
   ".gitleaks.toml",
+  ".git/hooks/pre-commit",
+  ".git/config",
+  ".git/config.worktree",
   ".claude/settings.local.json",
   "src/../.husky/pre-commit",
 ];

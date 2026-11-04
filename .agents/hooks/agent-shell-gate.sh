@@ -117,6 +117,15 @@ lex() {
           flush
           words+=("$separator")
           ;;
+        '{' | '}')
+          if ((has_word)); then
+            word+=$char
+            has_word=1
+          else
+            flush
+            words+=("$separator")
+          fi
+          ;;
         '>')
           flush
           while [[ ${text:index+1:1} == [\>\|\&] ]]; do
@@ -271,7 +280,9 @@ check_command() {
       continue
     fi
     case ${word##*/} in
-      env | command | exec | nohup | time | nice | sudo | builtin) args=("${args[@]:1}") ;;
+      env | command | exec | nohup | time | nice | sudo | builtin | if | then | else | elif | fi | while | until | for | do | done | case | esac | select | in | '!' | '{' | '}')
+        args=("${args[@]:1}")
+        ;;
       *) break ;;
     esac
   done

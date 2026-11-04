@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.4
+
+### Patch Changes
+
+- 98aed8f: Generated projects include a Codebase Hygiene rule. Agents change existing code instead of accumulating new code, and git keeps the history.
+
 ## 2.1.3
 
 ### Patch Changes

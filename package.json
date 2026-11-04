@@ -40,17 +40,21 @@
     "dev": "tsdown --watch",
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
+    "gates:check": "node scripts/check-agent-gates.ts",
     "knip": "knip",
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
     "prepare": "husky",
+    "rules:check": "node scripts/sync-agent-rules.ts --check",
+    "rules:sync": "node scripts/sync-agent-rules.ts",
     "sort-package-json": "sort-package-json package.json",
     "sort-package-json:check": "sort-package-json --check package.json",
+    "suppressions:check": "bash .agents/hooks/agent-suppression-gate.sh --repo",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "verify": "pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
+    "verify": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
   },
   "dependencies": {
     "@clack/prompts": "1.8.1"

@@ -1,0 +1,17 @@
+# Current State
+
+For implementation decisions, use this order:
+
+1. Explicit current user requirements
+2. Project instructions on the affected path
+3. Current working tree
+4. Tests, contracts, schemas, and configuration
+5. Runtime behavior and logs
+6. Official upstream documentation
+7. Git history as evidence of what changed and why
+
+Code absent from the working tree is removed. Restore it only when the user names that historical implementation, then verify it against current requirements.
+
+Identify the owning project before investigating. Apply the more specific convention inside its scope.
+
+_Completion criterion_: The change matches current requirements and the working tree. Historical code appears only when the user named it.

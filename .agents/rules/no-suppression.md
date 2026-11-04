@@ -1,0 +1,7 @@
+# Findings
+
+Fix what a linter, type checker, or scanner reports, including the replacement it suggests. Comments a tool requires follow `code-comments.md`.
+
+Record an accepted risk only in that tool's central file, with an owner, a reason, and an expiry date: `.github/zizmor.yml` for zizmor, `osv-scanner.toml` for OSV-Scanner, `.gitleaksignore` for gitleaks, `.trivyignore` for Trivy, or `.hadolint.yaml` for hadolint. Create the file or key when the first accepted risk needs it. Do not add inline suppressions; `.agents/hooks/agent-suppression-gate.sh` defines the rejected directives.
+
+When a finding looks wrong, stop and cite the tool's documentation to the user. Report a finding as fixed only when the tool passes, with any accepted risk in that central file.

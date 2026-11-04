@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.3
+
+### Patch Changes
+
+- 8691e3b: Generated projects include `CLAUDE.md`, which imports `AGENTS.md`, so Claude Code loads the same agent guide as Cursor.
+
 ## 2.1.2
 
 ### Patch Changes

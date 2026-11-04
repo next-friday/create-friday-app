@@ -1,5 +1,12 @@
 # @next-friday/create-app
 
+## 2.1.2
+
+### Patch Changes
+
+- d1b9a9f: This repository and generated projects run GitHub Dependency Review, CodeQL, and OpenSSF Scorecard. Generated projects also upload zizmor results to code scanning and pin TruffleHog with the CLI repository.
+- acc8fa7: Generated projects run the production build from `pnpm check` and `pnpm verify`, so the `pre-push` hook matches the CLI gate.
+
 ## 2.1.1
 
 ### Patch Changes

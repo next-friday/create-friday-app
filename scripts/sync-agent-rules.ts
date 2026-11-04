@@ -75,6 +75,11 @@ const expected = new Map<string, string>();
 
 for (const name of configNames) {
   const rule = config[name];
+
+  if (rule === undefined) {
+    throw new Error(`${configPath} is missing ${name}.`);
+  }
+
   const body = readFileSync(path.join(sourceDirectory, `${name}.md`), "utf8");
 
   expected.set(path.join(claudeDirectory, `${name}.md`), renderClaudeRule(name, rule, body));

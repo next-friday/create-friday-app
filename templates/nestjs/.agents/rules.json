@@ -5,6 +5,9 @@
   "code-comments": {
     "description": "Required comments: comment only where a tool or rule needs it, or for a reason the code cannot show"
   },
+  "codebase-hygiene": {
+    "description": "Codebase hygiene: modify existing code instead of accumulating new code"
+  },
   "current-state-authority": {
     "description": "Current state: implement from user requirements and the working tree"
   },

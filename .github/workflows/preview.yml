@@ -29,7 +29,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up pnpm
-        uses: $/.github/actions/setup-pnpm
+        uses: ./.github/actions/setup-pnpm
       - name: Build package
         run: pnpm build
       - name: Publish preview release

@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: "18 4 * * 1"
 
-permissions: {}
+permissions: {} # No token beyond the job grants below.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
@@ -17,13 +17,14 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
+    if: github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      actions: read
-      contents: read
-      packages: read
-      security-events: write
+      actions: read # Needed to fetch CodeQL packs used by this workflow.
+      contents: read # Needed to check out the repository.
+      packages: read # Needed to fetch internal or private CodeQL packs.
+      security-events: write # Needed to upload SARIF results to GitHub code scanning.
     strategy:
       fail-fast: false
       matrix:

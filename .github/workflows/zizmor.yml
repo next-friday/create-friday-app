@@ -11,7 +11,7 @@ on:
     paths:
       - ".github/**"
 
-permissions: {}
+permissions: {} # No token beyond the job grants below.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: read # Needed to check out the repository.
       security-events: write # Needed to upload SARIF results to GitHub code scanning.
     steps:
       - name: Checkout repository
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: read
+      contents: read # Needed to check out the repository.
     env:
       ACTIONLINT_VERSION: 1.7.12
       ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8

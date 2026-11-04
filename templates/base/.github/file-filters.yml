@@ -7,6 +7,7 @@ heavy:
   - "!.github/pull_request_template.md"
   - "!.github/dependabot.yml"
   - "!AGENTS.md"
+  - "!CLAUDE.md"
 
 ci_policy:
   - ".github/file-filters.yml"

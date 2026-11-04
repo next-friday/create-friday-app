@@ -32,7 +32,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 - **Git hooks:** Husky runs gitleaks and lint-staged before each commit, commitlint on each message, and `pnpm check` before each push. Commits and pushes to `main` are blocked after the first one.
 - **CI:** GitHub Actions run the static checks, tests with patch coverage, the build, end-to-end tests for Next.js and Payload, a container build and vulnerability scan, Semgrep, OSV-Scanner, CodeQL, dependency review, OpenSSF Scorecard, gitleaks, TruffleHog, zizmor, and pull request title validation. Dependabot keeps dependencies current.
 - **Deployment:** a `Dockerfile` that runs as the `node` user, and a Railway workflow that promotes one commit through `dev`, `uat`, and `prod`.
-- **Agent rules:** shared rules in `.agents/rules`, with hooks that enforce them in Claude Code and Cursor, and a Cursor Bugbot configuration.
+- **Agent rules:** `CLAUDE.md` imports `AGENTS.md`. Shared rules live in `.agents/rules`, with hooks that enforce them in Claude Code and Cursor, and a Cursor Bugbot configuration.
 
 ## Requirements
 

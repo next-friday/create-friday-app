@@ -7,7 +7,7 @@ Use this guide to prepare changes to this repository.
 - Use the Node.js version declared by `.nvmrc` and `package.json#engines`.
 - Change the Node.js version in `.nvmrc` and the `Dockerfile` together. Dependabot updates only the `Dockerfile`.
 - Install pnpm once with `npm install --global pnpm`. It switches to the version declared by `package.json#packageManager` automatically.
-- Use Claude Code v2.1.295 or later. It reads `AGENTS.md` directly and supports the `onFailure` field the agent hooks use.
+- Use Claude Code v2.1.295 or later. It reads `CLAUDE.md`, which imports `AGENTS.md`, and supports the `onFailure` field the agent hooks use.
 - Install gitleaks 8.19 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
 
 From the repository root:

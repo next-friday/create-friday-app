@@ -43,7 +43,7 @@ The server listens on the port set by `PORT` in `.env`, which the CLI created fr
 | `pnpm check`      | Run the static checks, the tests for changed code, and the production build (the `pre-push` hook) |
 | `pnpm verify`     | Run the static checks, all tests with coverage, and the production build                          |
 
-CI also runs the build, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard.
+CI also runs the build, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
 
 ## Container
 

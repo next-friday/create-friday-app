@@ -17,7 +17,7 @@ concurrency:
 jobs:
   analysis:
     name: Scorecard analysis
-    if: github.event.repository.visibility == 'public' && (github.event.repository.default_branch == github.ref_name || github.event_name == 'branch_protection_rule')
+    if: (github.event.repository.visibility == 'public' || vars.CODE_SCANNING == 'true') && (github.event.repository.default_branch == github.ref_name || github.event_name == 'branch_protection_rule')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "build": "turbo run build ${TURBO_FILTER:-\"--filter=./apps/*\"}",
-    "check": "pnpm verify:static && pnpm test:changed",
+    "check": "pnpm verify:static && pnpm test:changed && pnpm build",
     "clean": "rm -rf apps/app/.next apps/app/coverage apps/backoffice/.next apps/backoffice/coverage .turbo coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "depcruise": "turbo run depcruise ${TURBO_FILTER:-\"--filter=./apps/*\"}",
     "dev": "turbo run dev --filter=./apps/*",
@@ -40,7 +40,7 @@
     "test:e2e": "turbo run test:e2e ${TURBO_FILTER:-\"--filter=./apps/*\"}",
     "test:watch": "turbo run test:watch --filter=./apps/*",
     "typecheck": "tsc --noEmit -p tsconfig.json && turbo run typecheck ${TURBO_FILTER:-\"--filter=./apps/*\"}",
-    "verify": "pnpm verify:static && pnpm test:coverage",
+    "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
     "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "devDependencies": {

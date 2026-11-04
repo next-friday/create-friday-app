@@ -33,15 +33,15 @@ The server listens on the port set by `PORT` in `.env`, which the CLI created fr
 
 ## Scripts
 
-| Script            | Purpose                                                                    |
-| :---------------- | :------------------------------------------------------------------------- |
-| `pnpm start:dev`  | Start in watch mode from `src/main.ts`; loads `.env` when present          |
-| `pnpm build`      | Compile to `dist/`                                                         |
-| `pnpm start`      | Run `dist/main.js`; loads `.env` when present                              |
-| `pnpm start:prod` | Run `dist/main.js`; the environment sets `PORT`                            |
-| `pnpm test`       | Run tests (`src/**/*.test.ts`)                                             |
-| `pnpm check`      | Run the static checks and the tests for changed code (the `pre-push` hook) |
-| `pnpm verify`     | Run the static checks and all tests with coverage                          |
+| Script            | Purpose                                                                                           |
+| :---------------- | :------------------------------------------------------------------------------------------------ |
+| `pnpm start:dev`  | Start in watch mode from `src/main.ts`; loads `.env` when present                                 |
+| `pnpm build`      | Compile to `dist/`                                                                                |
+| `pnpm start`      | Run `dist/main.js`; loads `.env` when present                                                     |
+| `pnpm start:prod` | Run `dist/main.js`; the environment sets `PORT`                                                   |
+| `pnpm test`       | Run tests (`src/**/*.test.ts`)                                                                    |
+| `pnpm check`      | Run the static checks, the tests for changed code, and the production build (the `pre-push` hook) |
+| `pnpm verify`     | Run the static checks, all tests with coverage, and the production build                          |
 
 CI also runs the build, the container image scan, and the security scans.
 

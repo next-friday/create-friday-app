@@ -54,8 +54,8 @@ In development, Payload applies collection changes to the database directly. In 
 | `pnpm generate:importmap` | Regenerate the admin import map after adding a custom component                                                   |
 | `pnpm migrate:create`     | Create a migration from collection changes, for example `pnpm migrate:create add-posts`                           |
 | `pnpm migrate`            | Apply pending migrations to the database in `DATABASE_URL`                                                        |
-| `pnpm check`              | Run the static checks and the unit tests for changed code (the `pre-push` hook)                                   |
-| `pnpm verify`             | Run the static checks and all unit tests with coverage                                                            |
+| `pnpm check`              | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook)            |
+| `pnpm verify`             | Run the static checks, all unit tests with coverage, and the production build                                     |
 
 CI also runs the build, the end-to-end tests, the container image scan, and the security scans.
 

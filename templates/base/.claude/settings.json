@@ -20,6 +20,7 @@
       "Edit(./.husky/**)",
       "Edit(./.git/hooks/**)",
       "Edit(./.git/config)",
+      "Edit(./.git/config.worktree)",
       "Edit(./.lintstagedrc.json)",
       "Edit(./.gitleaks.toml)",
       "Bash(gh repo delete *)",

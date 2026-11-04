@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-protected='^(\.agents/rules/|\.agents/rules\.json$|\.agents/hooks/|\.claude/rules/|\.claude/settings(\.local)?\.json$|\.cursor/rules/|\.cursor/hooks/|\.cursor/hooks\.json$|scripts/sync-agent-rules\.ts$|scripts/check-agent-gates\.ts$|\.commitlintrc\.json$|\.prettierrc\.json$|prettier\.config\.ts$|eslint\.config\.ts$|\.husky/|\.lintstagedrc\.json$|\.gitleaks\.toml$|\.git/hooks/|\.git/config$)'
+protected='^(\.agents/rules/|\.agents/rules\.json$|\.agents/hooks/|\.claude/rules/|\.claude/settings(\.local)?\.json$|\.cursor/rules/|\.cursor/hooks/|\.cursor/hooks\.json$|scripts/sync-agent-rules\.ts$|scripts/check-agent-gates\.ts$|\.commitlintrc\.json$|\.prettierrc\.json$|prettier\.config\.ts$|eslint\.config\.ts$|\.husky/|\.lintstagedrc\.json$|\.gitleaks\.toml$|\.git/hooks/|\.git/config(\.worktree)?$)'
 
 allow() {
   printf '%s\n' '{"permission":"allow"}'

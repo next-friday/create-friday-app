@@ -79,6 +79,7 @@ const blockedCommands = [
   "if true; then git commit -n -m x; fi",
   "while true; do git commit -n -m x; done",
   "if git commit -n -m x; then true; fi",
+  "printf x > .git/config.worktree",
 ];
 
 const allowedCommands = [
@@ -121,6 +122,7 @@ const protectedPaths = [
   ".gitleaks.toml",
   ".git/hooks/pre-commit",
   ".git/config",
+  ".git/config.worktree",
   ".claude/settings.local.json",
   "src/../.husky/pre-commit",
 ];

@@ -20,7 +20,7 @@ command=$(jq -r '.command // .tool_input.command // empty' <<< "$input")
 
 separator=$'\x1f'
 redirect=$'\x1e'
-protected_names='(\.husky|\.agents|\.cursor|\.claude/rules|\.claude/settings(\.local)?\.json|\.git/hooks|\.git/config|\.lintstagedrc\.json|\.gitleaks\.toml|\.commitlintrc\.json|\.prettierrc\.json|prettier\.config\.ts|eslint\.config\.ts|scripts/(sync-agent-rules|check-agent-gates)\.ts)'
+protected_names='(\.husky|\.agents|\.cursor|\.claude/rules|\.claude/settings(\.local)?\.json|\.git/hooks|\.git/config(\.worktree)?|\.lintstagedrc\.json|\.gitleaks\.toml|\.commitlintrc\.json|\.prettierrc\.json|prettier\.config\.ts|eslint\.config\.ts|scripts/(sync-agent-rules|check-agent-gates)\.ts)'
 protected="(^|[/=])$protected_names(/|$)"
 policy="Hooks and agent policy files are company policy; stop and ask the user."
 in_protected=0

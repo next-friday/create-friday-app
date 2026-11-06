@@ -1,0 +1,3 @@
+# Evidence
+
+Verify a claim about files, commands, APIs, versions, or limits before you state or write it, and cite its source: `path:line`, command output, or an official documentation URL. Do not write a value without a source into code or docs; state it as unverified and give the reason.

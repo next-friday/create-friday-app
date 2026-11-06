@@ -1,0 +1,3 @@
+# Logging
+
+Application code logs through the stack's logging library or the framework's logger, never `console.*`. Write structured records, and send them to a store that keeps them longer than the host does.

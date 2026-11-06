@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.5
+
+### Patch Changes
+
+- c6f6604: Generated projects include a Descriptive Naming rule. Agents give paths and identifiers names that say what they hold, keep organization names out of them, and do not copy a sibling name that breaks the rule.
+
 ## 2.1.4
 
 ### Patch Changes

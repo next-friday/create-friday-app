@@ -17,6 +17,7 @@ Review pull requests against this repository's agent rules:
 - [Current State](../.agents/rules/current-state-authority.md)
 - [Demand-Driven Configuration](../.agents/rules/demand-driven-configuration.md)
 - [Dependencies](../.agents/rules/dependency-security.md)
+- [Descriptive Naming](../.agents/rules/descriptive-naming.md)
 - [Test Admission](../.agents/rules/deterministic-testing.md)
 - [Diagnostics](../.agents/rules/diagnostics-and-error-handling.md)
 - [Git Workflow](../.agents/rules/git-workflow.md)

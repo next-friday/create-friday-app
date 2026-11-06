@@ -2,6 +2,6 @@
 
 Treat each application, package, or component as one author's work. Match representative siblings for layout, naming, exports, helpers, composition, errors, and abstraction. Use the language's standard idiom when no sibling exists. Name the convention when a conflict affects the design.
 
-Keep execution flow collocated. Extract a helper when multiple callers share it. One term per concept; parallel symbols share grammatical shape. Comments follow `code-comments.md`.
+Keep execution flow collocated. Extract a helper when multiple callers share it. One term per concept; parallel symbols share grammatical shape. Comments follow `code-comments.md`. Names follow `descriptive-naming.md`, which matching siblings does not override.
 
 Keep edits in the requested component, its call sites, and the workspace metadata it needs. Cross-project convention changes are in scope only when the task names them.

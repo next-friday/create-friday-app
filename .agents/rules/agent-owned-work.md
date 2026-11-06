@@ -1,0 +1,3 @@
+# Agent-Owned Work
+
+Do the work that an agent, a script, or an API can do; do not hand it to the user. Before you ask the user, check the code, data, docs, and tools that already exist. Ask only for what no one else can provide, such as payment, legal identity, or a business fact recorded nowhere. Constitution edits follow `constitution-changes.md`.

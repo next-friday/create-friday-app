@@ -1,4 +1,7 @@
 {
+  "agent-owned-work": {
+    "description": "Agent-owned work: do what an agent, script, or API can do instead of asking the user"
+  },
   "automation-owned-checks": {
     "description": "Owned checks: hooks and CI define what must pass; run checks by hand to verify"
   },
@@ -7,6 +10,9 @@
   },
   "codebase-hygiene": {
     "description": "Codebase hygiene: modify existing code instead of accumulating new code"
+  },
+  "constitution-changes": {
+    "description": "Constitution changes: change rules, hooks, and agent settings only through a dedicated issue"
   },
   "current-state-authority": {
     "description": "Current state: implement from user requirements and the working tree"
@@ -28,17 +34,26 @@
   "diagnostics-and-error-handling": {
     "description": "Diagnostics: fix runtime failures at the source and keep the root cause"
   },
+  "evidence-before-claims": {
+    "description": "Evidence: verify and cite a claim before stating or writing it"
+  },
   "git-workflow": {
     "description": "Git workflow: trunk-based branches, commits, and pull requests"
   },
   "no-suppression": {
     "description": "Findings: fix scanner and linter reports without inline suppressions"
   },
+  "platform-and-library-first": {
+    "description": "Platform and library first: use built-in features, then maintained libraries, then custom code"
+  },
   "script-driven-changes": {
     "description": "Scripts: apply a repeated edit across many files with a script"
   },
   "single-author-style": {
     "description": "Sibling style: match layout, naming, and composition in the same project"
+  },
+  "structured-logging": {
+    "description": "Logging: log through a logging library in structured, durable records"
   },
   "typescript-first": {
     "description": "TypeScript-first: write source, tests, and scripts as .ts",

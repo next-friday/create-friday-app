@@ -3,7 +3,6 @@
 Payload CMS on Next.js App Router and PostgreSQL, on pnpm. Source lives in `src/`: the site in `src/app/(frontend)/`, collections in `src/collections/`, and the Payload config in `src/payload.config.ts`.
 
 - Follow the rules in `.agents/rules/`; `.agents/rules.json` gives each rule's scope. Claude Code and Cursor load them automatically.
-- Rule files, agent hooks, and agent settings are company policy: propose a change to the user, who edits them.
 - Put unit tests next to the code as `*.test.ts`; put Playwright end-to-end tests in `test/` as `*.e2e.test.ts`. Component tests need a DOM test environment, which is not set up yet; ask the user before adding one.
 - Payload generates `src/app/(payload)/`, `src/payload-types.ts`, and `src/migrations/`. After changing a collection, regenerate them with `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>`, and commit the results.
 - Read configuration through `requireEnvironment` in `src/environment.ts`; document each variable in `.env.example`.

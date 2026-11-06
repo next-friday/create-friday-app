@@ -3,7 +3,6 @@
 Next.js App Router application on pnpm. Routes live in `app/`.
 
 - Follow the rules in `.agents/rules/`; `.agents/rules.json` gives each rule's scope. Claude Code and Cursor load them automatically.
-- Rule files, agent hooks, and agent settings are company policy: propose a change to the user, who edits them.
 - Put unit tests next to the code as `*.test.ts`; put Playwright end-to-end tests in `test/` as `*.e2e.test.ts`. Component tests need a DOM test environment, which is not set up yet; ask the user before adding one.
 - Read configuration from environment variables and fail when one is missing; document each variable in `.env.example`.
 

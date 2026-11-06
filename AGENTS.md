@@ -3,7 +3,6 @@
 CLI that generates Next Friday projects. Source lives in `src/`. Tests live in `test/`. Each stack is `templates/base` plus `templates/<stack>`.
 
 - Follow the rules in `.agents/rules/`. `.agents/rules.json` gives each rule's scope. Claude Code and Cursor load them.
-- Rule files, agent hooks, and agent settings are company policy. Propose a change to the user, who edits them.
 - Edit source under `src/`, tests under `test/`, and templates under `templates/`.
 - `templates/` is the consumer kit. Root rules and hooks are this repository's own copies. Do not link the two trees together.
 - Preserve CLI arguments, prompts, and the generated project layout unless the change declares a breaking contract.

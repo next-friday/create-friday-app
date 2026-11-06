@@ -1,10 +1,40 @@
 # Agent guide
 
-Next.js App Router application on pnpm. Routes live in `app/`.
+Next.js App Router web app with React and Tailwind CSS, in TypeScript on pnpm and Node.js `>=24.15.0 <25`.
 
-- Follow the rules in `.agents/rules/`; `.agents/rules.json` gives each rule's scope. Claude Code and Cursor load them automatically.
-- Put unit tests next to the code as `*.test.ts`; put Playwright end-to-end tests in `test/` as `*.e2e.test.ts`. Component tests need a DOM test environment, which is not set up yet; ask the user before adding one.
-- Read configuration from environment variables and fail when one is missing; document each variable in `.env.example`.
+## Commands
+
+| Task                        | Command                                                     |
+| :-------------------------- | :---------------------------------------------------------- |
+| Start with reload           | `pnpm dev`                                                  |
+| One test                    | `pnpm vitest run app/health/route.test.ts -t "<test name>"` |
+| Unit tests                  | `pnpm test`, or `pnpm test:coverage`                        |
+| End-to-end tests            | `pnpm test:e2e`                                             |
+| What `pre-push` runs        | `pnpm check`                                                |
+| Every check                 | `pnpm verify`                                               |
+| Render rules after a change | `pnpm rules:sync`                                           |
+
+## How it fits together
+
+- Routes live in `app/`. `app/health/route.ts` serves `/health`.
+- `next.config.ts` builds `output: "standalone"`, enables Cache Components, and sets the security headers. `pnpm start` copies the static assets into `.next/standalone` and serves it.
+
+## Mandatory rules
+
+1. **Follow `.agents/rules/`.** `.agents/rules.json` gives each rule's scope; Claude Code and Cursor load them. After changing either, run `pnpm rules:sync`; `pnpm check` fails on stale copies.
+2. **Put unit tests next to the code as `app/**/*.test.{ts,tsx}` and Playwright end-to-end tests in `test/` as `*.e2e.test.ts`.** Vitest collects only the first pattern.
+3. **Ask the user before adding component tests.** They need a DOM test environment, and Vitest runs in Node.js.
+4. **Read configuration from environment variables and fail when one is missing.** Document each variable in `.env.example`.
+
+## Known pitfalls
+
+- **First end-to-end run**: run `pnpm exec playwright install chromium` once. `pnpm test:e2e` starts the development server unless one is already running.
+- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that names a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`, even when it only reads.
+
+## Related documentation
+
+- [README.md](README.md): scripts, container, deploy
+- [CONTRIBUTING.md](CONTRIBUTING.md): prerequisites, Git hooks, pull requests
 
 <!-- BEGIN:nextjs-agent-rules -->
 

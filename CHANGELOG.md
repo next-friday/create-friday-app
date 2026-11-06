@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.6
+
+### Patch Changes
+
+- 4353d52: Generated projects include Evidence, Platform and Library First, Logging, Constitution Changes, and Agent-Owned Work rules. The Dependencies rule accepts a maintained library that replaces custom code.
+
 ## 2.1.5
 
 ### Patch Changes

@@ -18,6 +18,9 @@
     "description": "Dependencies: add a package only when code or a contract uses it",
     "globs": ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"]
   },
+  "descriptive-naming": {
+    "description": "Descriptive naming: paths and identifiers name what they hold, without organization names"
+  },
   "deterministic-testing": {
     "description": "Test admission: add a case only when it catches a defect current tests miss",
     "globs": ["**/*.test.ts", "**/*.test.tsx"]

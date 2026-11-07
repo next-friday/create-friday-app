@@ -12,7 +12,25 @@
     "description": "Codebase hygiene: modify existing code instead of accumulating new code"
   },
   "constitution-changes": {
-    "description": "Constitution changes: change rules, hooks, and agent settings only through a dedicated issue"
+    "description": "Constitution changes: change rules, hooks, and agent settings only through a dedicated issue",
+    "globs": [
+      ".agents/rules/**",
+      ".agents/rules.json",
+      ".agents/hooks/**",
+      ".claude/settings.json",
+      ".claude/rules/**",
+      ".cursor/rules/**",
+      ".cursor/hooks/**",
+      ".cursor/hooks.json",
+      "scripts/sync-agent-rules.ts",
+      "scripts/check-agent-gates.ts",
+      ".husky/**",
+      ".commitlintrc.json",
+      ".prettierrc.json",
+      "eslint.config.ts",
+      ".lintstagedrc.json",
+      ".gitleaks.toml"
+    ]
   },
   "current-state-authority": {
     "description": "Current state: implement from user requirements and the working tree"
@@ -32,13 +50,11 @@
     "globs": ["**/*.test.ts", "**/*.test.tsx"]
   },
   "diagnostics-and-error-handling": {
-    "description": "Diagnostics: fix runtime failures at the source and keep the root cause"
+    "description": "Diagnostics: fix runtime failures at the source and keep the root cause",
+    "globs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
   },
   "evidence-before-claims": {
     "description": "Evidence: verify and cite a claim before stating or writing it"
-  },
-  "git-workflow": {
-    "description": "Git workflow: trunk-based branches, commits, and pull requests"
   },
   "no-suppression": {
     "description": "Findings: fix scanner and linter reports without inline suppressions"
@@ -46,14 +62,12 @@
   "platform-and-library-first": {
     "description": "Platform and library first: use built-in features, then maintained libraries, then custom code"
   },
-  "script-driven-changes": {
-    "description": "Scripts: apply a repeated edit across many files with a script"
-  },
   "single-author-style": {
     "description": "Sibling style: match layout, naming, and composition in the same project"
   },
   "structured-logging": {
-    "description": "Logging: log through a logging library in structured, durable records"
+    "description": "Logging: log through a logging library in structured, durable records",
+    "globs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
   },
   "typescript-first": {
     "description": "TypeScript-first: write source, tests, and scripts as .ts or .tsx",

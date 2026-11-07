@@ -23,13 +23,22 @@ dir="$(mktemp -d)"
 cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 ```
 
-## How it fits together
+## Verifying your work
+
+- Build: `pnpm build` (its last line starts with `✔ Build complete`)
+- Test: `pnpm test:coverage` (all green, then the coverage summary; never skip or delete a failing test)
+- Lint: `pnpm lint:check` (prints nothing after `$ eslint . --cache --max-warnings=0 --no-inline-config`)
+
+Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
+If a test fails, fix the code, not the test.
+
+## Architecture
 
 - `src/main.ts` calls `create()` in `src/create.ts`, which parses arguments (`arguments.ts`), validates the name (`project-name.ts`), copies `templates/base` and then `templates/<stack>`, replaces `next-friday-template-<stack>` with the project name in every text file (`rename.ts`), renames `_gitignore`, writes `.env` from `.env.example`, runs `git init`, and runs `pnpm install` (`setup.ts`).
 - A stack is an entry in `src/stacks.ts` plus `templates/<stack>/`, whose `package.json` is named `next-friday-template-<stack>`.
 - Agent rules: `.agents/rules/*.md` and `.agents/rules.json` are the source. `scripts/sync-agent-rules.ts` renders them to `.claude/rules/` and `.cursor/rules/`. The repository root has its own copy of the rules, hooks, and scripts; `templates/` is the consumer kit with a separate copy.
 
-## Mandatory rules
+## Conventions
 
 1. **Follow `.agents/rules/`.** `.agents/rules.json` gives each rule's scope; Claude Code and Cursor load them. Rules, hooks, and agent settings change as `constitution-changes.md` describes.
 2. **Edit `src/`, `test/`, and `templates/`; treat `dist/` as generated.** The build overwrites `dist/`.
@@ -38,8 +47,12 @@ cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 5. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 6. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.** npm drops `.gitignore` from the package and `pnpm pack` drops nested lockfiles.
 7. **After changing a template, generate a project and run its `pnpm verify`.** The root lint, format, Knip, and test configs skip `templates/`.
+8. **Start from the accepted spec, in plan mode.** Claude Code starts every session in plan mode (`.claude/settings.json`); in Cursor, switch to Plan Mode before the first edit. Give the plan the change's `intent/<change>/intent.md` and `spec.md`, and have it name the files that change, the order of the work, and the tests that prove it. Commit the approved plan as `intent/<change>/plan.md`. When implementation departs from the plan, update `plan.md` in the same commit.
+9. **Start a bug fix with a failing test.** Reproduce the bug as a test, run it, and confirm it fails for the reason you expect. Commit that test. Then create `.git/bug-fix-in-progress`, so `.agents/hooks/agent-test-edit-gate.sh` blocks test edits, and make the test pass without editing it. Delete `.git/bug-fix-in-progress` when the fix is done.
 
-## Known pitfalls
+## Things Claude gets wrong
+
+When Claude makes a mistake twice, add the correction here.
 
 - **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back.
 - **Node.js for payload and turborepo**: those stacks require Node.js `>=24.22.1`; `pnpm install` fails with `ERR_PNPM_UNSUPPORTED_ENGINE` on older versions.

@@ -1,6 +1,7 @@
 ---
 description: "Logging: log through a logging library in structured, durable records"
-alwaysApply: true
+globs: "**/*.ts,**/*.js"
+alwaysApply: false
 ---
 
 # Logging

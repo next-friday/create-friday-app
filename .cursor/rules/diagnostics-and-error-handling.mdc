@@ -1,6 +1,7 @@
 ---
 description: "Diagnostics: fix runtime failures at the source and keep the root cause"
-alwaysApply: true
+globs: "**/*.ts,**/*.js"
+alwaysApply: false
 ---
 
 # Diagnostics

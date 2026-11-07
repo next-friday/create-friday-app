@@ -49,7 +49,7 @@
         ]
       },
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell|Monitor",
         "hooks": [
           {
             "type": "command",

@@ -6,5 +6,6 @@
   "!(package).json": ["prettier --write --cache"],
   "*.{md,yml,yaml}": ["prettier --write --cache"],
   "package.json": ["sort-package-json", "prettier --write --cache"],
-  ".husky/{commit-msg,pre-commit,pre-merge-commit,pre-push}": ["prettier --write --cache"]
+  ".husky/{commit-msg,pre-commit,pre-merge-commit,pre-push}": ["prettier --write --cache"],
+  "*.sh": ["prettier --write --cache"]
 }

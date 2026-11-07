@@ -1,0 +1,128 @@
+name: Agent evals
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  list:
+    name: List evals
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      evals: ${{ steps.list.outputs.evals }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: List the evals to run
+        id: list
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "schedule" ]] || git diff --name-only "$BASE_SHA" HEAD | grep -qE '^(CLAUDE\.md|AGENTS\.md|REVIEW\.md|\.mcp\.json|\.agents/|\.claude/|\.cursor/|evals/)'; then
+            echo "evals=$(find evals -maxdepth 1 -name '*.json' | sort | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
+          else
+            echo 'evals=[]' >> "$GITHUB_OUTPUT"
+          fi
+
+  eval:
+    name: Eval
+    needs: list
+    if: needs.list.outputs.evals != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write # Needed to authenticate to Anthropic with the workflow's OIDC token.
+    strategy:
+      fail-fast: false
+      matrix:
+        eval: ${{ fromJSON(needs.list.outputs.evals) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js and pnpm
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          cache: true
+          require-lockfile: true
+      - name: Read the eval prompt
+        id: read
+        env:
+          EVAL: ${{ matrix.eval }}
+        run: |
+          {
+            echo "prompt<<EVAL_PROMPT_END"
+            jq -r '.prompt' "$EVAL"
+            echo "EVAL_PROMPT_END"
+          } >> "$GITHUB_OUTPUT"
+      - name: Run the eval task
+        id: claude
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_federation_rule_id: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+          anthropic_organization_id: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          prompt: ${{ steps.read.outputs.prompt }}
+          claude_args: --permission-mode acceptEdits --allowedTools "Read,Edit,Bash(pnpm test)"
+      - name: Check the result
+        env:
+          EVAL: ${{ matrix.eval }}
+          CONCLUSION: ${{ steps.claude.outputs.conclusion }}
+        run: ./evals/check.sh "$EVAL" "$CONCLUSION"
+
+  evals:
+    name: Agent evals
+    needs:
+      - list
+      - eval
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read # Needed to read the result of each eval job.
+    steps:
+      - name: Check the pass rate
+        env:
+          EVALS: ${{ needs.list.outputs.evals }}
+          LIST_RESULT: ${{ needs.list.result }}
+          EVALS_MIN_PASS_RATE: ${{ vars.EVALS_MIN_PASS_RATE }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          if [[ "$LIST_RESULT" != "success" ]]; then
+            echo "::error::Listing the evals failed."
+            exit 1
+          fi
+          total=$(jq 'length' <<< "$EVALS")
+          if ((total == 0)); then
+            echo "No evals to run."
+            exit 0
+          fi
+          if [[ -z "$EVALS_MIN_PASS_RATE" ]]; then
+            echo "::error::Set the repository variable EVALS_MIN_PASS_RATE (0 to 100)."
+            exit 1
+          fi
+          passed=$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" --paginate --jq '.jobs[] | select((.name | startswith("Eval (")) and .conclusion == "success") | .id' | wc -l)
+          rate=$((passed * 100 / total))
+          echo "Pass rate: $rate% ($passed of $total)"
+          if ((rate < EVALS_MIN_PASS_RATE)); then
+            echo "::error::The pass rate $rate% is below EVALS_MIN_PASS_RATE ($EVALS_MIN_PASS_RATE%)."
+            exit 1
+          fi

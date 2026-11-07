@@ -24,22 +24,7 @@ In development, Payload applies collection changes to the database directly. In 
 
 ## After creating a project from this template
 
-1. Install gitleaks and jq (see [CONTRIBUTING.md](CONTRIBUTING.md)). Make the first commit on `main` and push it. The Git hooks allow only this first commit and push on `main`; work on branches after that.
-
-   ```sh
-   git add --all
-   git commit -m "chore(repo): start from template"
-   git push --set-upstream origin main
-   ```
-
-2. Add your team as the owner of every file in `.github/CODEOWNERS`, and replace the owner placeholder in `.github/zizmor.yml`.
-3. Replace the template's description and owner: `package.json#description`, `repository.url`, and `author`, and the `Next Friday Payload template` text in `src/app/(frontend)/layout.tsx`, `src/app/(frontend)/page.tsx`, and their tests. Change `license` from `UNLICENSED` if the project is open source.
-4. In the repository settings:
-   - **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**. Every workflow requests the extra permissions it needs.
-   - **Advanced Security:** enable private vulnerability reporting, Dependabot alerts, Dependabot security updates, secret scanning, and push protection. `SECURITY.md` sends reporters to private vulnerability reporting.
-   - **Cursor Bugbot:** enable the repository at [Bugbot](https://cursor.com/automations/from-cursor/bugbot). Bugbot reviews pull requests against the rules linked from `.cursor/BUGBOT.md`.
-   - **Rules → Rulesets:** protect `main` with squash merges only, a linear history, no force pushes or deletion, and the required checks `All Checks` and `Validate pull request title`. Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
-   - Create the `needs triage` label, which the issue forms apply: `gh label create "needs triage"`.
+Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Next Friday Payload template` text in `src/app/(frontend)/layout.tsx`, `src/app/(frontend)/page.tsx`, and their tests.
 
 ## Scripts
 

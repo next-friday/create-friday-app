@@ -1,4 +1,4 @@
-ชชname: Verify
+name: Verify
 
 on:
   pull_request: {}

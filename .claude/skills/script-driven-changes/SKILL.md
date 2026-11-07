@@ -1,3 +1,8 @@
+---
+name: script-driven-changes
+description: Change many files with a script, not by hand. Use when a change repeats one pattern across more than a few files, or needs a one-off script.
+---
+
 # Scripts
 
 When a change repeats one pattern across more than a few files, run a script. Derive facts from the toolchain (TypeScript compiler API, `git`), not by reading files by eye. Edit by hand when the change needs judgment in one place.

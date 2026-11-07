@@ -1,6 +1,6 @@
 ---
-description: "Git workflow: trunk-based branches, commits, and pull requests"
-alwaysApply: true
+name: git-workflow
+description: Trunk-based branches, commits, and pull requests. Use when creating a branch, committing, pushing, or opening, updating, or merging a pull request.
 ---
 
 # Git Workflow

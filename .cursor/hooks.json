@@ -13,6 +13,12 @@
         "matcher": "Write|StrReplace|Delete",
         "timeout": 10,
         "failClosed": true
+      },
+      {
+        "command": ".agents/hooks/agent-test-edit-gate.sh",
+        "matcher": "Write|StrReplace",
+        "timeout": 10,
+        "failClosed": true
       }
     ],
     "beforeShellExecution": [
@@ -20,6 +26,15 @@
         "command": ".agents/hooks/agent-shell-gate.sh",
         "timeout": 10,
         "failClosed": true
+      },
+      {
+        "command": ".agents/hooks/agent-production-gate.sh",
+        "timeout": 10
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".agents/hooks/agent-format-after-edit.sh"
       }
     ]
   }

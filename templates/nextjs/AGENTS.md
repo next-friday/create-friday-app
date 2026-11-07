@@ -29,7 +29,7 @@ Next.js App Router web app with React and Tailwind CSS, in TypeScript on pnpm an
 ## Known pitfalls
 
 - **First end-to-end run**: run `pnpm exec playwright install chromium` once. `pnpm test:e2e` starts the development server unless one is already running.
-- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that names a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`, even when it only reads.
+- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that writes to a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`. It is a convenience, not a security boundary: CI and code-owner review are the boundary.
 
 ## Related documentation
 

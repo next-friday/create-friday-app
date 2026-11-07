@@ -32,7 +32,7 @@ Payload CMS on Next.js App Router and PostgreSQL, in TypeScript on pnpm and Node
 ## Known pitfalls
 
 - **Database for `pnpm dev` and end-to-end tests**: both need a PostgreSQL database in `DATABASE_URL` and `PAYLOAD_SECRET` in `.env`; the README lists every variable. Run `pnpm exec playwright install chromium` once before the first `pnpm test:e2e`.
-- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that names a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`, even when it only reads.
+- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that writes to a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`. It is a convenience, not a security boundary: CI and code-owner review are the boundary.
 
 ## Related documentation
 

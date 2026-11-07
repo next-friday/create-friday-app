@@ -26,7 +26,7 @@ TypeScript HTTP service on `node:http`, without a framework, on pnpm and Node.js
 
 ## Known pitfalls
 
-- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that names a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`, even when it only reads.
+- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that writes to a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`. It is a convenience, not a security boundary: CI and code-owner review are the boundary.
 
 ## Related documentation
 

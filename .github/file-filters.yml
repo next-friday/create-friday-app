@@ -30,3 +30,4 @@ ci_policy:
   - ".claude/**"
   - ".cursor/**"
   - "scripts/**"
+  - "templates/**"

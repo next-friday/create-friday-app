@@ -13,6 +13,12 @@
         "matcher": "Write|StrReplace|Delete",
         "timeout": 10,
         "failClosed": true
+      },
+      {
+        "command": ".agents/hooks/agent-test-edit-gate.sh",
+        "matcher": "Write|StrReplace",
+        "timeout": 10,
+        "failClosed": true
       }
     ],
     "beforeShellExecution": [

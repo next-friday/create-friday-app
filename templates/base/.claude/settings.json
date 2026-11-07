@@ -54,6 +54,12 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-suppression-gate.sh",
             "timeout": 10,
             "onFailure": "block"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-test-edit-gate.sh",
+            "timeout": 10,
+            "onFailure": "block"
           }
         ]
       },

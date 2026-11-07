@@ -12,6 +12,13 @@ Follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 - Use the pnpm version declared by `package.json#packageManager` through Corepack.
 - Install [gitleaks](https://github.com/gitleaks/gitleaks#installing), for example `brew install gitleaks`. The pre-commit hook refuses to commit without it.
 - Install [jq](https://jqlang.org/download/). The agent hooks refuse to run without it.
+- Allow `editorconfig-checker` to fetch its binary. `pnpm format:check`, which `pnpm verify` and the pre-push hook run, downloads it through the GitHub releases API on first use; set `GITHUB_TOKEN` to avoid the anonymous rate limit. Where that API is unreachable, as in a Claude Code cloud session, place the release binary before the first run:
+
+  ```sh
+  mkdir -p node_modules/editorconfig-checker/bin/latest
+  curl -fsSL https://github.com/editorconfig-checker/editorconfig-checker/releases/download/v4.0.2/editorconfig-checker-linux-amd64.tar.gz \
+    | tar -xz -C node_modules/editorconfig-checker/bin/latest
+  ```
 
 From the repository root:
 

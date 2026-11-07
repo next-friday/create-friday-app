@@ -214,37 +214,46 @@ jobs:
             done
           } >> "$GITHUB_OUTPUT"
       - name: Lint Dockerfile
+        env:
+          AFFECTED_APP: ${{ steps.affected.outputs.app }}
+          AFFECTED_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
         run: |
           curl --silent --show-error --fail --location --output hadolint \
             "https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-linux-x86_64"
           echo "${HADOLINT_SHA256}  hadolint" | sha256sum --check --strict
           chmod +x hadolint
           files=()
-          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+          if [[ "$AFFECTED_APP" == "true" ]]; then
             files+=(apps/app/Dockerfile)
           fi
-          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+          if [[ "$AFFECTED_BACKOFFICE" == "true" ]]; then
             files+=(apps/backoffice/Dockerfile)
           fi
           if [[ "${#files[@]}" -gt 0 ]]; then
             ./hadolint "${files[@]}"
           fi
       - name: Build images
+        env:
+          AFFECTED_APP: ${{ steps.affected.outputs.app }}
+          AFFECTED_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
         run: |
-          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+          if [[ "$AFFECTED_APP" == "true" ]]; then
             docker build --file apps/app/Dockerfile --tag app:ci .
           fi
-          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+          if [[ "$AFFECTED_BACKOFFICE" == "true" ]]; then
             docker build --file apps/backoffice/Dockerfile --tag backoffice:ci .
           fi
       - name: Smoke test images
+        env:
+          AFFECTED_APP: ${{ steps.affected.outputs.app }}
+          AFFECTED_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
         id: smoke
         run: |
-          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+          if [[ "$AFFECTED_APP" == "true" ]]; then
             docker run --detach --name app --env PORT=3000 --publish 3000:3000 app:ci
             curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3000/health
           fi
-          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+          if [[ "$AFFECTED_BACKOFFICE" == "true" ]]; then
             docker run --detach --name backoffice --env PORT=3001 --env DATABASE_URL=postgres://build-only@localhost/build-only --env PAYLOAD_SECRET=ci-only-secret --env APP_URL=http://localhost:3001 --publish 3001:3001 backoffice:ci
             curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3001/health
           fi
@@ -258,16 +267,19 @@ jobs:
             docker logs backoffice
           fi
       - name: Scan images for vulnerabilities
+        env:
+          AFFECTED_APP: ${{ steps.affected.outputs.app }}
+          AFFECTED_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
         run: |
           archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
           curl --silent --show-error --fail --location --output "$archive" \
             "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archive}"
           echo "${TRIVY_SHA256}  ${archive}" | sha256sum --check --strict
           tar --extract --gzip --file "$archive" trivy
-          if [[ "${{ steps.affected.outputs.app }}" == "true" ]]; then
+          if [[ "$AFFECTED_APP" == "true" ]]; then
             ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress app:ci
           fi
-          if [[ "${{ steps.affected.outputs.backoffice }}" == "true" ]]; then
+          if [[ "$AFFECTED_BACKOFFICE" == "true" ]]; then
             ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress backoffice:ci
           fi
 

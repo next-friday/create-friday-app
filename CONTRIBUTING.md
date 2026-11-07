@@ -36,7 +36,7 @@ pnpm install
 Each stack is `templates/base` plus `templates/<stack>`. The CLI copies `base`, then the stack directory, into the new project.
 
 - `base` holds the files every stack uses with the same content, such as the Git hooks, gitleaks, and agent rules. It is not a template on its own.
-- A stack directory holds the files whose content differs by stack, such as `package.json` or `eslint.config.ts`. No path exists in both.
+- A stack directory holds the files whose content differs by stack, such as `package.json` or `eslint.config.ts`. A stack replaces a `base` file only when that stack needs different content (rule 4 in `AGENTS.md`).
 - Each stack stores its `.gitignore` as `_gitignore`, because npm leaves `.gitignore` out of published packages. The CLI renames it.
 
 The root lint, format, Knip, and test configs skip `templates/`. To change or check a template, generate a project under the template's own name, so the rename changes nothing and files can be copied back as they are:

@@ -2,8 +2,6 @@
 
 Add a changeset for every change that users of the CLI would notice. Changes to documentation, CI, or repository tooling need none.
 
-The current package baseline is `0.0.0`. `.changeset/first-release.md` is the pending First Release; do not create a second initial-release changeset.
-
 ## Add a changeset
 
 From the repository root:

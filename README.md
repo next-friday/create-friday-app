@@ -65,7 +65,7 @@ The name must:
 ## What the CLI does
 
 1. Copies the template into the project directory and replaces the template's package name with the project name.
-2. Writes `.env` from `.env.example`. For Payload, it sets `PAYLOAD_SECRET` to a random secret.
+2. Writes `.env` from `.env.example`. For Payload and Turborepo, it sets `PAYLOAD_SECRET` to a random secret.
 3. Runs `git init --initial-branch=main`, unless the directory is already in a Git repository.
 4. Runs `pnpm install`, which also installs the Git hooks.
 5. Prints the next steps, for example:
@@ -75,7 +75,7 @@ The name must:
    pnpm start:dev
    ```
 
-   The development script is `pnpm dev` for Next.js and Payload, and `pnpm start:dev` for Node.js and NestJS.
+   The development script is `pnpm dev` for Next.js, Payload, and Turborepo, and `pnpm start:dev` for Node.js and NestJS.
 
 Then follow **After creating a project from this template** in the project's `README.md` to make the first commit and set up the repository.
 

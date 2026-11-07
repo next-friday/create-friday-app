@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-The package is currently unreleased at `0.0.0`. Security fixes apply to the `main` branch.
+Security fixes apply to the latest published version and the `main` branch.
 
 After the first published release, only the latest published release receives security updates. Earlier releases and prerelease versions are not supported.
 

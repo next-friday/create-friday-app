@@ -34,7 +34,7 @@ cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 1. **Follow `.agents/rules/`.** `.agents/rules.json` gives each rule's scope; Claude Code and Cursor load them. Rules, hooks, and agent settings change as `constitution-changes.md` describes.
 2. **Edit `src/`, `test/`, and `templates/`; treat `dist/` as generated.** The build overwrites `dist/`.
 3. **Preserve CLI arguments, prompts, and the generated project layout** unless a major changeset declares the break. CI and agents run the CLI without prompts.
-4. **No path exists in both `base` and a stack directory.** `base` holds files every stack uses with the same content; the CLI copies the stack after `base`, so a shared path would silently replace the `base` file.
+4. **A stack replaces a `base` file only when that stack needs different content.** The CLI copies the stack after `base`, so the stack's file wins. Today these replace `base`: `knip.json` in `nextjs` and `turborepo`, and `pnpm-workspace.yaml`, `.github/dependabot.yml`, and `.github/workflows/deploy.yml` in `turborepo`. When you change one of those `base` files, make the same change in each replacement.
 5. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 6. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.** npm drops `.gitignore` from the package and `pnpm pack` drops nested lockfiles.
 7. **After changing a template, generate a project and run its `pnpm verify`.** The root lint, format, Knip, and test configs skip `templates/`.
@@ -44,7 +44,7 @@ cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 - **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back.
 - **Node.js for payload and turborepo**: those stacks require Node.js `>=24.22.1`; `pnpm install` fails with `ERR_PNPM_UNSUPPORTED_ENGINE` on older versions.
 - **Commit messages**: commitlint rejects a subject longer than 50 characters and accepts only `Co-Authored-By` trailers in the footer. Put `Closes #<issue>` in the pull request body.
-- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that names a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`, even when it only reads.
+- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that writes to a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`. It is a convenience, not a security boundary: CI and code-owner review are the boundary.
 - **CI-only jobs**: Template, Consumer Smoke, and Compatibility run only in CI. Do not report them as local results.
 
 ## Related documentation

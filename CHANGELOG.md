@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.9
+
+### Patch Changes
+
+- 5bf1bfa: Generated Node.js, NestJS, Next.js, and Payload projects format `*.sh` files on commit, as Turborepo projects already do.
+
 ## 2.1.8
 
 ### Patch Changes

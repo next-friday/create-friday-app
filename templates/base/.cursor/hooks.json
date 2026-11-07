@@ -21,6 +21,11 @@
         "timeout": 10,
         "failClosed": true
       }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".agents/hooks/agent-format-after-edit.sh"
+      }
     ]
   }
 }

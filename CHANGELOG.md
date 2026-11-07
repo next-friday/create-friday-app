@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 2.1.8
+
+### Patch Changes
+
+- c1d9f41: Generated projects deploy only from `main`, promote to `prod` only from runs on `main`, format `*.sh` files on commit in every stack, run the shell gate for every Claude Code shell tool. The turborepo CI no longer expands step outputs inside `run:`.
+
 ## 2.1.7
 
 ### Patch Changes

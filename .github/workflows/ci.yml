@@ -1,4 +1,4 @@
-name: Verify
+ชชname: Verify
 
 on:
   pull_request: {}
@@ -53,7 +53,7 @@ jobs:
           fi
 
           full_verification=false
-          if [[ "$EVENT_NAME" == "push" || ( "$EVENT_NAME" == "pull_request" && "$release_pr" != "true" && ( "$HEAVY" == "true" || "$CI_POLICY" == "true" ) ) ]]; then
+          if [[ "$EVENT_NAME" == "push" || ( "$EVENT_NAME" == "pull_request" && ( "$release_pr" == "true" || "$HEAVY" == "true" || "$CI_POLICY" == "true" ) ) ]]; then
             full_verification=true
           fi
 

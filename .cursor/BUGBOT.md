@@ -10,6 +10,7 @@
 
 Review pull requests against this repository's agent rules:
 
+- [Review instructions](../.agents/review.md)
 - [Agent guide](../AGENTS.md)
 - [Agent-Owned Work](../.agents/rules/agent-owned-work.md)
 - [Owned Checks](../.agents/rules/automation-owned-checks.md)
@@ -23,10 +24,10 @@ Review pull requests against this repository's agent rules:
 - [Test Admission](../.agents/rules/deterministic-testing.md)
 - [Diagnostics](../.agents/rules/diagnostics-and-error-handling.md)
 - [Evidence](../.agents/rules/evidence-before-claims.md)
-- [Git Workflow](../.agents/rules/git-workflow.md)
+- [Git Workflow](../.agents/skills/git-workflow/SKILL.md)
 - [Findings](../.agents/rules/no-suppression.md)
 - [Platform and Library First](../.agents/rules/platform-and-library-first.md)
-- [Scripts](../.agents/rules/script-driven-changes.md)
+- [Scripts](../.agents/skills/script-driven-changes/SKILL.md)
 - [Sibling Style](../.agents/rules/single-author-style.md)
 - [Logging](../.agents/rules/structured-logging.md)
 - [TypeScript-First](../.agents/rules/typescript-first.md)

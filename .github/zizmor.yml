@@ -1,6 +1,6 @@
-# Owner: @joetakara @next-friday-engineer. Reason: zizmor flags local composite actions as self-repository reuse. Local actions stay at ./.github/actions. Expires: 2027-11-04.
-# Owner: @joetakara @next-friday-engineer. Reason: the consumer smoke test installs the packed CLI tarball outside the lockfile. Expires: 2027-11-04.
-# Owner: @joetakara @next-friday-engineer. Reason: preview publishes with pkg-pr-new, which is not trusted publishing. Expires: 2027-11-04.
+# Owner: @joetakara @next-friday-engineer. Reason: zizmor flags local composite actions as self-repository reuse. Local actions stay at ./.github/actions.
+# Owner: @joetakara @next-friday-engineer. Reason: the consumer smoke test installs the packed CLI tarball outside the lockfile.
+# Owner: @joetakara @next-friday-engineer. Reason: preview publishes with pkg-pr-new, which is not trusted publishing.
 rules:
   adhoc-packages:
     ignore:

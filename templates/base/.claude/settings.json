@@ -71,6 +71,11 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-shell-gate.sh",
             "timeout": 10,
             "onFailure": "block"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-production-gate.sh",
+            "timeout": 10
           }
         ]
       }

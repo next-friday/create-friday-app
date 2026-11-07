@@ -26,6 +26,10 @@
         "command": ".agents/hooks/agent-shell-gate.sh",
         "timeout": 10,
         "failClosed": true
+      },
+      {
+        "command": ".agents/hooks/agent-production-gate.sh",
+        "timeout": 10
       }
     ],
     "afterFileEdit": [

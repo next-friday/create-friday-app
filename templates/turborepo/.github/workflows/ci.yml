@@ -297,6 +297,50 @@ jobs:
       environment: dev
       commit_sha: ${{ github.sha }}
 
+  triage:
+    name: Triage failed build
+    needs:
+      - checks
+      - image
+    if: failure() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read # Needed to read the logs of the failed jobs.
+      id-token: write # Needed to authenticate to Anthropic with the workflow's OIDC token.
+      pull-requests: write # Needed to post the summary on the pull request.
+    steps:
+      - name: Collect the build log
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p out
+          for job in $(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" --paginate --jq '.jobs[] | select(.conclusion == "failure") | .id'); do
+            gh api "repos/$REPOSITORY/actions/jobs/$job/logs" >> out/build.log
+          done
+      - name: Triage failed build
+        id: triage
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_federation_rule_id: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+          anthropic_organization_id: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          prompt: >
+            Read the build log at out/build.log. Identify the most
+            likely cause, say whether the failure looks flaky or real, and write a
+            three-line summary for the PR thread.
+          claude_args: >-
+            --allowedTools "Read"
+            --json-schema '{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}'
+      - name: Post the summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          SUMMARY: ${{ fromJSON(steps.triage.outputs.structured_output).summary }}
+        run: gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "$SUMMARY"
+
   ci:
     name: All Checks
     if: always()

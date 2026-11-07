@@ -2,6 +2,7 @@
 
 Review pull requests against the project's agent guide and rules:
 
+- [Review instructions](../.agents/review.md)
 - [Agent guide](../AGENTS.md)
 - [Agent-Owned Work](../.agents/rules/agent-owned-work.md)
 - [Owned Checks](../.agents/rules/automation-owned-checks.md)

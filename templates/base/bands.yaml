@@ -1,0 +1,10 @@
+# Placeholder: the example from the AI-native SDLC Playbook. Replace it with this project's metric, and add a
+# version-controlled, unit-tested detection script that reads this file. Detection stays deterministic, with no
+# model involved.
+metric: ci_test_failure_rate
+baseline: rolling_30d
+rules: western_electric
+tiers:
+  1sigma: {action: log}
+  2sigma: {action: diagnose, tools: "Read,Grep,Bash(gh run view *)"}
+  3sigma: {action: propose, routes: [pull_request, runbook:rollback-deploy]}

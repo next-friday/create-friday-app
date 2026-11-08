@@ -1,24 +1,27 @@
-# Intent: Ship the company's agent kit as a plugin
+# Intent: Ship the company's optional agent extras as a plugin
 
 Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Problem
 
 - The agent kit is the rules, skills, subagents, hooks, and scripts that guide Claude Code and Cursor. This repository keeps two copies of it by hand: one in the root and one in `templates/base/`. 78 files in the two copies are identical.
-- The copies have already drifted. The root's `scripts/sync-agent-rules.ts` (lines 84–88) stops with an error when `.agents/rules.json` names a rule that has no file; the copy in `templates/base/scripts/sync-agent-rules.ts` lacks that check. A fix reached one copy only.
+- Nothing keeps the two copies in step except people. Today they differ only where they must: for example, the root's `scripts/sync-agent-rules.ts` has five more lines (84–88) because the root's `tsconfig.json` sets `noUncheckedIndexedAccess` and the templates' do not.
 - The CLI copies the kit into a project once, when it generates the project. A later fix to a rule, skill, or hook never reaches the client projects that already exist.
 - The playbook distributes this kind of kit through a plugin:
   - Page 25, step 3: put the skill in the repository, "or distribute it organization-wide through a plugin".
   - Page 43: every skill, agent, hook, and MCP server "arrived through the organization's approved plugin marketplace".
-- Both agents support plugins:
+- Both agents support plugins, with limits:
   - A Claude Code plugin holds skills, subagents, hooks, and MCP servers, and updates come from its marketplace. It does not hold rules or `AGENTS.md` ([Claude Code: Plugins](https://code.claude.com/docs/en/plugins)).
-  - Cursor installs rules from a plugin published through a marketplace ([Cursor: Rules](https://cursor.com/docs/rules)).
+  - A plugin cannot carry permissions: from a plugin's `settings.json`, "Only two keys take effect … `agent` and `subagentStatusLine`; every other key is dropped" ([Claude Code: Plugin components](https://code.claude.com/docs/en/plugins/components)).
+  - A cloud session does not load a plugin that a repository enables: "Plugins and marketplaces declared in your repo's `.claude/settings.json`" are listed as not loaded, while the repository's own `.claude/settings.json` hooks and permission rules, `.claude/rules/`, and `.claude/skills/` are ([Claude Code: Cloud environments](https://code.claude.com/docs/en/cloud-environments)).
+  - Each person installs the plugin on their own machine, and auto-update is "Off by default" for a company's own marketplace ([Claude Code: Install plugins](https://code.claude.com/docs/en/plugins/install)).
+  - Cursor installs rules from a plugin published through a marketplace ([Cursor: Rules](https://cursor.com/docs/rules)), in its own `.cursor-plugin/` format ([Cursor: Plugins](https://cursor.com/docs/plugins)).
 
 ## Proposed outcome
 
-- The pieces every company project shares, such as the policy skills, the shared skills, the subagents, and the agent hooks, ship as one company plugin through the company's own marketplace, for Claude Code and for Cursor.
-- A generated project enables that plugin in its committed settings, so everyone who works in the project gets it, and an existing project gets a fix by updating the plugin.
-- The template keeps only what belongs to each project: `AGENTS.md`, the project's rules, CI, and Git hooks.
+- Everything that guards or constrains the agent stays committed in each project's repository, because a cloud session loads only what the repository holds: the hooks, the permissions in `.claude/settings.json`, the rules, and the skills every task needs.
+- A company plugin, through the company's own marketplace, carries only optional extras, such as the policy skills: pieces whose absence lets no one skip a check. Projects that use Cursor get the same extras in Cursor's plugin format.
+- An existing project gets a fix to a plugin extra by updating the plugin; turning on auto-update for the company marketplace is part of setup.
 - This repository keeps no second hand-made copy of the kit.
 - The company's marketplace lives in this repository, beside the templates. Claude Code accepts a marketplace in a folder of an existing repository, including a private one ([Claude Code: Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)).
 
@@ -31,10 +34,11 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 - CI and code owner review stay the boundary; the agent still cannot weaken the checks on its own work (page 32).
 - Every agent feature used is checked against that agent's official documentation before it is relied on.
+- The kit that stays in the repository follows `intent/multi-agent-support/intent.md`.
 - A generated project must still pass its own `pnpm verify`.
 - Cursor installs a company marketplace only on its Teams plan (one marketplace) or Enterprise plan ([Cursor: Plugins](https://cursor.com/docs/plugins)).
 
 ## Open questions
 
-1. Which pieces go into the plugin, and which stay in the template?
-2. Do cloud sessions, such as Claude Code on the web, load a plugin that a project enables in its committed settings? The Claude Code documentation says a cloud session does not load the plugins in a person's local settings.
+1. Which optional extras go into the plugin?
+2. How does a fix to the kit that stays in the repository reach the client projects that already exist?

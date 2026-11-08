@@ -1,16 +1,16 @@
-# Intent: One monorepo per product, with apps the team names and adds
+# Intent: One monorepo per project, with apps the team names and adds
 
 Author: Joe Takara. Status: draft.
 
 ## Problem
 
-- The company is being set up and will build many web products: customer web apps, LINE LIFF apps, backoffices, CMSs, a corporate site, landing pages, event sites, other marketing sites, APIs, and background services.
+- The company is an enterprise software house being set up. Its projects include customer web apps, LINE LIFF apps, backoffices, CMSs, corporate sites, landing pages, event sites, other marketing sites, APIs, and background services. Later projects may need other frameworks, such as Medusa, React Native, or native Android and iOS apps.
 - The CLI generates one stack per repository (`--stack nodejs|nestjs|nextjs|payload|turborepo`). The only monorepo stack, `turborepo`, has two fixed apps, `apps/app` and `apps/backoffice`. A team cannot choose which apps a product has, add an app later, or name an app by what it is for.
 - Documentation is Markdown spread across many files. People find it hard to read, and there is no single place that both people and AI agents read.
 
 ## Proposed outcome
 
-- Every product is one monorepo. Each app lives exactly two levels deep, at `apps/<group>/<app>`.
+- Every client project is one monorepo, so access and handover stay per client. A small project is a monorepo with one app and the docs app; no project is a single-app repository. Each app lives exactly two levels deep, at `apps/<group>/<app>`.
 - The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken.
 - Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules:
 
@@ -24,7 +24,11 @@ Author: Joe Takara. Status: draft.
 
 - Shared code is grouped by business domain, at `packages/<domain>/<package>`, also exactly two levels deep, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Backstage's system model, where one monorepo is a system, an app is a component, and a package folder is a domain.
 - `.github/CODEOWNERS` assigns an owner to each group and domain folder.
-- Each app is created from a template that says how it is built: `nextjs`, `payload`, `nestjs`, `nodejs`, or `docs`. The folder name says what the app is for; the template name does not appear in it.
+- Each app is created from a template that says how it is built. The folder name says what the app is for; the template name does not appear in it.
+- Templates follow one generic contract, so the CLI needs no change to support a new framework:
+  - A template is a folder with a manifest that names it and states what it needs, such as a database or an entry in a root file. The CLI reads the manifest and knows no framework.
+  - Every app has the same scripts, `dev`, `build`, `test`, `lint`, and `typecheck`, whatever its language. Turborepo runs any script a workspace's `package.json` defines, so root tasks and CI work for every app.
+- The first release ships templates only for the stacks in use today: `nextjs`, `payload`, `nestjs`, `nodejs`, and `docs`. A new framework's template is added when a project needs it.
 - The CLI adds an app to an existing monorepo at any time, so a product does not have to choose every app on day one.
 - Every monorepo has a docs app. It renders `docs/` for people and serves `llms.txt` for agents; `docs/` stays the single source.
 - An app carries its own configuration: Dockerfile, tests, lint, and Turborepo package configuration. Adding or removing an app does not change root files or CI, except where a tool allows no other place.
@@ -55,6 +59,7 @@ intent/
 - Engineers who create products and add apps, and agents that run the CLI without prompts.
 - Product owners, marketing, and other readers of the docs app.
 - The CLI (`src/`), every template under `templates/`, this repository's CI (the Template job), and `README.md`.
+- Templates for later frameworks, which the contract must allow without being built now.
 - Projects already generated from the CLI are not migrated.
 
 ## Constraints
@@ -65,12 +70,11 @@ intent/
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
 - Templates use framework features before custom code: Turborepo package configurations, and Fumadocs for the docs app.
 - The excess found by the playbook audit that grows with each app, such as per-stack rule copies and the Cursor render step, is removed first.
+- Known limits for later templates, recorded so the contract does not block them: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.
 
 ## Open questions
 
-1. Does one monorepo hold one product, one client, or the whole company?
-2. Landing pages and events: is one app with many campaign pages the default, with a separate app only for an event that needs its own domain, team, or release? This would be guidance in `docs/`, not a CLI check.
-3. LINE LIFF: a separate `nextjs-liff` template, or the `nextjs` template plus the LIFF SDK?
-4. Names are free, so where does the docs app go by default? `internal/docs` is a suggestion.
-5. Do single-app repositories remain for small client work, or does every project become a monorepo?
-6. Which shared packages ship from day one, such as `packages/shared/ui` or shared configuration, if any?
+1. Landing pages and events: is one app with many campaign pages the default, with a separate app only for an event that needs its own domain, team, or release? This would be guidance in `docs/`, not a CLI check.
+2. LINE LIFF: a separate `nextjs-liff` template, or the `nextjs` template plus the LIFF SDK?
+3. Names are free, so where does the docs app go by default? `internal/docs` is a suggestion.
+4. Which shared packages ship from day one, such as `packages/shared/ui` or shared configuration, if any?

@@ -1,6 +1,6 @@
 # Intent: CI that follows the playbook and Turborepo's guidance
 
-Author: Joe Takara. Status: draft.
+Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Problem
 

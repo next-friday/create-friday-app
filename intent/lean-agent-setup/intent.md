@@ -1,6 +1,6 @@
 # Intent: A lean agent setup that matches the playbook
 
-Author: Joe Takara. Status: draft.
+Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Problem
 

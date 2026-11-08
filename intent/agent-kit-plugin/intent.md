@@ -1,6 +1,6 @@
 # Intent: Ship the company's agent kit as a plugin
 
-Author: Joe Takara. Status: draft.
+Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Problem
 

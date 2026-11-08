@@ -77,6 +77,7 @@ On Vercel, deploy without the image; the Next.js preset takes precedence over th
 
 3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health`.
+5. Roll back with `bash scripts/deploy-rollback.sh <uat|prod>`. It redeploys the last commit that succeeded in that environment before the current one, through the same workflow and gates. A rollback to `prod` needs the same release approval as a deploy.
 
 Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
 

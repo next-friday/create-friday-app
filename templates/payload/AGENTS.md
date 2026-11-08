@@ -37,7 +37,7 @@ If a test fails, fix the code, not the test.
 3. **Put unit tests next to the code as `src/**/*.test.{ts,tsx}` and Playwright end-to-end tests in `test/` as `*.e2e.test.ts`.** Vitest collects only the first pattern.
 4. **Ask the user before adding component tests.** They need a DOM test environment, and Vitest runs in Node.js.
 5. **Read configuration through `requireEnvironment` in `src/environment.ts`.** Document each variable in `.env.example`.
-6. **Start in plan mode and commit the approved plan.** Claude Code starts every session in plan mode (`.claude/settings.json`); in Cursor, switch to Plan Mode before the first edit. Give the plan the change's `intent/<change>/intent.md` and `spec.md` when they exist; `intent/README.md` says which changes need them. Have it name the files that change, the order of the work, and the tests that prove it. Commit the approved plan as `intent/<change>/plan.md`. When implementation departs from the plan, update `plan.md` in the same commit. Before merging, move what stays true into `docs/`.
+6. **Start from the accepted spec, in plan mode.** Claude Code starts every session in plan mode (`.claude/settings.json`); in Cursor, switch to Plan Mode before the first edit. Give the plan the change's `intent/<change>/intent.md` and `spec.md`, and have it name the files that change, the order of the work, and the tests that prove it. Commit the approved plan as `intent/<change>/plan.md`. When implementation departs from the plan, update `plan.md` in the same commit.
 7. **Start a bug fix with a failing test.** Reproduce the bug as a test, run it, and confirm it fails for the reason you expect. Commit that test. Then create `.git/bug-fix-in-progress`, so `.agents/hooks/agent-test-edit-gate.sh` blocks test edits, and make the test pass without editing it. Delete `.git/bug-fix-in-progress` when the fix is done.
 
 ## Things Claude gets wrong
@@ -49,7 +49,6 @@ When Claude makes a mistake twice, add the correction here.
 
 ## Related documentation
 
-- [docs/](docs/README.md): how the project works, how to run it, and the decisions in `docs/adr/`
 - [README.md](README.md): environment variables, scripts, container, deploy
 - [CONTRIBUTING.md](CONTRIBUTING.md): prerequisites, Git hooks, pull requests
 

@@ -42,7 +42,7 @@ The CI in this repository and in the templates has drifted from the AI-native SD
   - Keep diff-cover for the templates' patch coverage gate: it runs inside CI with no paid service, which private projects need. The root keeps Codecov, which is free for this open-source repository. A Vitest threshold cannot replace either, because it measures the whole project, not the changed lines.
   - Keep Trivy, hadolint, zizmor, Scorecard, and the pull request title check; none overlaps another tool.
   - Remove the `changes` label from `.github/labeler.yml`.
-- A CI decision that departs from the playbook or from a tool's official documentation records the decision as an architecture decision record (ADR) beside the project's other ADRs, with its reason.
+- A CI decision that departs from the playbook or from a tool's official documentation records the reason in that change's `spec.md` or `plan.md`, which the playbook commits as the audit trail (pages 7 and 20).
 - The root and every template have `.github/AGENTS.md`, which tells an agent how to write a workflow safely, following the Next.js file.
 
 ## Affected users and systems

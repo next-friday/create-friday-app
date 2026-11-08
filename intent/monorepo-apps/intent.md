@@ -70,7 +70,6 @@ apps/
 packages/
   booking/api-client/
   shared/ui/
-docs/
 intent/
 ```
 

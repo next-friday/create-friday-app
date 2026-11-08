@@ -22,7 +22,7 @@ A play-by-play check of the templates on `main` against the AI-native SDLC Playb
 - The four missing plays are added: evals in CI, the `@claude` fix loop, the build triage job, and `lessons/`. They reach the Claude API with an API key secret instead of workload identity federation.
 - Rollback is a single command that the agent can run and that is rehearsed in staging (page 45, step 6).
 - The production gate matches the command and environment the template actually deploys with.
-- A change that removes or weakens part of a play cites the playbook page it affects, and the reviewer checks that page before approving.
+- A change that removes or weakens part of a play records the decision as an architecture decision record (ADR) beside the project's other ADRs, with its reason, so the departure is visible in review and later.
 
 ## Affected users and systems
 

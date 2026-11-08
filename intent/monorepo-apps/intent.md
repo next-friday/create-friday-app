@@ -10,7 +10,7 @@ Author: Joe Takara. Status: draft.
 
 ## Proposed outcome
 
-- Every client project is one monorepo, so access and handover stay per client. A small project is a monorepo with one app and the docs app; no project is a single-app repository. Each app lives exactly two levels deep, at `apps/<group>/<app>`.
+- Every client project is one monorepo, so access and handover stay per client. A small project is a monorepo with one app and the docs app; no project is a single-app repository. Each app lives exactly two levels deep, at `apps/<group>/<app>`, except the docs app, which is always `apps/docs`.
 - The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken.
 - Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules:
 
@@ -18,7 +18,7 @@ Author: Joe Takara. Status: draft.
   | :---------- | :------------------------------------------ | :--------------------------------- |
   | `customer`  | End customers                               | web, liff, mobile-web              |
   | `partner`   | Partners, merchants, and agents             | partner portal, merchant dashboard |
-  | `internal`  | Employees                                   | backoffice, cms, docs              |
+  | `internal`  | Employees                                   | backoffice, cms                    |
   | `marketing` | The public, before they become customers    | corporate, landing, event          |
   | `platform`  | Other systems; these apps have no interface | api, worker, notification          |
 
@@ -28,20 +28,22 @@ Author: Joe Takara. Status: draft.
 - Templates follow one generic contract, so the CLI needs no change to support a new framework:
   - A template is a folder with a manifest that names it and states what it needs, such as a database or an entry in a root file. The CLI reads the manifest and knows no framework.
   - Every app has the same scripts, `dev`, `build`, `test`, `lint`, and `typecheck`, whatever its language. Turborepo runs any script a workspace's `package.json` defines, so root tasks and CI work for every app.
-- The first release ships templates only for the stacks in use today: `nextjs`, `payload`, `nestjs`, `nodejs`, and `docs`. A new framework's template is added when a project needs it.
-- The CLI adds an app to an existing monorepo at any time, so a product does not have to choose every app on day one.
-- Every monorepo has a docs app. It renders `docs/` for people and serves `llms.txt` for agents; `docs/` stays the single source.
+- The first release ships templates only for what projects use today: `nextjs`, `nextjs-liff` for LINE LIFF apps, `payload`, `nestjs`, `nodejs`, and `docs`. A new framework's template is added when a project needs it.
+- Campaign and event pages live in one marketing landing app by default. An event gets its own app only when it needs its own domain and also its own team, release, or technology; that app is deleted when the event ends. This is guidance in `docs/`, not a CLI check.
+- Shared packages are created when a second app needs the code, not in advance; a new monorepo has none. Lint, format, and commit configuration stay shared through their npm packages.
+- The CLI adds an app to an existing monorepo at any time, so a project does not have to choose every app on day one.
+- Every monorepo has a docs app at `apps/docs`, outside every group, because `docs/` is the project's highest source of truth: it renders `docs/` for people and serves `llms.txt` for agents, and `AGENTS.md` and the agent rules link to it rather than repeat it. No group may be named `docs`.
 - An app carries its own configuration: Dockerfile, tests, lint, and Turborepo package configuration. Adding or removing an app does not change root files or CI, except where a tool allows no other place.
 
 For example:
 
 ```text
 apps/
+  docs/                    docs
   customer/web/            nextjs
-  customer/liff/           nextjs
+  customer/liff/           nextjs-liff
   internal/backoffice/     nextjs
   internal/cms/            payload
-  internal/docs/           docs
   marketing/corporate/     nextjs
   marketing/landing/       nextjs
   partner/merchant/        nextjs
@@ -65,16 +67,9 @@ intent/
 ## Constraints
 
 - Removing `--stack` and the single-app layouts is a breaking change and ships as a major release.
-- Turborepo does not support recursive workspace globs; the workspace globs are `apps/*/*` and `packages/*/*`. This needs testing against the pnpm and Turborepo versions the templates use.
+- Turborepo does not support recursive workspace globs; the workspace globs are `apps/docs`, `apps/*/*`, and `packages/*/*`. Turborepo rejects a package nested inside another, so no folder inside `apps/docs` may hold a `package.json`. This needs testing against the pnpm and Turborepo versions the templates use.
 - Every choice has a command-line flag, so CI and agents run the CLI without prompts.
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
 - Templates use framework features before custom code: Turborepo package configurations, and Fumadocs for the docs app.
 - The excess found by the playbook audit that grows with each app, such as per-stack rule copies and the Cursor render step, is removed first.
 - Known limits for later templates, recorded so the contract does not block them: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.
-
-## Open questions
-
-1. Landing pages and events: is one app with many campaign pages the default, with a separate app only for an event that needs its own domain, team, or release? This would be guidance in `docs/`, not a CLI check.
-2. LINE LIFF: a separate `nextjs-liff` template, or the `nextjs` template plus the LIFF SDK?
-3. Names are free, so where does the docs app go by default? `internal/docs` is a suggestion.
-4. Which shared packages ship from day one, such as `packages/shared/ui` or shared configuration, if any?

@@ -7,10 +7,10 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 1. **Plan:** an idea, a ticket, or an incident becomes `intent/<change>/intent.md` (`write-intent` skill). The product owner merges or closes it.
 2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (`write-spec` skill). The product owner resolves concerns with the policy owners.
 3. **Build:** the engineer starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
-4. **Test:** the session runs **Verifying your work** in `AGENTS.md`; `evals/` tests the agent configuration.
-5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`; `@claude` on a review comment makes Claude push a fix. A code owner approves; the agent never does.
-6. **Deploy:** a failed build gets a triage summary on the pull request; `agent-production-gate.sh` gates production.
-7. **Maintain:** each incident gets a post-mortem in `lessons/` and an eval; larger work becomes a new `intent.md`.
+4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
+5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
+6. **Deploy:** `agent-production-gate.sh` gates production.
+7. **Maintain:** larger work becomes a new `intent.md`.
 
 ## 1. First commit and push
 
@@ -55,30 +55,26 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 
 - **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**. Every workflow requests the extra permissions it needs.
 - **Advanced Security:** enable private vulnerability reporting, Dependabot alerts, Dependabot security updates, secret scanning, and push protection. `SECURITY.md` sends reporters to private vulnerability reporting.
-- **Secrets and variables → Actions:**
-  - the variables `ANTHROPIC_FEDERATION_RULE_ID` and `ANTHROPIC_ORGANIZATION_ID`, from step 4. They are identifiers, not secrets: `.github/workflows/claude.yml`, `.github/workflows/agent-evals.yml`, and the **Triage failed build** job in `ci.yml` exchange the workflow's OIDC token for short-lived Claude API access, so the repository stores no Claude token.
-  - the variable `EVALS_MIN_PASS_RATE`, from 0 to 100, once the team has decided it (step 6).
 - **Rules → Rulesets:** protect `main` with:
   - squash merges only, a linear history, and no force pushes or deletion;
-  - the required checks `All Checks`, `Validate pull request title`, and `Agent evals`;
+  - the required checks `All Checks` and `Validate pull request title`;
   - a pull request before merging, with at least one approval, review from Code Owners, and stale approvals dismissed when new commits are pushed. Claude Code Review follows the severity, exclusion, and nit-cap rules in `REVIEW.md` only on a default branch protected this way ([customize Code Review](https://code.claude.com/docs/en/code-review-customize)).
 
   Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
 
 - Create the `needs triage` label, which the issue forms apply: `gh label create "needs triage"`.
 
-**Check:** a test pull request shows the three required checks and asks for a code owner's review.
+**Check:** a test pull request shows the two required checks and asks for a code owner's review.
 
 ## 4. Claude
 
 **Who:** an Owner of the Claude organization, with an owner of the GitHub organization.
 
-- **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow. The same app also serves `.github/workflows/claude.yml`.
-- **Workload identity federation:** in the [Claude Console](https://platform.claude.com), under **Settings → Workload identity**, register the issuer `https://token.actions.githubusercontent.com`, create a service account in the workspace the workflows should use, and create a federation rule for it that matches this repository's subject prefix, `repo:OWNER/REPOSITORY:` ([setup](https://github.com/anthropics/claude-code-action/blob/main/docs/setup.md), [workload identity federation](https://platform.claude.com/docs/en/manage-claude/workload-identity-federation)). Put the rule's `fdrl_...` ID and the organization ID in the repository variables of step 3. Usage is billed to the Console organization.
+- **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow.
 - **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the playbook's worked example in `.claude/managed-settings.example.json`. Engineers cannot override them.
 - **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage) that the playbook's indicators read.
 
-**Check:** the test pull request gets a **Claude Code Review** check run within a few minutes. A review comment that tags `@claude` starts the **Claude** workflow.
+**Check:** the test pull request gets a **Claude Code Review** check run within a few minutes.
 
 ## 5. Cursor
 
@@ -98,7 +94,6 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 - **Policies (each policy owner, with an engineer):** write the policy in `.agents/skills/<area>-policy/SKILL.md` from the owner's source of truth, then run `pnpm rules:sync`. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time. The policy owner approves every later change as its code owner.
 - **Production gate (engineering leadership, with change management and compliance):** list the approvals that must survive. A person then changes `.agents/hooks/agent-production-gate.sh` to match this project's production deploy command and approval; agent settings deny the file to agents.
 - **Review (tech lead):** replace `src/gen/` in `.agents/review.md` with this project's generated paths, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
-- **Evals (platform engineer):** collect 20 to 50 real tasks in `evals/` (`evals/README.md`), and set `EVALS_MIN_PASS_RATE` (step 3).
 - **People without Git experience:** connect GitHub to Claude (claude.ai or Cowork), so Claude commits `intent.md` for them.
 
 ## 7. Later, as the guardrails mature

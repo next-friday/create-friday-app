@@ -24,6 +24,7 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 - `scripts/sync-agent-rules.ts` is custom code, 236 lines in the root and 231 in `templates/base/`, although maintained tools such as [Ruler](https://github.com/intellectronica/ruler) and [rulesync](https://github.com/dyoshikawa/rulesync) render one source for both agents. `platform-and-library-first.md` asks a pull request to state why custom code is needed, and none records it.
 - The Cursor copy has already drifted from the source: `.cursor/BUGBOT.md` lists `templates/turborepo/.github/labeler.yml`, which does not exist.
 - The CI step that runs `pnpm rules:check` is named "Check Cursor rules match .agents/rules", although the check covers both `.claude/` and `.cursor/` copies. The name appears in the root `.github/workflows/ci.yml` and in every template's `ci.yml`.
+- A new worktree starts without its setup. A worktree is a fresh checkout, so it has no `node_modules` and no `.env`. Cursor runs the commands in `.cursor/worktrees.json` when it creates a worktree ([Cursor: Worktrees](https://cursor.com/docs/configuration/worktrees)), as the official Next.js repository does with `pnpm install` and `pnpm build` ([vercel/next.js `.cursor/worktrees.json`](https://github.com/vercel/next.js/blob/canary/.cursor/worktrees.json)). Claude Code copies the gitignored files that `.worktreeinclude` lists, such as `.env`, and leaves installing dependencies to the session ([Claude Code: Worktrees](https://code.claude.com/docs/en/worktrees)). Neither file exists in the root or the templates, and the root's `.gitignore` does not ignore `.claude/worktrees/`, which the Claude Code documentation recommends.
 
 ## Proposed outcome
 
@@ -34,6 +35,7 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 - Where Cursor lacks a feature that Claude Code has, `AGENTS.md` says so, as it already does for plan mode, and CI and code owner review remain the boundary for both agents.
 - No rendered file drifts from its source.
 - Names and messages about the rendered copies name both agents.
+- A new worktree is ready to work in, for Claude Code and for Cursor, in the root and in every template: `.cursor/worktrees.json` installs dependencies, `.worktreeinclude` copies `.env`, and `.gitignore` ignores `.claude/worktrees/`.
 
 ## Affected users and systems
 

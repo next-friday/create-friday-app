@@ -4,9 +4,9 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 
 ## How a change flows
 
-1. **Plan:** a large change starts as `intent/<change>/intent.md` (`write-intent` skill); `intent/README.md` sizes the documents to the change. The product owner merges or closes it.
+1. **Plan:** an idea, a ticket, or an incident becomes `intent/<change>/intent.md` (`write-intent` skill); `intent/README.md` says which changes need one. The product owner merges or closes it.
 2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (`write-spec` skill). The product owner resolves concerns with the policy owners.
-3. **Build:** the engineer starts in plan mode and approves the plan; medium and large changes commit it as `plan.md`. A tech lead approves higher-risk plans.
+3. **Build:** the engineer starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
 5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
 6. **Deploy:** `agent-production-gate.sh` gates production.

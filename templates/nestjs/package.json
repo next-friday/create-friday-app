@@ -56,8 +56,8 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
     "@nestjs/testing": "12.3.2",
-    "@next-friday/commitlint-config-friday": "5.2.0",
-    "@next-friday/eslint-config-friday": "5.2.0",
+    "@next-friday/commitlint-config-friday": "4.0.0",
+    "@next-friday/eslint-config-friday": "5.1.0",
     "@next-friday/prettier-config-friday": "4.0.0",
     "@types/node": "26.6.5",
     "@types/supertest": "7.2.1",
@@ -76,7 +76,7 @@
     "typescript": "7.0.2",
     "vitest": "5.0.5"
   },
-  "packageManager": "pnpm@12.17.0+sha512.b8d223ebec04b580a89ed206daa71d1bccb6a1ee1d52efa95cc3b0db75271561df8f0d8e2c43add39c5ec08018af7a8a95108e7090f95a29f88727b7a40fd53d",
+  "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec",
   "engines": {
     "node": ">=24.15.0 <25"
   }

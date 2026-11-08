@@ -1,6 +1,6 @@
 # Agent guide
 
-`@next-friday/create-app` is an ESM TypeScript CLI (`pnpm create @next-friday/app`) that generates a Next Friday project from one of the stacks in `src/stacks.ts`. It runs on Node.js `>=24.15.0`; this repository uses `.nvmrc` (24.22.2) and pnpm.
+`@next-friday/create-app` is an ESM TypeScript CLI (`pnpm create @next-friday/app`) that generates a Next Friday project from one of the stacks in `src/stacks.ts`. It runs on Node.js `>=24.15.0`; this repository uses `.nvmrc` (24.22.1) and pnpm.
 
 ## Commands
 

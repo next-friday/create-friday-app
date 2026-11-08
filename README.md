@@ -36,7 +36,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 
 ## Requirements
 
-- Node.js 24.22.1, the version in the generated `.nvmrc`. The CLI itself runs on the range in [`package.json#engines`](package.json).
+- Node.js 24.22.2, the version in the generated `.nvmrc`. The CLI itself runs on the range in [`package.json#engines`](package.json).
 - pnpm: `npm install --global pnpm`. The generated project pins its pnpm version in `package.json#packageManager`.
 - Git 2.28 or later.
 - gitleaks 8.19 or later and jq, which the generated project's Git hooks need for the first commit.

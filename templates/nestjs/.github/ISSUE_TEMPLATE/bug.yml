@@ -30,7 +30,7 @@ body:
       label: Environment
       description: List Node.js, operating system, package manager, and the request that triggers the issue.
       placeholder: |
-        Node.js: 24.22.1
+        Node.js: 24.22.2
         OS: Ubuntu 24.04 / macOS
         Package manager: pnpm 12.6.0
         Request: curl -i http://localhost:3000/

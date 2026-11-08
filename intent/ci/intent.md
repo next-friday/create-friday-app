@@ -1,0 +1,41 @@
+# Intent: CI that follows the playbook and Turborepo's guidance
+
+Author: Joe Takara. Status: draft.
+
+## Problem
+
+The CI in this repository and in the templates has drifted from the AI-native SDLC Playbook and from Turborepo's official guidance. It works, but it is the traditional kind: deterministic scripts only, with every judgment step left to a person.
+
+| Problem                                                                                                                                                     | Where                                                                                           | Source                                                           |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| The AI-native steps were removed in #55: evals, the triage summary of a failed build, and the `@claude` fix loop.                                           | `templates/`, root                                                                              | Playbook pages 34–35, 38, 44–45                                  |
+| There is no rollback command, so rollback is a manual runbook.                                                                                              | `templates/*/.github/workflows/deploy.yml`                                                      | Playbook page 45, step 6                                         |
+| The production gate checks for "production", but deploys target the `prod` environment, so the gate never fires.                                            | `templates/base/.agents/hooks/agent-production-gate.sh`                                         | Playbook pages 40–41                                             |
+| CI names each app in code: `affected-apps.sh` lists `app` and `backoffice`, and each Dockerfile copies every app's `package.json` instead of `turbo prune`. | `templates/turborepo/.github/scripts/affected-apps.sh`, `templates/turborepo/apps/*/Dockerfile` | Turborepo docs: `constructing-ci.mdx`, `guides/tools/docker.mdx` |
+| The root CI splits checks into many jobs that each install dependencies again, while the pre-push hook already runs the same `pnpm verify`.                 | `.github/workflows/ci.yml`                                                                      | Playbook audit                                                   |
+| The root "Triage failed build" job still uses workload identity federation, which was dropped.                                                              | `.github/workflows/ci.yml`, lines 345–398                                                       | #55                                                              |
+
+## Proposed outcome
+
+- CI does what the playbook's CI plays describe: evals run when the agent's configuration changes, a failed build gets a triage summary, `@claude` on a review comment pushes a fix, and rollback is one rehearsed command.
+- The agent may act up to the production gate and cannot pass it, and the gate matches how the project really deploys.
+- CI follows Turborepo's official guidance: it finds changed apps with `turbo query affected`, runs checks with `turbo run --affected`, builds images with `turbo prune --docker`, and names no app in code.
+- The root CI runs each check once and keeps the jobs that test the product: Template, Consumer Smoke, and Compatibility.
+- Every CI decision cites the playbook page or the official document it follows.
+
+## Affected users and systems
+
+- This repository's `.github/workflows/`.
+- Every template's `.github/workflows/`, `.github/scripts/`, Dockerfiles, and `SETUP.md`.
+- Each consumer's Claude API budget, because evals, triage, and the fix loop call the API.
+
+## Constraints
+
+- Workflow files at the root of this repository cannot be pushed from an agent session; a person commits them.
+- Claude API access uses an API key secret, which management allows.
+- Related intents: `intent/restore-playbook-plays/intent.md` covers the plays outside CI, and `intent/monorepo-apps/intent.md` covers CI for apps at `apps/<group>/<app>`, the remote cache, and image promotion.
+
+## Open questions
+
+1. Do evals run on every pull request that changes the agent's configuration, or only on a schedule, to limit API cost?
+2. Is the root CI collapsed into one job, or kept split for faster feedback on which check failed?

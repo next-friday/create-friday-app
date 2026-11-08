@@ -13,7 +13,7 @@ Author: Joe Takara. Status: draft.
 - Dependabot does not cover several of these:
   - It does not update `.nvmrc` or the `packageManager` field.
   - The root groups take only minor and patch updates, so a major such as TypeScript 7 waits.
-  - A new company config version needs a manual entry in `minimumReleaseAgeExclude` before pnpm installs it. The entries already drift: `templates/base/pnpm-workspace.yaml` excludes `@next-friday/eslint-config-friday@5.0.0`, while every template installs 5.1.0.
+  - A new company config version needs a manual entry in `minimumReleaseAgeExclude` before pnpm installs it. Old entries stay behind: `templates/base/pnpm-workspace.yaml` still lists `@next-friday/eslint-config-friday@5.0.0`, which no template installs, next to the 5.1.0 that every template uses.
 
 ## Proposed outcome
 

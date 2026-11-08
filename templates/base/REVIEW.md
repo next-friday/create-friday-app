@@ -6,7 +6,7 @@ Run three passes and tag each finding with its pass:
 
 - Bugs: logic errors, broken edge cases, subtle regressions
 - Security: injection risks, authentication gaps, PII in logs
-- Compliance: the change matches spec.md, plan.md and our design principles
+- Compliance: the change matches its spec.md and plan.md, when it has them, and our design principles
 
 ## What Important means here
 

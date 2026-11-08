@@ -32,7 +32,7 @@ If a test fails, fix the code, not the test.
 1. **Follow `.agents/rules/`.** `.agents/rules.json` gives each rule's scope; Claude Code and Cursor load them. After changing either, or a skill or subagent in `.agents/skills/` or `.agents/agents/`, run `pnpm rules:sync`; `pnpm check` fails on stale copies.
 2. **Put tests next to the code as `src/**/*.test.ts`.** Vitest collects only that pattern.
 3. **Read configuration from environment variables and fail when one is missing**, as `parsePort` does. Document each variable in `.env.example`; `pnpm start` and `pnpm start:dev` load `.env`.
-4. **Start from the accepted spec, in plan mode.** Claude Code starts every session in plan mode (`.claude/settings.json`); in Cursor, switch to Plan Mode before the first edit. Give the plan the change's `intent/<change>/intent.md` and `spec.md`, and have it name the files that change, the order of the work, and the tests that prove it. Commit the approved plan as `intent/<change>/plan.md`. When implementation departs from the plan, update `plan.md` in the same commit.
+4. **Plan in plan mode, with documents sized to the change.** Claude Code starts every session in plan mode (`.claude/settings.json`); in Cursor, switch to Plan Mode before the first edit. `intent/README.md` says which changes need `intent.md`, `spec.md`, and `plan.md`. Give the plan the ones the change has, and have it name the files that change, the order of the work, and the tests that prove it. When the change needs a `plan.md`, commit the approved plan as `intent/<change>/plan.md`, and update it in the same commit when implementation departs from it. Before merging, move what stays true into `docs/`.
 5. **Start a bug fix with a failing test.** Reproduce the bug as a test, run it, and confirm it fails for the reason you expect. Commit that test. Then create `.git/bug-fix-in-progress`, so `.agents/hooks/agent-test-edit-gate.sh` blocks test edits, and make the test pass without editing it. Delete `.git/bug-fix-in-progress` when the fix is done.
 
 ## Things Claude gets wrong
@@ -43,5 +43,6 @@ When Claude makes a mistake twice, add the correction here.
 
 ## Related documentation
 
+- [docs/](docs/README.md): how the project works, how to run it, and the decisions in `docs/adr/`
 - [README.md](README.md): scripts, container, deploy
 - [CONTRIBUTING.md](CONTRIBUTING.md): prerequisites, Git hooks, pull requests

@@ -33,7 +33,9 @@ Author: Joe Takara. Status: draft.
 - Campaign and event pages live in one marketing landing app by default. An event gets its own app only when it needs its own domain and also its own team, release, or technology; that app is deleted when the event ends. This is guidance in `docs/`, not a CLI check.
 - A package exists only for code that two or more apps use, such as UI components shared by the customer web app and the LIFF app, or API types shared by a web app and the API. It is created when the second app needs the code, not in advance, so a new monorepo has no packages. Lint, format, and commit configuration stay shared through their npm packages.
 - The CLI adds an app to an existing monorepo at any time, so a project does not have to choose every app on day one.
-- Every monorepo has a docs site at `apps/docs`, outside every group, because `docs/` is the project's highest source of truth; `AGENTS.md` and the agent rules link to it rather than repeat it. The docs site uses [Mintlify](https://www.mintlify.com/): pages are Markdown and MDX in the repository, a `docs.json` file sets navigation and theme, Mintlify builds and hosts the site on each push to the connected branch, and every site gets `llms.txt` and `llms-full.txt` for agents. The docs site is not a Turborepo workspace and is not deployed by the project's CI.
+- Every monorepo keeps all of its documentation in `apps/docs`, outside every group, because Markdown files in a repository are hard for people to read, and the docs are the project's highest source of truth. `AGENTS.md` and the agent rules link to them rather than repeat them.
+- `apps/docs` is a [Mintlify](https://www.mintlify.com/) site: the pages are Markdown and MDX files, and `docs.json` sets navigation and theme, all in that one folder. Mintlify builds and hosts the site on each push to the connected branch, reading `apps/docs` through its monorepo setting ([Monorepo setup](https://www.mintlify.com/docs/deploy/monorepo)), and gives every site `llms.txt` and `llms-full.txt` for agents. The folder is not a Turborepo workspace, and the project's CI does not deploy it.
+- Pages use plain Markdown where they can, so they stay readable in the repository and the docs can move off Mintlify.
 - An app carries its own configuration: Dockerfile, tests, lint, and Turborepo package configuration. Adding or removing an app does not change root files or CI, except where a tool allows no other place.
 - CI follows Turborepo's official guidance and knows no app by name:
   - `turbo query affected` lists the changed apps, and every per-app job (end-to-end tests, container image, deploy) runs as a matrix over that list.
@@ -93,4 +95,5 @@ intent/
 
 ## Open questions
 
-1. Does Mintlify read the pages from `apps/docs` or from `docs/`, and which plan covers private client repositories? Both need checking against Mintlify's documentation and pricing page.
+1. Which Mintlify plan covers private client repositories, and what does one site per client project cost? Third-party sources disagree; Mintlify's pricing page or sales team has to confirm.
+2. Do client contracts allow their documentation to be hosted on Mintlify's cloud?

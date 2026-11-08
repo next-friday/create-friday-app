@@ -14,13 +14,13 @@ Author: Joe Takara. Status: draft.
 - The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken.
 - Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules:
 
-  | Group       | Who uses it                                 | Example apps                       |
-  | :---------- | :------------------------------------------ | :--------------------------------- |
-  | `customer`  | End customers                               | web, liff, mobile-web              |
-  | `partner`   | Partners, merchants, and agents             | partner portal, merchant dashboard |
-  | `internal`  | Employees                                   | backoffice, cms                    |
-  | `marketing` | The public, before they become customers    | corporate, landing, event          |
-  | `platform`  | Other systems; these apps have no interface | api, worker, notification          |
+| Group       | Who uses it                                 | Example apps                       |
+| :---------- | :------------------------------------------ | :--------------------------------- |
+| `customer`  | End customers                               | web, liff, mobile-web              |
+| `partner`   | Partners, merchants, and agents             | partner portal, merchant dashboard |
+| `internal`  | Employees                                   | backoffice, cms                    |
+| `marketing` | The public, before they become customers    | corporate, landing, event          |
+| `platform`  | Other systems; these apps have no interface | api, worker, notification          |
 
 - Shared code is grouped by business domain, at `packages/<domain>/<package>`, also exactly two levels deep, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Backstage's system model, where one monorepo is a system, an app is a component, and a package folder is a domain.
 - `.github/CODEOWNERS` assigns an owner to each group and domain folder.
@@ -40,7 +40,7 @@ Author: Joe Takara. Status: draft.
   - Checks run as `turbo run` tasks with `--affected`.
   - Container images build with `turbo prune <app> --docker`, so a dependency change in one app does not rebuild another.
   - An app's own files say what CI does for it: a `test:e2e` script, a `Dockerfile`, and its Turborepo package configuration.
-- A generated monorepo's remote cache defaults to Railway, as management decided: a self-hosted remote cache that follows Turborepo's Remote Cache API, such as `ducktors/turborepo-remote-cache`, one of the implementations Turborepo's documentation lists. It stores its artifacts in a Railway Bucket. The consumer may choose another provider, such as Vercel Remote Cache, through repository variables alone, without changing the workflow:
+- A generated monorepo's remote cache defaults to Railway: a self-hosted remote cache that follows Turborepo's Remote Cache API, such as `ducktors/turborepo-remote-cache`, one of the implementations Turborepo's documentation lists. It stores its artifacts in a Railway Bucket. The consumer may choose another provider, such as Vercel Remote Cache, through repository variables alone, without changing the workflow:
   - CI reaches the cache with the `TURBO_API` and `TURBO_TEAM` variables and the `TURBO_TOKEN` secret.
   - CI signs every artifact with the `TURBO_REMOTE_CACHE_SIGNATURE_KEY` secret, so a tampered artifact counts as a cache miss.
   - Without these variables, CI runs without a remote cache.
@@ -88,5 +88,5 @@ intent/
 - Every choice has a command-line flag, so CI and agents run the CLI without prompts.
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
 - Templates use framework features before custom code: Turborepo package configurations, and Fumadocs for the docs app.
-- The excess found by the playbook audit that grows with each app, such as per-stack rule copies and the Cursor render step, is removed first.
+- Setup that grows with each app, such as per-stack rule copies, is reduced first.
 - Known limits for later templates, recorded so the contract does not block them: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.

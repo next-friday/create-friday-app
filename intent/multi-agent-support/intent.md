@@ -6,7 +6,6 @@ Author: Joe Takara. Status: draft.
 
 - Claude Code is the primary coding agent, and some teams work mainly in Cursor.
 - The repository and the templates support both: `.agents/` is the source, and `scripts/sync-agent-rules.ts` renders it into `.claude/` and `.cursor/`.
-- The playbook audit suggested removing Cursor as unused. That suggestion is wrong: some teams use Cursor as their main agent, so removing it would leave those teams without the rules, skills, and hooks.
 - The Cursor copy has already drifted from the source: `.cursor/BUGBOT.md` lists `templates/turborepo/.github/labeler.yml`, which does not exist.
 
 ## Proposed outcome

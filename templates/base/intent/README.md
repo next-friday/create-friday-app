@@ -4,10 +4,10 @@ This folder holds the documents for one change while it is planned and built. Do
 
 Every change commits its approved plan as `plan.md`. A change also starts from `intent.md` and `spec.md` when it is large: a new feature, a change across teams, or a change a tech lead classes as higher risk.
 
-| Change                                                        | Documents                                   |
-| :------------------------------------------------------------ | :------------------------------------------ |
-| Every change                                                  | `plan.md`                                   |
-| Large: a new feature, a change across teams, or a higher risk | `intent.md`, then `spec.md`, then `plan.md` |
+| Change                                                         | Documents                                   |
+| :------------------------------------------------------------- | :------------------------------------------ |
+| Every change                                                   | `plan.md`                                   |
+| Large: a new feature, a change across teams, or a higher risk  | `intent.md`, then `spec.md`, then `plan.md` |
 
 Each change has its own folder, `intent/<change>/`, where `<change>` is a short kebab-case name.
 

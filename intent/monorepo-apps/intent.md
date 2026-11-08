@@ -22,7 +22,7 @@ Author: Joe Takara. Status: draft.
 | `marketing` | The public, before they become customers    | corporate, landing, event          |
 | `platform`  | Other systems; these apps have no interface | api, worker, notification          |
 
-- Shared code is grouped by business domain, at `packages/<domain>/<package>`, also exactly two levels deep, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Backstage's system model, where one monorepo is a system, an app is a component, and a package folder is a domain.
+- Shared code is grouped by business domain, at `packages/<domain>/<package>`, also exactly two levels deep, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Nx's guidance to group libraries by the application or business domain they serve, which uses the same `booking` and `shared` examples ([Nx folder structure](https://nx.dev/docs/kb/folder-structure)).
 - `.github/CODEOWNERS` assigns an owner to each group and domain folder.
 - Each app is created from a template that says how it is built. The folder name says what the app is for; the template name does not appear in it.
 - Templates follow one generic contract, so the CLI needs no change to support a new framework:

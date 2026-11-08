@@ -40,8 +40,9 @@ Author: Joe Takara. Status: draft.
   - Checks run as `turbo run` tasks with `--affected`.
   - Container images build with `turbo prune <app> --docker`, so a dependency change in one app does not rebuild another.
   - An app's own files say what CI does for it: a `test:e2e` script, a `Dockerfile`, and its Turborepo package configuration.
-- Remote caching runs on Railway, as management decided: a self-hosted Turborepo remote cache service that stores its artifacts in a Railway Bucket. CI reaches it with the `TURBO_API` variable and the `TURBO_TOKEN` secret, and signs every artifact with the `TURBO_REMOTE_CACHE_SIGNATURE_KEY` secret, so a tampered artifact counts as a cache miss. Without `TURBO_API`, CI runs without a remote cache.
-- Every app deploys to Railway. GitHub Actions deploys only the changed apps, and only after CI passes.
+- A generated monorepo's remote cache runs on Railway, as management decided: a self-hosted Turborepo remote cache service that stores its artifacts in a Railway Bucket. The generated CI reaches it with the `TURBO_API` variable and the `TURBO_TOKEN` secret, and signs every artifact with the `TURBO_REMOTE_CACHE_SIGNATURE_KEY` secret, so a tampered artifact counts as a cache miss. Without `TURBO_API`, CI runs without a remote cache.
+- Every app of a generated monorepo deploys to Railway. Its GitHub Actions deploy only the changed apps, and only after CI passes.
+- This repository is the npm package that ships the templates; it runs no cache service and deploys nothing. Each consumer sets up its own Railway cache service, Railway projects, tokens, and repository variables, and the generated `SETUP.md` gives the steps.
 
 For example:
 

@@ -33,11 +33,10 @@ A play-by-play check of the templates on `main` against the AI-native SDLC Playb
 ## Constraints
 
 - The agent may act up to the production gate and cannot pass it (page 46).
-- Evals run on a schedule or on changes to `CLAUDE.md`, skills, or hooks, not on every change (page 34).
+- Evals run as `intent/ci/intent.md` decides.
 - Agent jobs in CI hold no production credentials and use short-lived, scoped tokens (page 45, step 3).
 
 ## Open questions
 
-1. Do evals run on every pull request that changes the agent's configuration, or only on a schedule, to limit API cost?
-2. Who writes the content of each policy skill, and from which source of truth?
-3. Which metric does the first control band watch?
+1. Who writes the content of each policy skill, and from which source of truth?
+2. Which metric does the first control band watch?

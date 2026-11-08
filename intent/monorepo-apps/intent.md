@@ -11,7 +11,19 @@ Author: Joe Takara. Status: draft.
 ## Proposed outcome
 
 - Every product is one monorepo. Each app lives exactly two levels deep, at `apps/<group>/<app>`.
-- The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken. Example names in the documentation are guidance, not rules.
+- The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken.
+- Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules:
+
+  | Group       | Who uses it                                 | Example apps                       |
+  | :---------- | :------------------------------------------ | :--------------------------------- |
+  | `customer`  | End customers                               | web, liff, mobile-web              |
+  | `partner`   | Partners, merchants, and agents             | partner portal, merchant dashboard |
+  | `internal`  | Employees                                   | backoffice, cms, docs              |
+  | `marketing` | The public, before they become customers    | corporate, landing, event          |
+  | `platform`  | Other systems; these apps have no interface | api, worker, notification          |
+
+- Shared code is grouped by business domain, at `packages/<domain>/<package>`, also exactly two levels deep, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Backstage's system model, where one monorepo is a system, an app is a component, and a package folder is a domain.
+- `.github/CODEOWNERS` assigns an owner to each group and domain folder.
 - Each app is created from a template that says how it is built: `nextjs`, `payload`, `nestjs`, `nodejs`, or `docs`. The folder name says what the app is for; the template name does not appear in it.
 - The CLI adds an app to an existing monorepo at any time, so a product does not have to choose every app on day one.
 - Every monorepo has a docs app. It renders `docs/` for people and serves `llms.txt` for agents; `docs/` stays the single source.
@@ -28,9 +40,12 @@ apps/
   internal/docs/           docs
   marketing/corporate/     nextjs
   marketing/landing/       nextjs
+  partner/merchant/        nextjs
   platform/api/            nestjs
   platform/notification/   nodejs
 packages/
+  booking/api-client/
+  shared/ui/
 docs/
 intent/
 ```
@@ -45,7 +60,7 @@ intent/
 ## Constraints
 
 - Removing `--stack` and the single-app layouts is a breaking change and ships as a major release.
-- Turborepo does not support recursive workspace globs; the workspace glob is `apps/*/*`. This needs testing against the pnpm and Turborepo versions the templates use.
+- Turborepo does not support recursive workspace globs; the workspace globs are `apps/*/*` and `packages/*/*`. This needs testing against the pnpm and Turborepo versions the templates use.
 - Every choice has a command-line flag, so CI and agents run the CLI without prompts.
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
 - Templates use framework features before custom code: Turborepo package configurations, and Fumadocs for the docs app.
@@ -58,4 +73,4 @@ intent/
 3. LINE LIFF: a separate `nextjs-liff` template, or the `nextjs` template plus the LIFF SDK?
 4. Names are free, so where does the docs app go by default? `internal/docs` is a suggestion.
 5. Do single-app repositories remain for small client work, or does every project become a monorepo?
-6. Which shared packages under `packages/` ship from day one, such as UI components or configuration, if any?
+6. Which shared packages ship from day one, such as `packages/shared/ui` or shared configuration, if any?

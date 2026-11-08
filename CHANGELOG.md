@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 4.0.1
+
+### Patch Changes
+
+- 47e7676: Generated Dockerfiles (`nodejs`, `nestjs`, `nextjs`, `payload`, and both `turborepo` apps) activate pnpm with `corepack enable`, which installs the version and sha512 hash in `package.json#packageManager`, instead of `npm install --global pnpm`. Their `node` base image is referenced by digest alone, and long `FROM` and `rm -rf` lines are split with backslash continuations.
+
 ## 4.0.0
 
 ### Major Changes

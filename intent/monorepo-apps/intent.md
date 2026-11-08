@@ -35,6 +35,13 @@ Author: Joe Takara. Status: draft.
 - The CLI adds an app to an existing monorepo at any time, so a project does not have to choose every app on day one.
 - Every monorepo has a docs app at `apps/docs`, outside every group, because `docs/` is the project's highest source of truth: it renders `docs/` for people and serves `llms.txt` for agents, and `AGENTS.md` and the agent rules link to it rather than repeat it. No group may be named `docs`.
 - An app carries its own configuration: Dockerfile, tests, lint, and Turborepo package configuration. Adding or removing an app does not change root files or CI, except where a tool allows no other place.
+- CI follows Turborepo's official guidance and knows no app by name:
+  - `turbo query affected` lists the changed apps, and every per-app job (end-to-end tests, container image, deploy) runs as a matrix over that list.
+  - Checks run as `turbo run` tasks with `--affected`.
+  - Container images build with `turbo prune <app> --docker`, so a dependency change in one app does not rebuild another.
+  - An app's own files say what CI does for it: a `test:e2e` script, a `Dockerfile`, and its Turborepo package configuration.
+- Remote caching runs on Railway, as management decided: a self-hosted Turborepo remote cache service that stores its artifacts in a Railway Bucket. CI reaches it with the `TURBO_API` variable and the `TURBO_TOKEN` secret, and signs every artifact with the `TURBO_REMOTE_CACHE_SIGNATURE_KEY` secret, so a tampered artifact counts as a cache miss. Without `TURBO_API`, CI runs without a remote cache.
+- Every app deploys to Railway. GitHub Actions deploys only the changed apps, and only after CI passes.
 
 For example:
 

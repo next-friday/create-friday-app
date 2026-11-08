@@ -7,6 +7,7 @@ Author: Joe Takara. Status: draft.
 - Claude Code is the primary coding agent, and some teams work mainly in Cursor.
 - The repository and the templates support both: `.agents/` is the source, and `scripts/sync-agent-rules.ts` renders it into `.claude/` and `.cursor/`.
 - The Cursor copy has already drifted from the source: `.cursor/BUGBOT.md` lists `templates/turborepo/.github/labeler.yml`, which does not exist.
+- The CI step that runs `pnpm rules:check` is named "Check Cursor rules match .agents/rules", although the check covers both `.claude/` and `.cursor/` copies. The name appears in the root `.github/workflows/ci.yml` and in every template's `ci.yml`.
 
 ## Proposed outcome
 
@@ -14,6 +15,7 @@ Author: Joe Takara. Status: draft.
 - Claude Code stays the reference agent: a new control lands there first and is then rendered for Cursor.
 - Where Cursor lacks a feature that Claude Code has, `AGENTS.md` says so, as it already does for plan mode, and CI and code owner review remain the boundary for both agents.
 - No rendered file drifts from its source.
+- Names and messages about the rendered copies name both agents.
 
 ## Affected users and systems
 

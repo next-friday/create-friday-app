@@ -7,13 +7,13 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 - Dependencies in this repository and in the templates fall behind their latest releases, so every generated project starts out of date.
 - On 2026-11-08 the root and the templates were behind on:
   - the company configs, which `friday-code-standards` now releases together at one version (5.2.1 on 2026-11-08): `@next-friday/commitlint-config-friday` 4.0.0, `@next-friday/eslint-config-friday` 5.0.0 and 5.1.0, and `@next-friday/prettier-config-friday` 4.0.0, all instead of 5.2.1;
-  - TypeScript at the root: 6.0.3 instead of 7.0.2, released 122 days earlier;
+  - TypeScript at the root: 6.0.3 instead of 7.0.2, released 123 days earlier;
   - pnpm: 12.6.0 instead of 12.17.0 or later;
   - Node.js in `.nvmrc`: 24.22.1 instead of 24.22.2.
 - Dependabot does not cover several of these:
   - It does not update `.nvmrc` or the `packageManager` field.
-  - The root groups take only minor and patch updates, so a major such as TypeScript 7 waits.
-  - A new company config version needs a manual entry in `minimumReleaseAgeExclude` before pnpm installs it. Old entries stay behind: `templates/base/pnpm-workspace.yaml` still lists `@next-friday/eslint-config-friday@5.0.0`, which no template installs, next to the 5.1.0 that every template uses.
+  - The root groups take only minor and patch updates. A major such as TypeScript 7 gets its own pull request, because GitHub updates "any outdated dependencies that do not match a rule … in individual pull requests" ([GitHub Docs: Dependabot options](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)), and that pull request waits until someone merges it.
+  - No `pnpm-workspace.yaml` sets `minimumReleaseAge`, so pnpm uses its built-in default of one day, which does not block an install: "The built-in 1440-minute default stays non-strict" (pnpm 12.6.0 `CHANGELOG.md`, line 859). The `minimumReleaseAgeExclude` entries therefore change nothing today, and old ones stay behind: `templates/base/pnpm-workspace.yaml` still lists `@next-friday/eslint-config-friday@5.0.0`, which no template installs, next to the 5.1.0 that every template uses, and `templates/turborepo/pnpm-workspace.yaml` repeats the pair. The seven-day wait that does apply is Dependabot's `cooldown` (`.github/dependabot.yml`).
 
 ## Proposed outcome
 
@@ -28,11 +28,11 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Constraints
 
-- The seven-day cooldown and `minimumReleaseAge` stay, as supply-chain protection.
+- Dependabot's seven-day cooldown stays, as supply-chain protection. Whether pnpm also enforces a release age, and for how long, is decided in the spec.
 - A generated project passes its own `pnpm verify` after each update.
 
 ## Open questions
 
 1. What updates Node.js and pnpm on a schedule, since Dependabot does not?
-2. Who updates a company config when it is published, and how does the update reach `minimumReleaseAgeExclude`?
+2. Who updates a company config when it is published?
 3. Which major updates wait for review, and where is the reason recorded?

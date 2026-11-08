@@ -20,6 +20,7 @@ Author: Joe Takara. Status: draft.
 - A generated project enables that plugin in its committed settings, so everyone who works in the project gets it, and an existing project gets a fix by updating the plugin.
 - The template keeps only what belongs to each project: `AGENTS.md`, the project's rules, CI, and Git hooks.
 - This repository keeps no second hand-made copy of the kit.
+- The company's marketplace lives in this repository, beside the templates. Claude Code accepts a marketplace in a folder of an existing repository, including a private one ([Claude Code: Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)).
 
 ## Affected users and systems
 
@@ -31,9 +32,9 @@ Author: Joe Takara. Status: draft.
 - CI and code owner review stay the boundary; the agent still cannot weaken the checks on its own work (page 32).
 - Every agent feature used is checked against that agent's official documentation before it is relied on.
 - A generated project must still pass its own `pnpm verify`.
+- Cursor installs a company marketplace only on its Teams plan (one marketplace) or Enterprise plan ([Cursor: Plugins](https://cursor.com/docs/plugins)).
 
 ## Open questions
 
 1. Which pieces go into the plugin, and which stay in the template?
 2. Do cloud sessions, such as Claude Code on the web, load a plugin that a project enables in its committed settings? The Claude Code documentation says a cloud session does not load the plugins in a person's local settings.
-3. Where does the company's marketplace live?

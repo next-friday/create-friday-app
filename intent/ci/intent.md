@@ -26,7 +26,7 @@ The CI in this repository and in the templates has drifted from the AI-native SD
 - The root CI runs every check in one job, `pnpm verify`, the same command the pre-push hook runs, as the templates' CI already does. It keeps the jobs that test the product: Template, Consumer Smoke, and Compatibility.
 - Each check has one tool:
   - Keep CodeQL for static analysis; it is the default for teams on GitHub and reports into the Security tab and the pull request. Remove Semgrep (`sast.yml`).
-  - Keep both secret scanners: gitleaks runs fast at commit time and in CI, and holds the payment card (PAN) rules in `.gitleaks.toml`; TruffleHog in CI checks whether a found secret is still live.
+  - Keep both secret scanners: gitleaks runs fast at commit time and in CI, and holds the payment card (PAN) rules in `.gitleaks.toml`, which stay in every template even though no template handles payments, because client projects may, and card numbers can leak through fixtures, logs, or copied test data (pages 4 and 27); TruffleHog in CI checks whether a found secret is still live.
   - Keep Dependency Review with Dependabot for dependency vulnerabilities. Remove OSV-Scanner.
   - Keep diff-cover for the templates' patch coverage gate: it runs inside CI with no paid service, which private projects need. The root keeps Codecov, which is free for this open-source repository. A Vitest threshold cannot replace either, because it measures the whole project, not the changed lines.
   - Keep Trivy, hadolint, zizmor, Scorecard, and the pull request title check; none overlaps another tool.

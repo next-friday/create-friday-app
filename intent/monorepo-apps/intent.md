@@ -29,13 +29,13 @@ Author: Joe Takara. Status: draft.
   - A template is a folder with a manifest that names it and states what it needs, such as a database or an entry in a root file. The CLI reads the manifest and knows no framework.
   - Every app has the same scripts, `dev`, `build`, `test`, `lint`, and `typecheck`, whatever its language. Turborepo runs any script a workspace's `package.json` defines, so root tasks and CI work for every app.
 - Each template looks like the framework's current official starter, so engineers find the layout they already know. A template is generated from the official generator at its current version, such as `create-next-app`, `@nestjs/cli`, `create-payload-app`. Only the contract scripts and the company tooling are added on top. The starter's code may change where the company's ESLint, Prettier, or agent rules require it, but its layout does not: files, folders, and their names stay as the official starter has them. The template records which generator and version it came from, so it can be regenerated when that starter changes. Where the official starter is out of date, the template follows the framework's current official documentation instead; for example, LINE's `create-liff-app` Next.js template does not use the App Router, so `nextjs-liff` is `create-next-app` plus the `@line/liff` SDK set up as LINE's documentation shows.
-- The first release ships templates only for what projects use today: `nextjs`, `nextjs-liff` for LINE LIFF apps, `payload`, `nestjs`, and `nodejs`, plus the Mintlify docs site. A new framework's template is added when a project needs it.
+- The first release ships templates only for what projects use today: `nextjs`, `nextjs-liff` for LINE LIFF apps, `payload`, `nestjs`, `nodejs`, and `docs` for the Starlight docs site. A new framework's template is added when a project needs it.
 - Campaign and event pages live in one marketing landing app by default. An event gets its own app only when it needs its own domain and also its own team, release, or technology; that app is deleted when the event ends. This is guidance in `docs/`, not a CLI check.
 - A package exists only for code that two or more apps use, such as UI components shared by the customer web app and the LIFF app, or API types shared by a web app and the API. It is created when the second app needs the code, not in advance, so a new monorepo has no packages. Lint, format, and commit configuration stay shared through their npm packages.
 - The CLI adds an app to an existing monorepo at any time, so a project does not have to choose every app on day one.
 - Every monorepo keeps all of its documentation in `apps/docs`, outside every group, because Markdown files in a repository are hard for people to read, and the docs are the project's highest source of truth. `AGENTS.md` and the agent rules link to them rather than repeat them.
-- `apps/docs` is a [Mintlify](https://www.mintlify.com/) site: the pages are Markdown and MDX files, and `docs.json` sets navigation and theme, all in that one folder. Mintlify builds and hosts the site on each push to the connected branch, reading `apps/docs` through its monorepo setting ([Monorepo setup](https://www.mintlify.com/docs/deploy/monorepo)), and gives every site `llms.txt` and `llms-full.txt` for agents. The folder is not a Turborepo workspace, and the project's CI does not deploy it.
-- Pages use plain Markdown where they can, so they stay readable in the repository and the docs can move off Mintlify.
+- `apps/docs` is a [Starlight](https://starlight.astro.build/) site, the documentation framework built on Astro, generated from Starlight's official starter. The pages are Markdown and MDX files in `apps/docs/src/content/docs/`. Starlight gives the site navigation and full-text search with Pagefind out of the box, and the community plugin `starlight-llms-txt` serves `llms.txt` and `llms-full.txt` for agents.
+- `apps/docs` is a workspace like any other app: the project's CI builds it, and the project deploys it with its other apps, so the docs stay in the project's own infrastructure at no extra cost.
 - An app carries its own configuration: Dockerfile, tests, lint, and Turborepo package configuration. Adding or removing an app does not change root files or CI, except where a tool allows no other place.
 - CI follows Turborepo's official guidance and knows no app by name:
   - `turbo query affected` lists the changed apps, and every per-app job (end-to-end tests, container image, deploy) runs as a matrix over that list.
@@ -58,7 +58,7 @@ For example:
 
 ```text
 apps/
-  docs/                    mintlify
+  docs/                    starlight
   customer/web/            nextjs
   customer/liff/           nextjs-liff
   internal/backoffice/     nextjs
@@ -86,14 +86,9 @@ intent/
 ## Constraints
 
 - Removing `--stack` and the single-app layouts is a breaking change and ships as a major release.
-- Turborepo does not support recursive workspace globs; the workspace globs are `apps/*/*` and `packages/*/*`, and `apps/docs` holds no `package.json`. This needs testing against the pnpm and Turborepo versions the templates use.
+- Turborepo does not support recursive workspace globs; the workspace globs are `apps/docs`, `apps/*/*`, and `packages/*/*`. Turborepo rejects a package nested inside another, so no folder inside `apps/docs` may hold a `package.json`. This needs testing against the pnpm and Turborepo versions the templates use.
 - Every choice has a command-line flag, so CI and agents run the CLI without prompts.
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
-- Templates use framework and platform features before custom code: Turborepo package configurations, and Mintlify for the docs site.
+- Templates use framework and platform features before custom code: Turborepo package configurations, and Starlight for the docs site.
 - Setup that grows with each app, such as per-stack rule copies, is reduced first.
 - Known limits for later templates, recorded so the contract does not block them: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.
-
-## Open questions
-
-1. Which Mintlify plan covers private client repositories, and what does one site per client project cost? Third-party sources disagree; Mintlify's pricing page or sales team has to confirm.
-2. Do client contracts allow their documentation to be hosted on Mintlify's cloud?

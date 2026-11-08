@@ -20,9 +20,10 @@ The CI in this repository and in the templates has drifted from the AI-native SD
 ## Proposed outcome
 
 - CI does what the playbook's CI plays describe: evals run when the agent's configuration changes, a failed build gets a triage summary, `@claude` on a review comment pushes a fix, and rollback is one rehearsed command.
+- Evals run both on every pull request that changes `CLAUDE.md`, `AGENTS.md`, skills, hooks, or `evals/`, and on a nightly schedule, as the playbook's `agent-evals.yml` example shows (pages 34–35).
 - The agent may act up to the production gate and cannot pass it, and the gate matches how the project really deploys.
 - CI follows Turborepo's official guidance: it finds changed apps with `turbo query affected`, runs checks with `turbo run --affected`, builds images with `turbo prune --docker`, and names no app in code.
-- The root CI runs each check once and keeps the jobs that test the product: Template, Consumer Smoke, and Compatibility.
+- The root CI runs every check in one job, `pnpm verify`, the same command the pre-push hook runs, as the templates' CI already does. It keeps the jobs that test the product: Template, Consumer Smoke, and Compatibility.
 - Every CI decision cites the playbook page or the official document it follows.
 
 ## Affected users and systems
@@ -36,8 +37,3 @@ The CI in this repository and in the templates has drifted from the AI-native SD
 - Workflow files at the root of this repository cannot be pushed from an agent session; a person commits them.
 - Claude API access uses an API key secret, which management allows.
 - Related intents: `intent/restore-playbook-plays/intent.md` covers the plays outside CI, and `intent/monorepo-apps/intent.md` covers CI for apps at `apps/<group>/<app>`, the remote cache, and image promotion.
-
-## Open questions
-
-1. Do evals run on every pull request that changes the agent's configuration, or only on a schedule, to limit API cost?
-2. Is the root CI collapsed into one job, or kept split for faster feedback on which check failed?

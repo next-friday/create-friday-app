@@ -12,7 +12,7 @@ Author: Joe Takara. Status: draft.
 
 - Every client project is one monorepo, so access and handover stay per client. A small project is a monorepo with one app and the docs site; no project is a single-app repository. Each app lives exactly two levels deep, at `apps/<group>/<app>`, except the docs site, which is always `apps/docs`.
 - The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken.
-- Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules:
+- Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules. The names are this company's own standard, chosen so every client project looks the same; they are not an industry standard. Turborepo allows grouping folders without prescribing names, and Nx, the closest published convention, groups by business domain instead:
 
 | Group       | Who uses it                                 | Example apps                       |
 | :---------- | :------------------------------------------ | :--------------------------------- |

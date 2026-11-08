@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 5.0.0
+
+### Major Changes
+
+- 2f474f9: Generated projects no longer call the Claude API from GitHub Actions, so they need no workload identity federation or repository variables. The `Claude` and `Agent evals` workflows, the `Triage failed build` job in `ci.yml`, `evals/`, and `lessons/` are removed, and `SETUP.md` drops their steps. Claude Code Review still reviews pull requests from the Claude GitHub App.
+
 ## 4.0.1
 
 ### Patch Changes

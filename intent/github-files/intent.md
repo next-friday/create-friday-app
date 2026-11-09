@@ -17,7 +17,7 @@ The templates ship a full set of GitHub files: README, contributing guide, secur
 
 - `SECURITY.md` names a contact the team sets during setup, such as the security email of the company or of the client, and `SETUP.md` has a step to fill it in. Private vulnerability reporting is removed from the templates' `SECURITY.md` and `SETUP.md`, because GitHub offers it only for public repositories; the root, a public repository, keeps it.
 - The templates' `SETUP.md` no longer turns on secret scanning and push protection, which a private repository cannot use without GitHub Secret Protection; gitleaks and TruffleHog stay the templates' secret scanners. The root, a public repository, can use both features free.
-- The root and every template have a documentation report issue form, with the same fields as the Next.js form and the labels `documentation` and `needs triage`. In the templates this is a company decision, because the Next.js form serves a public repository.
+- The root and every template have a documentation report issue form, with the same fields as the Next.js form and the labels `documentation` and `needs triage`.
 - `.git-blame-ignore-revs` is added, in the root or in a generated project, together with the first commit that only reformats code, and lists that commit and each later one; no project carries an empty file.
 
 ## Affected users and systems

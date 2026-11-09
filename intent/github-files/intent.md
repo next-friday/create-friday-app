@@ -14,7 +14,7 @@ The templates ship a full set of GitHub files: README, contributing guide, secur
 
 ## Proposed outcome
 
-- `SECURITY.md` names a contact the team sets during setup, such as the security email of the company or of the client, and `SETUP.md` has a step to fill it in. Private vulnerability reporting is turned on only when the repository is public.
+- `SECURITY.md` names a contact the team sets during setup, such as the security email of the company or of the client, and `SETUP.md` has a step to fill it in. Private vulnerability reporting is removed from the templates' `SECURITY.md` and `SETUP.md`, because GitHub documents it only for public repositories; the root, a public repository, keeps it.
 - The root and every template have a documentation report issue form, with the same fields as the Next.js form and the labels `documentation` and `needs triage`.
 - The root and every template have `.git-blame-ignore-revs`, and a commit that only reformats code is added to it.
 

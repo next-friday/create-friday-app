@@ -38,7 +38,6 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 - Claude Code and Cursor get the same rules and skills from one source, and the same guardrails as far as each agent supports them: Claude Code through `permissions.deny`, Cursor through its own file-path hook, because Cursor does not read Claude Code's permissions.
 - Each instruction, rule, skill, and hook has one source, and neither agent loads a copy twice. A file is rendered for one agent only where that agent's official documentation shows it cannot read the source; today that is Cursor's scoped `.mdc` rules, `.cursor/mcp.json`, and a subagent file per agent, rendered from one subagent source, because the two agents use different subagent fields. No symlinks.
 - The rendering uses a maintained tool when one does the job; the spec compares the tools with the current script.
-- Claude Code stays the reference agent: a new control lands there first and is then rendered for Cursor.
 - Where Cursor lacks a feature that Claude Code has, `AGENTS.md` says so, as it already does for plan mode, and CI and code owner review remain the boundary for both agents.
 - No rendered file drifts from its source.
 - Names and messages about the rendered copies name both agents.
@@ -53,4 +52,4 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 - Each instruction, rule, skill, and subagent has one source; a file rendered from it is not edited by hand.
 - Every agent feature used is checked against that agent's official documentation before it is relied on.
-- Rules, hooks, and agent settings are constitution files and change as `constitution-changes.md` describes.
+- A change to hooks, rules, or agent settings goes through a pull request that code owners approve.

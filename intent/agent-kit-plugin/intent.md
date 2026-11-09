@@ -24,6 +24,7 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 - An existing project gets a fix to a plugin extra by updating the plugin; turning on auto-update for the company marketplace is part of setup.
 - This repository keeps no second hand-made copy of the kit.
 - The company's marketplace lives in this repository, beside the templates. Claude Code accepts a marketplace in a folder of an existing repository, including a private one ([Claude Code: Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)).
+- CI checks the company marketplace with Claude Code's own `claude plugin validate`, which checks the JSON, the required fields, the names, and each plugin's manifest ([Claude Code: Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)). Anthropic's own marketplace runs four checks (`anthropics/claude-plugins-official`) because it accepts plugins from outside; the company marketplace does not.
 
 ## Affected users and systems
 

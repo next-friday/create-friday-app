@@ -7,7 +7,7 @@ Written at `23f15ab` with the `write-spec` skill as committed there. The product
 ## Requirements
 
 1. In the root and in every template, the agent commits the artifact it was prompted to write, opens its pull request, and drives that pull request until it is green and waiting only on code owner approval, without asking.
-2. The agent asks a person only at the playbook's gates: the questions while writing an intent (page 12, step 2), the review and approval (pages 16 and 39), and the production deploy (page 46). It also asks for what no file, tool, or source can answer (`agent-owned-work.md`).
+2. The agent asks a person only at the playbook's gates: the questions while writing an intent (page 12, step 2), the review and approval (pages 16 and 39), and the production deploy (page 46). It also asks for what no file, tool, or source can answer (`agent-owned-work.md`), and any question a project instruction requires, such as the component-test question in `templates/nextjs/AGENTS.md`.
 3. A choice the product owner has not made goes into the artifact as a proposal, not into a chat question.
 4. `AGENTS.md` records requirements 1 to 3 as the product owner's standing request, in the root and in every template.
 5. `git-workflow` has the agent drive every pull request it opened to merge-ready without being asked (page 38). Merging stays with a person (page 39).

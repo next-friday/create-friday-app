@@ -1,6 +1,6 @@
 # Spec: The agent carries each step of the loop without asking for permission
 
-From `intent/loop-autonomy/intent.md`, written on 2026-11-09 at the product owner's request before that intent's pull request (#65) merged. Status: draft.
+From `intent/loop-autonomy/intent.md`, written on 2026-11-09 at the product owner's request before that intent's pull request (#65) merged. Status: accepted.
 
 Written at `23f15ab` with the `write-spec` skill as committed there. The product owner's prompt, "ทำ spec ของ loop-autonomy ต่อเลย" ("write the loop-autonomy spec now"), added no constraint to the skill's prompt.
 

@@ -34,7 +34,6 @@ The CI in this repository and in the templates has drifted from the AI-native SD
   - The `prod` environment accepts deploys only from that tag pattern, and the deploy job no longer requires the `main` branch ref, which a tag run does not have.
   - The agent's own GitHub identity, such as the Claude GitHub App, is not on the ruleset's bypass list.
   - This gate checks who creates the tag; it does not require a second person. An agent that runs with a release team member's own access is held back only by the local hook, which is a convenience, not a boundary. The README and `SETUP.md` say so.
-- A client whose contract or compliance requires two-person approval uses GitHub Enterprise, where `prod` has required reviewers with self-review prevented.
 - CI follows Turborepo's official guidance: it finds changed apps with `turbo query affected`, runs checks with `turbo run --affected`, builds images with `turbo prune --docker`, and names no app in code.
 - The root CI runs every check in one job, `pnpm verify`, the same command the pre-push hook runs, as the templates' CI already does. It keeps the jobs that test the product: Template, Consumer Smoke, and Compatibility. The Release Integrity job is removed: on the release pull request it repeats format, `package.json` order, build, and publint, which the same run already checks (`.github/workflows/ci.yml`, lines 55–57 and 321–343).
 - Scanners:

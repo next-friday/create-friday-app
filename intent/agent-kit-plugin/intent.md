@@ -20,9 +20,10 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 ## Proposed outcome
 
 - Everything that guards or constrains the agent stays committed in each project's repository, because a cloud session loads only what the repository holds: the hooks, the permissions in `.claude/settings.json`, the rules, and the skills every task needs.
-- A company plugin, through the company's own marketplace, carries only optional extras, such as the policy skills: pieces whose absence lets no one skip a check. Projects that use Cursor get the same extras in Cursor's plugin format.
+- A company plugin, through the company's own marketplace, carries the four policy skills, which page 25 says to "distribute … organization-wide through a plugin", and only other pieces whose absence lets no one skip a check. Projects that use Cursor get the same extras in Cursor's plugin format.
 - An existing project gets a fix to a plugin extra by updating the plugin; turning on auto-update for the company marketplace is part of setup.
 - This repository keeps no second hand-made copy of the kit.
+- A fix to the kit that stays in each repository reaches existing projects the way template tools do it: each generated project records the template and version it came from, and an update applies the newer template's changes, as Copier's `copier update` does from `.copier-answers.yml` ([Copier: Updating a project](https://github.com/copier-org/copier/blob/master/docs/updating.md)).
 - The company's marketplace lives in this repository, beside the templates. Claude Code accepts a marketplace in a folder of an existing repository, including a private one ([Claude Code: Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)).
 - CI checks the company marketplace with Claude Code's own `claude plugin validate`, which checks the JSON, the required fields, the names, and each plugin's manifest ([Claude Code: Create a marketplace](https://code.claude.com/docs/en/plugins/create-marketplace)). Anthropic's own marketplace runs four checks (`anthropics/claude-plugins-official`) because it accepts plugins from outside; the company marketplace does not.
 
@@ -38,8 +39,3 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 - The kit that stays in the repository follows `intent/multi-agent-support/intent.md`.
 - A generated project must still pass its own `pnpm verify`.
 - Cursor installs a company marketplace only on its Teams plan (one marketplace) or Enterprise plan ([Cursor: Plugins](https://cursor.com/docs/plugins)).
-
-## Open questions
-
-1. Which optional extras go into the plugin?
-2. How does a fix to the kit that stays in the repository reach the client projects that already exist?

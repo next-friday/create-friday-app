@@ -16,7 +16,7 @@ The repository was renamed from `next-friday/create-friday-app` to `next-friday/
 
 ## Proposed outcome
 
-- The next release publishes to npm with provenance, from the renamed repository.
+- The next release publishes to npm with provenance, from the renamed repository. Before it, an npm owner checks the trusted publisher on npmjs.com, which still names the old repository if it was set up for release 5.0.0 (its provenance names `https://github.com/next-friday/create-friday-app`), and changes it to `next-friday/create-next-friday-app`.
 - No file in this repository names the old repository by its URL or slug, except release history. The CLI's command name `create-friday-app` (`package.json`, line 27), which `knip.json` and the CI smoke tests also use, is not the repository name and stays, because changing it would break the CLI for its users (`AGENTS.md`, convention 3).
 
 ## Affected users and systems
@@ -28,7 +28,3 @@ The repository was renamed from `next-friday/create-friday-app` to `next-friday/
 
 - Only a person with npm owner access can change the trusted publisher on npmjs.com.
 - Release history stays as it was written.
-
-## Open questions
-
-1. Does the trusted publisher on npmjs.com still name the old repository? Release 5.0.0 was built before the rename: its provenance names `https://github.com/next-friday/create-friday-app`, `.github/workflows/release.yml`, on `refs/heads/main` (npm attestations for `@next-friday/create-app@5.0.0`).

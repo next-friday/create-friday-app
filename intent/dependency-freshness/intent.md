@@ -18,8 +18,9 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 ## Proposed outcome
 
 - Every dependency in the root and the templates is at its latest release once that release has passed the seven-day cooldown, or the reason it is held back is recorded.
-- Company configs (`@next-friday/*`) are updated as soon as they are published, without the cooldown.
-- Node.js, pnpm, and major versions are updated on a schedule, not only when someone notices.
+- Company configs (`@next-friday/*`) are updated as soon as they are published: Dependabot's `cooldown` takes an `exclude` list that "Supports wildcards", so `@next-friday/*` is excluded from the seven-day wait ([GitHub Docs: Dependabot options](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference)).
+- Node.js and pnpm are updated on a schedule by Renovate, whose `nvm` manager "keeps the `.nvmrc` file updated" and whose `npm` manager reads the `packageManager` field (renovatebot/renovate `lib/modules/manager/nvm/readme.md`; `lib/modules/manager/npm/extract/common/package-file.ts`); Dependabot's supported ecosystems include neither. Whether Renovate also replaces Dependabot for the other dependencies is decided in the spec.
+- Every major version opens its own pull request and waits for code owner review like any other change. A version held back is recorded in `.github/dependabot.yml` as an `ignore` entry with `update-types: ["version-update:semver-major"]` for that dependency, with its reason beside it (same GitHub page).
 
 ## Affected users and systems
 
@@ -30,9 +31,3 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 - Dependabot's seven-day cooldown stays, as supply-chain protection. Whether pnpm also enforces a release age, and for how long, is decided in the spec.
 - A generated project passes its own `pnpm verify` after each update.
-
-## Open questions
-
-1. What updates Node.js and pnpm on a schedule, since Dependabot does not?
-2. Who updates a company config when it is published?
-3. Which major updates wait for review, and where is the reason recorded?

@@ -24,7 +24,7 @@ A play-by-play check of the templates and the root on `main` against the AI-nati
 
 Every play the playbook describes is present in the templates, and in the root where it applies, or its absence is recorded with the playbook page and the reason. By play, in the playbook's stage order:
 
-- **Requirements and design (15–17):** each policy skill holds its policy, written by its owner from that policy's source of truth.
+- **Requirements and design (15–17):** each policy skill holds the organization's policy. As page 25 says, "An engineer writes it from the policy owner's source of truth", the owner is named (each project names its policy owners in `CODEOWNERS`, as `SETUP.md` step 2 already asks), and "When the policy changes, change the skill and have the policy owner sign off the change".
 - **Continuous evals in CI (34–35):** evals run on every pull request that changes `CLAUDE.md`, `AGENTS.md`, skills, hooks, or `evals/`, and on a nightly schedule. The playbook names "CLAUDE.md, skills or hooks" (page 34, step 3), and its `agent-evals.yml` example filters on `CLAUDE.md` and `.claude/**` with a nightly cron (page 35); `AGENTS.md` and `evals/` are added because these projects keep their instructions in `AGENTS.md`.
 - **AI in the PR review loop, step 4 (38):** `@claude` on a review comment pushes a fix.
 - **Hooks as approval gates (40–41):** the production gate matches the command and environment the project actually deploys with.
@@ -41,7 +41,7 @@ Every play the playbook describes is present in the templates, and in the root w
     - This gate checks who creates the tag; it does not require a second person. An agent that runs with a release team member's own access is held back only by the local hook, which is a convenience, not a boundary. The README and `SETUP.md` say so.
     - Promotion reads GitHub's deployment records to find which commit reached each environment, in `base` and `turborepo`; it matches no job name or run title. A record GitHub creates for a job holds the run's own commit, which for a manual run on `main` is the tip of `main`, not the promoted commit, so each deploy records the commit it actually deployed; the REST API takes a commit SHA as a deployment's `ref` ([GitHub REST API: Deployments](https://docs.github.com/en/rest/deployments/deployments)). How is decided in the spec.
   - Step 6: rollback is a single command that the agent can run and that is rehearsed in staging.
-- **Closing the loop (48–51):** a breached control band triggers the rollback and writes the next `intent.md`.
+- **Closing the loop (48–51):** the first control band watches the CI test failure rate, the metric of the playbook's own `bands.yaml` example (page 50: `metric: ci_test_failure_rate`, `baseline: rolling_30d`, `rules: western_electric`), which needs only the CI system's API. A breach is handled by tier as that example sets: log at 1σ, diagnose read-only at 2σ, and at 3σ propose a pull request or trigger the approved rollback runbook; the finding is written as the next `intent.md`.
 - **Claude Tag and the lessons file (52):** projects have `lessons/`, where the post-mortem is written.
 
 Across the plays:
@@ -61,8 +61,3 @@ Across the plays:
 - The agent may act up to the production gate and cannot pass it (page 46).
 - Agent jobs in CI hold no production credentials (page 45, step 3). Their Claude API key is the one departure from that step's short-lived, scoped tokens.
 - CI work that is not a playbook play, such as Turborepo, the scanners, and how the root's CI jobs are laid out, belongs to `intent/ci/intent.md`.
-
-## Open questions
-
-1. Who writes the content of each policy skill, and from which source of truth?
-2. Which metric does the first control band watch?

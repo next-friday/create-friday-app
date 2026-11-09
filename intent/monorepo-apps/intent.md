@@ -75,7 +75,6 @@ intent/
 - Engineers who create products and add apps, and agents that run the CLI without prompts.
 - Product owners, marketing, and other readers of the docs site.
 - The CLI (`src/`), every template under `templates/`, this repository's CI (the Template job), and `README.md`.
-- Templates for later frameworks, which the contract must allow without being built now.
 - Projects already generated from the CLI are not migrated.
 
 ## Constraints
@@ -86,4 +85,4 @@ intent/
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
 - Templates use framework and platform features before custom code: Turborepo package configurations, and Starlight for the docs site.
 - Setup that grows with each app, such as per-stack rule copies, is reduced first.
-- Known limits for later templates, recorded so the contract does not block them: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.
+- Known limits for later templates: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.

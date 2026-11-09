@@ -1,6 +1,6 @@
 # Intent: Support Claude Code and Cursor from one source
 
-Author: Joe Takara (Developer Productivity). Status: draft.
+Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 

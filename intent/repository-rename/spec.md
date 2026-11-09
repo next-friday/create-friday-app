@@ -1,6 +1,6 @@
 # Spec: Follow the repository rename to create-next-friday-app
 
-From `intent/repository-rename/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: draft.
+From `intent/repository-rename/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: accepted.
 
 ## Requirements
 

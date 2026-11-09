@@ -1,4 +1,4 @@
-# Intent: Restore the playbook plays the templates lost
+# Intent: Add the playbook plays the templates miss
 
 Author: Joe Takara (Developer Productivity). Status: draft.
 

@@ -12,12 +12,12 @@ The repository was renamed from `next-friday/create-friday-app` to `next-friday/
 | `repository.url`, `homepage`, and `bugs.url`                                        | `package.json`, lines 11, 13, and 17                   | The package's npm page links to the old name, and npm provenance compares `repository.url` with the repository that built the package.                        |
 | Private vulnerability reporting link                                                | `SECURITY.md`, line 13                                 | Reporters rely on a redirect.                                                                                                                                 |
 | Discussions links in the issue chooser                                              | `.github/ISSUE_TEMPLATE/config.yml`, lines 4 and 7     | Users rely on a redirect.                                                                                                                                     |
-| Clone command and trusted publisher instructions                                    | `CONTRIBUTING.md`, lines 27 and 91                     | Contributors copy the old name.                                                                                                                               |
+| Clone command, the folder it creates, and trusted publisher instructions            | `CONTRIBUTING.md`, lines 27, 28, and 91                | Contributors copy the old name.                                                                                                                               |
 
 ## Proposed outcome
 
 - The next release publishes to npm with provenance, from the renamed repository.
-- No file in this repository names the old repository, except release history such as `CHANGELOG.md`.
+- No file in this repository names the old repository by its URL or slug, except release history. The CLI's command name `create-friday-app` (`package.json`, line 27), which `knip.json` and the CI smoke tests also use, is not the repository name and stays, because changing it would break the CLI for its users (`AGENTS.md`, convention 3).
 
 ## Affected users and systems
 
@@ -31,4 +31,4 @@ The repository was renamed from `next-friday/create-friday-app` to `next-friday/
 
 ## Open questions
 
-1. Was release 5.0.0, published on 2026-11-08, built before or after the rename, and does the trusted publisher on npmjs.com still name the old repository?
+1. Does the trusted publisher on npmjs.com still name the old repository? Release 5.0.0 was built before the rename: its provenance names `https://github.com/next-friday/create-friday-app`, `.github/workflows/release.yml`, on `refs/heads/main` (npm attestations for `@next-friday/create-app@5.0.0`).

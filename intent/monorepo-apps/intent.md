@@ -44,7 +44,7 @@ Author: Joe Takara (Developer Productivity). Status: draft.
   - Railway is the default host and pulls the image from GitHub Container Registry; a private image needs Railway's Pro plan ("Private Docker registry deployments require the Pro plan"). The image also runs on any other host that runs containers.
 - Because one image serves every environment, a value that differs between environments is read at runtime. A Next.js app does not put such a value in a `NEXT_PUBLIC_` variable, which Next.js inlines at build time; it reads `process.env` on the server during dynamic rendering, as Next.js's self-hosting guide describes.
 - CI deploys only the changed apps, and only after its checks pass. Railway's own change detection (watch paths) and "Wait for CI" apply to services deployed from a GitHub repository, not to an image, so CI chooses and triggers each deploy.
-- This repository is the npm package that ships the templates; it runs no cache service and deploys nothing. Each consumer sets up its own Railway cache service, Railway projects, tokens, and repository variables, and the generated `SETUP.md` gives the steps.
+- This repository is the npm package that ships the templates; it runs no cache service and deploys no app, and its only release is the npm package that `release.yml` publishes. Each consumer sets up its own Railway cache service, Railway projects, tokens, and repository variables, and the generated `SETUP.md` gives the steps.
 
 For example:
 

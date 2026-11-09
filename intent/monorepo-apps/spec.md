@@ -1,6 +1,6 @@
 # Spec: One monorepo per project, with apps the team names and adds
 
-From `intent/monorepo-apps/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: draft.
+From `intent/monorepo-apps/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: accepted.
 
 Written at `main` `d856a39` with the `write-spec` skill as committed there. The product owner's prompt, "กลับมาทำงาน เดิม intent ให้จบ" ("back to the intent work, finish it"), added no constraint to the skill's prompt.
 

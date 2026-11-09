@@ -1,6 +1,6 @@
 # Intent: The agent carries each step of the loop without asking for permission
 
-Author: Joe Takara (Developer Productivity). Status: draft.
+Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 

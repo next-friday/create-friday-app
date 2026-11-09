@@ -16,7 +16,10 @@ The CI in this repository and in the templates has drifted from Turborepo's offi
 
 ## Proposed outcome
 
-- CI follows Turborepo's official guidance: it finds changed apps with `turbo query affected`, runs checks with `turbo run --affected`, builds images with `turbo prune --docker`, and names no app in code.
+- CI follows Turborepo's official guidance and names no app in code; this intent owns how CI runs Turborepo, and `intent/monorepo-apps/intent.md` owns the app layout:
+  - `turbo query affected` lists the changed apps, and every per-app job (end-to-end tests, container image, deploy) runs as a matrix over that list. Turborepo's documentation has no matrix example; the matrix is a common community pattern on GitHub Actions, where one job finds the changed apps and the next builds its matrix from them ([WarpBuild](https://warpbuild.com/blog/github-actions-monorepo-guide); [OneUptime](https://oneuptime.com/blog/post/2025-12-20-dynamic-matrix-github-actions/view)). The checkout keeps enough Git history to compare against: "if the checkout is too shallow, all packages will be considered changed" (`crafting-your-repository/constructing-ci.mdx`), and Turborepo's GitHub Actions guide uses `fetch-depth: 2`.
+  - Checks run as `turbo run` tasks with `--affected`.
+  - Container images build with `turbo prune <app> --docker`, so a dependency change in one app does not rebuild another.
 - The root CI keeps its checks in separate jobs by kind, as other projects do (`anthropics/anthropic-sdk-typescript`: lint, build, test; `anthropics/claude-code-action`: test, prettier, typecheck; `withastro/astro` and `vitejs/vite` likewise), and drops the Release Integrity job: on the release pull request it repeats format, `package.json` order, build, and publint, which the same run already checks (`.github/workflows/ci.yml`, lines 55–57 and 321–343).
 - Each change runs the checks for what it touches, in the root and in every template, at pull request time and on the push to `main`:
   - A change to Markdown or to other files that do not affect the running app runs Prettier and ESLint, whose Markdown rules check the `.md` files, and the secret scanners; it skips type checking, tests, the build, the image, the deploy, Semgrep, and OSV-Scanner. A change to code runs everything. This is what the official Next.js repository does: its `changes` job sets `docs-only`, its tests and native builds run only when `docs-only` is false, and `lint` and `validate-docs-links` run on every change (`vercel/next.js` `.github/workflows/build_and_test.yml`).
@@ -38,4 +41,4 @@ The CI in this repository and in the templates has drifted from Turborepo's offi
 
 ## Constraints
 
-- Related intents: `intent/restore-playbook-plays/intent.md` covers every playbook play, including the ones that run in CI, and `intent/monorepo-apps/intent.md` covers CI for apps at `apps/<group>/<app>`, the remote cache, and image promotion.
+- Related intents: `intent/restore-playbook-plays/intent.md` covers every playbook play, including the ones that run in CI, and `intent/monorepo-apps/intent.md` covers the app layout at `apps/<group>/<app>`, what an app's own files tell CI, the remote cache, and building and promoting images.

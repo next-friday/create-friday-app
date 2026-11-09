@@ -48,6 +48,8 @@ Every play the playbook describes is present in the templates, and in the root w
 
 - **Entering the loop:** every generated project's documentation site (`apps/docs`, as `intent/monorepo-apps/intent.md` sets it up) has a page that links to Anthropic's official playbook and lists, for each stage of the loop (Plan, Design, Build, Test, Deploy, Maintain), who acts and which file, skill, or command in the project carries that stage out. The page links to the playbook rather than copying its text, because the playbook is Anthropic's document.
 
+- **Entering the loop, setup:** every generated project has a setup skill that reads `SETUP.md`, does each step an agent can do in that session, and lists the steps that need a person, with who does each, as `SETUP.md` names them. The steps live only in `SETUP.md`; the skill holds none of its own. This is the company's own decision: the playbook's rule for skills covers knowledge applied again and again, not a one-time task (page 25).
+
 Across the plays:
 
 - Every job that calls the Claude API uses an API key secret instead of workload identity federation, as the playbook's eval example does (pages 34–35). This departs from page 45, step 3, which asks for short-lived, scoped tokens, and from Anthropic's own repositories, which use workload identity federation (for example `anthropics/claude-code-action`, `.github/workflows/issue-triage.yml`). That change's `spec.md` and `plan.md` record the departure and its reason: workload identity federation needs setup the team chose not to take on.

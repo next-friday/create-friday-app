@@ -31,7 +31,6 @@ The CI in this repository and in the templates has drifted from Turborepo's offi
   - Keep diff-cover for the templates' patch coverage gate: it runs inside CI with no paid service, which private projects need. The root keeps Codecov, which is free for this open-source repository. A Vitest threshold cannot replace either, because it measures the whole project, not the changed lines.
   - Keep Trivy, hadolint, zizmor, and the pull request title check. In the templates, zizmor and actionlint (both in `zizmor.yml`) check the workflow files; in the root, CodeQL also checks them, and Scorecard scores the root's security posture as a whole.
   - Remove the `changes` label from `.github/labeler.yml`.
-- A later change to CI that departs from the playbook or from a tool's official documentation starts from its own `intent.md`, which says why (page 11), so the reason stays in the audit trail (page 7).
 - The root and every template have a rule in `.agents/rules/`, scoped to `.github/**`, that tells an agent how to write a workflow safely, following the Next.js `.github/AGENTS.md`. It is rendered for Claude Code and Cursor like the other scoped rules. Where the Next.js advice conflicts with a workflow here, such as `pr-triage.yml` using `pull_request_target`, the spec decides.
 
 ## Affected users and systems
@@ -41,4 +40,4 @@ The CI in this repository and in the templates has drifted from Turborepo's offi
 
 ## Constraints
 
-- Related intents: `intent/restore-playbook-plays/intent.md` covers every playbook play, including the ones that run in CI, and `intent/monorepo-apps/intent.md` covers the app layout at `apps/<group>/<app>`, what an app's own files tell CI, the remote cache, and building and promoting images.
+- Related intents: `intent/restore-playbook-plays/intent.md` covers every playbook play, including the ones that run in CI, and `intent/monorepo-apps/intent.md` covers the app layout at `apps/<group>/<app>`, what an app's own files tell CI, the remote cache, and deploying and promoting images by digest; this intent owns how CI builds them.

@@ -36,7 +36,7 @@ The agent setup in this repository and in the templates is heavier than the AI-n
 
 ## Proposed outcome
 
-- The shell gate is small, in the root and in every template: it blocks only the bypasses that matter, such as skipping Git hooks and editing protected paths, and its test covers only those cases.
+- The shell gate is small, in the root and in every template: it blocks only skipping Git hooks, and its test covers only those cases.
 - The rules that load in every session are short, in the root and in every template: overlapping rules are merged, and only rules about this repository's own conventions remain.
 - A correction to rules, hooks, or agent settings goes into the pull request where it is found, and code owners approve it there; the separate-issue rule is removed.
 - No file names a path, tool, or step that the project does not have: the review instructions name this project's generated paths, the rules name only the tools the project runs, and the contributing guide drops the finished first-publish steps.
@@ -57,15 +57,13 @@ The agent setup in this repository and in the templates is heavier than the AI-n
 - The review instructions live only in `REVIEW.md`, in the root and in `templates/base/`: `.agents/review.md` and the line that copies it are removed, and `.cursor/BUGBOT.md` and `SETUP.md` point to `REVIEW.md`.
 - The list of files agents may not edit is declared once, and every gate reads it, in the root and in every template.
 - `CLAUDE.md` is the only file that imports `AGENTS.md`: `.claude/rules/agents-guide.md` and the script entry that renders it are removed, in the root and in every template.
-- The suppression gate lists only the directives of tools the project runs that no configured lint rule already rejects, in the root and in every template.
-- The gates follow one audited list, in the root and in every template:
-  - Blocked: skipping Git hooks (`--no-verify`, `git commit -n`, `HUSKY=0`, `core.hooksPath`, `git commit-tree`, `git update-ref`), because an agent must not weaken the check on its own work (page 32, step 7).
-  - Blocked: writing to the project's check configuration, hooks, agent settings, and rules, by any tool or command, `curl -o` and skill installers included (pages 27 and 32).
-  - Blocked: adding a suppression comment that no lint rule already rejects (page 32, step 7).
-  - Denied: reading `.env` files through Claude Code's file tools, with `Read(.env*)` in the templates' settings (pages 42–43).
-  - Never blocked: paths outside the project's own checkout, such as a developer's `~/.cursor/` and `~/.claude/` or another repository, and restoring a protected file to its committed state.
+- The suppression check runs at commit and in CI (`pnpm suppressions:check`), not as an edit hook, and lists only the directives of tools the project runs that no configured lint rule already rejects, in the root and in every template.
+- Local enforcement stays small, as Anthropic's and Next.js's repositories keep it (`anthropics/claude-code-action` runs one hook, Prettier after an edit; `anthropics/claude-code` and `vercel/next.js` run none), because each extra block becomes a bug and a bottleneck, as the `/setup-pstack` case shows. Playbook page 27: hooks "should be fast and scoped", and "Heavier checks … belong at the commit or the PR". In the root and in every template:
+  - Kept: Claude Code's built-in `permissions.deny` for the check configuration, hooks, agent settings, and rules, which Claude Code also applies to redirect and `tee` targets; Cursor's file-path gate as its counterpart; the block on skipping Git hooks; the production gate (pages 40–41); formatting after an edit; and `Read(.env*)` (pages 42–43).
+  - Not chased locally: other shell routes into protected files, such as `curl -o`, `python -c`, or a skill installer. CI (`pnpm rules:check`, `pnpm suppressions:check`) and code owner review of the diff catch them, which is the boundary `AGENTS.md` already names.
+  - Never blocked: anything outside the project's own checkout, such as a developer's `~/.cursor/` and `~/.claude/` or another repository, and restoring a protected file to its committed state.
   - Left to the server: force-pushing or pushing to `main`, which the `pre-push` hook and branch protection already stop.
-  - When a gate blocks a command, its message names the path and the reason, so a person sees that the step did not happen (page 40, step 4: "A block should explain itself").
+  - When a gate blocks a command, its message names the path and the reason (page 40, step 4: "A block should explain itself").
 
 ## Affected users and systems
 

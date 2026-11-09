@@ -1,6 +1,6 @@
 # Intent: Adopt the AI-native SDLC Playbook in the templates and the root
 
-Author: Joe Takara (Developer Productivity). Status: draft.
+Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 

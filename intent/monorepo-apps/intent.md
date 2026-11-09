@@ -1,6 +1,6 @@
 # Intent: One monorepo per project, with apps the team names and adds
 
-Author: Joe Takara (Developer Productivity). Status: draft.
+Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 

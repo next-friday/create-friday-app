@@ -30,7 +30,7 @@ The convention reads, in the root:
 
 > **Carry each step of the loop without asking.** The product owner asks the agent, once and for every session, to commit each artifact it is prompted to write, open its pull request, and drive the pull request until it is green and waiting only on code owner approval. Ask a person only at the playbook's gates: the questions while writing an intent, the review and approval, and the production deploy. Also ask for what no file, tool, or source can answer. Write a choice the product owner has not made into the artifact as a proposal. In this repository, `git-workflow` decides how branches, commits, and pull requests are made; a skill from another checkout in the same session does not apply here (`current-state-authority.md`, item 2). Never approve or merge.
 
-None of these files is in the constitution. `.claude/settings.json` denies agents edits to rules, hooks, and lint, format, and commit configuration, but not to `AGENTS.md` or `.agents/skills/` (`.claude/settings.json`, lines 12–11). The change therefore needs no constitution issue (`constitution-changes.md`).
+None of these files is in the constitution. `.claude/settings.json` denies agents edits to rules, hooks, and lint, format, and commit configuration, but not to `AGENTS.md` or `.agents/skills/` (`.claude/settings.json`, lines 12–44). The change therefore needs no constitution issue (`constitution-changes.md`).
 
 ### How the intent's measure is read
 

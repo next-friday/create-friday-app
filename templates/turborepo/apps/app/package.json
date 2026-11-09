@@ -25,11 +25,11 @@
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.3",
-    "@types/node": "26.6.5",
+    "@types/node": "26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitest/coverage-v8": "5.0.5",
-    "dependency-cruiser": "18.7.0",
+    "dependency-cruiser": "18.7.1",
     "fast-check": "4.10.2",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",

@@ -10,7 +10,7 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Proposed outcome
 
-- Every client project is one monorepo, so access and handover stay per client. A small project is a monorepo with one app and the docs site; no project is a single-app repository. Each app lives exactly two levels deep, at `apps/<group>/<app>`, except the docs site, which is always `apps/docs`.
+- Every client project is one monorepo, so access and handover stay per client. A small project is a monorepo with one app and the docs site; no project is a single-app repository. Each app lives at `apps/<group>/<app>`, except the docs site, which is always `apps/docs`.
 - The team names the group and the app freely. The CLI checks only that each name is kebab-case, that `<group>-<app>` is a valid package name, and that the path is not taken.
 - Apps are grouped by who uses them. The documentation recommends these group names, as guidance, not rules. The names are this company's own standard, chosen so every client project looks the same; they are not an industry standard. Turborepo allows grouping folders without prescribing names, and Nx, the closest published convention, groups libraries by business domain and keeps its example apps in one flat folder ([Nx folder structure](https://nx.dev/docs/kb/folder-structure)):
 
@@ -22,7 +22,7 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 | `marketing` | The public, before they become customers    | corporate, landing, event          |
 | `platform`  | Other systems; these apps have no interface | api, worker, notification          |
 
-- Shared code is grouped by business domain, at `packages/<domain>/<package>`, also exactly two levels deep, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Nx's guidance to group libraries by the application or business domain they serve, which uses the same `booking` and `shared` examples ([Nx folder structure](https://nx.dev/docs/kb/folder-structure)).
+- Shared code is grouped by business domain, at `packages/<domain>/<package>`, for example `packages/booking/api-client` and `packages/shared/ui`. Apps stay thin and use these packages. This follows Nx's guidance to group libraries by the application or business domain they serve, which uses the same `booking` and `shared` examples ([Nx folder structure](https://nx.dev/docs/kb/folder-structure)).
 - `.github/CODEOWNERS` assigns an owner to each group and domain folder.
 - Each app is created from a template that says how it is built. The folder name says what the app is for; the template name does not appear in it.
 - Templates follow one generic contract, so the CLI needs no change to support a new framework:

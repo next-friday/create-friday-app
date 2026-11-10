@@ -4,7 +4,7 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 
 ## How a change flows
 
-1. **Plan:** an idea, a ticket, or an incident becomes `intent/<change>/intent.md` (`write-intent` skill). The product owner merges or closes it.
+1. **Plan:** an idea, a ticket, or an incident becomes `intent/<change>/intent.md` (`write-intent` skill). The product owner merges it with `Status: accepted.` or `Status: rejected.`
 2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (`write-spec` skill). The product owner resolves concerns with the policy owners.
 3. **Build:** the engineer starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
@@ -54,6 +54,7 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 **Who:** a repository admin.
 
 - **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**. Every workflow requests the extra permissions it needs.
+- **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
 - **Advanced Security:** enable private vulnerability reporting, Dependabot alerts, Dependabot security updates, secret scanning, and push protection. `SECURITY.md` sends reporters to private vulnerability reporting.
 - **Rules → Rulesets:** protect `main` with:
   - squash merges only, a linear history, and no force pushes or deletion;

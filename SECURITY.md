@@ -10,7 +10,7 @@ After the first published release, only the latest published release receives se
 
 Do not report security vulnerabilities in public GitHub issues.
 
-1. Use [GitHub Private Vulnerability Reporting](https://github.com/next-friday/create-friday-app/security/advisories/new).
+1. Use [GitHub Private Vulnerability Reporting](https://github.com/next-friday/create-next-friday-app/security/advisories/new).
 2. Or email `security@next-friday.com`.
 3. Include reproduction steps, the affected package version or commit, the command you ran, and environment details. Remove secrets and private data.
 

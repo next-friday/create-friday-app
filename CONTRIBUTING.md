@@ -24,8 +24,8 @@ From the repository root:
 
 ```sh
 corepack enable
-git clone https://github.com/next-friday/create-friday-app.git
-cd create-friday-app
+git clone https://github.com/next-friday/create-next-friday-app.git
+cd create-next-friday-app
 pnpm install
 ```
 
@@ -88,10 +88,17 @@ Use [`.changeset/README.md`](.changeset/README.md) to decide whether the change 
 npm attaches a trusted publisher only to an existing package, so the first release publishes with an npm automation token:
 
 1. Store the token as the `NPM_BOOTSTRAP_TOKEN` secret of the `Release` environment.
-2. After the first publish, add `next-friday/create-friday-app` with workflow `release.yml` and environment `Release` as the package's trusted publisher on npmjs.com.
+2. After the first publish, add `next-friday/create-next-friday-app` with workflow `release.yml` and environment `Release` as the package's trusted publisher on npmjs.com.
 3. Delete the secret and the `NODE_AUTH_TOKEN` line from `release.yml`.
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.
+
+## Repository settings
+
+A repository admin sets these once in the GitHub repository settings. Git does not record them.
+
+- **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
+- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs.
 
 ## Pull requests
 

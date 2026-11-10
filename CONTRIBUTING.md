@@ -93,6 +93,13 @@ npm attaches a trusted publisher only to an existing package, so the first relea
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.
 
+## Repository settings
+
+A repository admin sets these once in the GitHub repository settings. Git does not record them.
+
+- **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
+- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs. Also select **Allow GitHub Actions to create and approve pull requests**, so [`.github/workflows/branch-pull-request.yml`](.github/workflows/branch-pull-request.yml) can open a pull request for a branch that has none.
+
 ## Pull requests
 
 - Use `<type>(<scope>): <subject>` for pull request titles. The scope is required and lowercase, and the subject is at most 50 characters. [`.github/workflows/validate-pr-title.yml`](.github/workflows/validate-pr-title.yml) lists the allowed types and enforces this.

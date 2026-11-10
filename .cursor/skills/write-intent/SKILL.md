@@ -9,7 +9,7 @@ description: Write intent.md, the proto-spec that starts a change. Use whenever 
 2. Brainstorm until the idea is concrete. Ask the questions an analyst would ask: scope, users, constraints, and what success looks like.
 3. Write the result as `intent/<change>/intent.md`, where `<change>` is a short kebab-case name, using the template below.
 4. Ask the originator to correct anything you misunderstood.
-5. Commit `intent.md` and open a pull request. The product owner accepts it by merging the pull request, or rejects it by closing it.
+5. Commit `intent.md` and open a pull request. The product owner accepts it by merging the pull request, or rejects it by setting `Status: rejected.` and merging.
 
 ## Template
 

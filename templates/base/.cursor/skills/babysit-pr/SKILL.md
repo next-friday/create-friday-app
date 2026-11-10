@@ -1,6 +1,6 @@
 ---
 name: babysit-pr
-description: Drive a pull request you opened until it waits only on code owner approval. Use when asked to babysit, watch, or finish a pull request.
+description: Drive a pull request you opened until it waits only on code owner approval. Use right after you open a pull request, or when a person asks you to babysit one.
 ---
 
 # Babysit a pull request

@@ -11,5 +11,5 @@ The repository uses trunk-based development.
 - Write commit messages in the format that `@next-friday/commitlint-config-friday` defines. The `commit-msg` hook rejects anything else.
 - When work ends in a pull request, push its branch and open the pull request ready for review without asking. CI skips drafts. Work that does not end in one, such as an investigation or a prototype, opens none.
 - Fill the pull request body from `.github/pull_request_template.md`.
-- After you open a pull request, report its URL and continue. Drive it to merge-ready only when the user asks, and watch the checks with `gh pr checks --watch`. Merge only when the user asks to merge, land, or ship. Merge with `--squash`, bottom-up for a stack.
+- After you open a pull request, report its URL and drive it until it is green and waits only on code owner approval, as `babysit-pr` describes. Never approve or merge it: a code owner approves, and a person merges with `--squash`, bottom-up for a stack.
 - Rebase and `git push --force-with-lease` only branches you own.

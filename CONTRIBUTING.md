@@ -83,8 +83,13 @@ Use [`.changeset/README.md`](.changeset/README.md) to decide whether the change 
 
 1. A pull request that adds a changeset merges into `main`.
 2. [`.github/workflows/release.yml`](.github/workflows/release.yml) opens or updates the `chore(release): version package` pull request, which bumps the version and writes `CHANGELOG.md`.
-3. Merging that pull request runs `pnpm verify`, stages the package on npm with provenance from the `Release` environment, and creates a GitHub release, before the version is on npm.
+3. Merging that pull request runs `pnpm verify`, stages the package on npm with provenance from the `Release` environment, and then creates the `v<version>` tag and GitHub release, before the version is on npm. Any later run on `main` skips a version whose tag exists: npm refuses to stage a version twice, and CI cannot list staged versions because npm lets a trusted-publishing token run only `npm stage publish` and `npm publish`.
 4. A package maintainer approves the staged version, with 2FA, under **Staged Packages** on the package's npmjs.com page. The new version reaches the registry only then. This is the production gate: CI can stage a release but cannot publish it.
+
+Two cases need a maintainer, because CI cannot see what npm has staged:
+
+- **Staged, but the run failed before it created the tag.** Every later run fails at `npm stage publish`. Create the tag and release from the commit the run built: `gh release create v<version> --target <commit> --title v<version> --notes-file <file>`, where the file holds that version's `CHANGELOG.md` section without its heading.
+- **A maintainer rejected the staged version.** Delete its release and tag with `gh release delete v<version> --cleanup-tag --yes`, then ship the fix as a new version through a changeset.
 
 The package's trusted publisher on npmjs.com is `next-friday/next-friday-create-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
 
@@ -96,7 +101,7 @@ A repository admin sets these once in the GitHub repository settings. Git does n
 
 - **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
 - **General → Pull Requests → Allow squash merging:** set the default commit message to the pull request title alone ([configure commit squashing](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests)). Each commit on `main` is then the pull request title and number, with only co-author trailers in the body; the pull request description holds the why.
-- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs.
+- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs. Also select **Allow GitHub Actions to create and approve pull requests**, so [`.github/workflows/release.yml`](.github/workflows/release.yml) can open the `chore(release): version package` pull request.
 
 ## Pull requests
 

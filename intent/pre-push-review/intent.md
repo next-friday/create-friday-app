@@ -16,6 +16,7 @@ The playbook puts an independent check before the work reaches a person. A verif
 ## Proposed outcome
 
 - Before every push, an independent reviewer subagent with a fresh context reviews the diff. It reads only the diff, `REVIEW.md`, `spec.md`, and `plan.md`. It runs the passes `REVIEW.md` names: bugs, security, and compliance with the spec and plan. The reviewer only reports; it does not edit.
+- A hook, not the agent's memory, enforces the review. Before an agent session runs `git push`, the hook blocks the push unless the review ran on the commit being pushed. The playbook: "A skill is a control, though an advisory one ... nothing forces a session to comply with it. A policy that must always hold needs something deterministic behind the skill, such as a hook that blocks the action" (page 26). Both agents already run hooks before a shell command: Claude Code through `PreToolUse` in `.claude/settings.json`, Cursor through `beforeShellExecution` in `.cursor/hooks.json`.
 - The agent fixes every Important finding before it pushes, and writes the reviewer's findings into the pull request, so a code owner sees what was checked. The playbook keeps the record on the pull request: "The PR thread records both the request and the change" (page 38).
 - Bugbot and CodeRabbit are removed. Rules in `.cursor/BUGBOT.md` that the review still needs move into `.agents/review.md`, so the review rules have one source.
 - Claude Code Review stays on each pull request (pages 37–38), so a change a person writes without an agent is still reviewed.
@@ -30,7 +31,7 @@ The playbook puts an independent check before the work reaches a person. A verif
 
 ## Constraints
 
-- The product owner decided on 2026-11-10: the reviewer replaces Bugbot and CodeRabbit, Claude Code Review stays, and the change applies in this repository and in every generated project.
+- The product owner decided on 2026-11-10: the reviewer replaces Bugbot and CodeRabbit, Claude Code Review stays, a hook enforces the review because agents forget steps, and the change applies in this repository and in every generated project.
 - A person approves and merges (page 39). The reviewer never approves.
 - A file in the constitution changes through `constitution-changes.md`.
 
@@ -38,4 +39,4 @@ The playbook puts an independent check before the work reaches a person. A verif
 
 - How does a pull request show that the review ran, so a skipped review is visible to the code owner and to CI?
 - Cursor sessions also write code in these projects. How does the same review run there?
-- A Git hook cannot call a model on every machine, because it needs network access and a key. So where is "before every push" enforced: in the agent's workflow, in a hook, or in both?
+- How does the hook know the review ran on the commit being pushed, in a way the agent cannot fake by writing the record itself?

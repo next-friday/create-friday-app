@@ -29,7 +29,8 @@
       },
       {
         "command": ".agents/hooks/agent-production-gate.sh",
-        "timeout": 10
+        "timeout": 10,
+        "failClosed": true
       }
     ],
     "beforeMCPExecution": [

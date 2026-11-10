@@ -98,6 +98,7 @@ To try a pull request before release, add the `preview` label. [`.github/workflo
 A repository admin sets these once in the GitHub repository settings. Git does not record them.
 
 - **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
+- **General → Pull Requests → Allow squash merging:** set the default commit message to the pull request title alone ([configure commit squashing](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests)). Each commit on `main` is then the pull request title and number, with only co-author trailers in the body; the pull request description holds the why.
 - **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs.
 
 ## Pull requests

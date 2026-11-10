@@ -6,8 +6,8 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 Review bots that run after a push hold up the loop:
 
-- **CodeRabbit:** its free plan for open source ran out on 2026-11-09. On pull requests #68 and #69 it posted only "Review limit reached", with the next review 43 and 41 minutes away, and on #66 "Review rate limited". None of the three got a review. It is installed in this repository only.
-- **Bugbot:** it reviews each pull request in every generated project (`templates/base/SETUP.md`, step 5 and line 11), by the rules in `.cursor/BUGBOT.md`. A second bot on each pull request adds another wait after the push.
+- **CodeRabbit:** its free plan for open source ran out on 2026-11-09. On pull requests #68 and #69 it posted only "Review limit reached", with the next review 43 and 41 minutes away, and on #66 "Review rate limited". None of the three got a review. Nothing under `templates/` sets it up.
+- **Bugbot:** it reviews each pull request by the rules in `.cursor/BUGBOT.md`, in this repository and in every generated project (`templates/base/SETUP.md`, line 11 and step 5). A second bot on each pull request adds another wait after the push.
 
 The agent's own check before a person sees the work is weak. `.claude/agents/verifier.md` runs the app and reports, but it does not apply the review passes in `REVIEW.md`, and on 2026-11-10 no build called it.
 

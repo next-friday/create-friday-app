@@ -89,6 +89,36 @@ describe("didInstallDependencies", () => {
     expect(existsSync(path.join(project, "node_modules", localTool, manifest))).toBe(true);
   });
 
+  it("runs install scripts in the project's own repository", () => {
+    const project = path.join(root, "own-repository");
+    const other = path.join(root, "other-repository");
+
+    mkdirSync(project);
+    mkdirSync(other);
+    expect(initGit(project)).toBe("initialized");
+    expect(initGit(other)).toBe("initialized");
+
+    writeFileSync(
+      path.join(project, manifest),
+      JSON.stringify({
+        name: "own-repository",
+        version: "1.0.0",
+        scripts: {
+          prepare: "git config core.hooksPath .husky/_",
+        },
+      }),
+    );
+
+    vi.stubEnv("GIT_DIR", path.join(other, ".git"));
+    expect(didInstallDependencies(project)).toBe(true);
+
+    expect(readFileSync(path.join(project, ".git", "config"), "utf8")).toContain(
+      "hooksPath = .husky/_",
+    );
+
+    expect(readFileSync(path.join(other, ".git", "config"), "utf8")).not.toContain("hooksPath");
+  });
+
   it("reports a failed install", () => {
     const project = path.join(root, "broken");
 

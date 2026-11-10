@@ -40,6 +40,15 @@ describe("initGit", () => {
     expect(initGit(nested)).toBe("parent");
   });
 
+  it("ignores a repository that the inherited GIT_DIR names", () => {
+    const outside = path.join(root, "outside");
+
+    mkdirSync(outside);
+    vi.stubEnv("GIT_DIR", path.join(project, ".git"));
+    expect(initGit(outside)).toBe("initialized");
+    expect(existsSync(path.join(outside, ".git", "HEAD"))).toBe(true);
+  });
+
   it("reports a failure when Git is missing", () => {
     const bare = path.join(root, "bare");
 

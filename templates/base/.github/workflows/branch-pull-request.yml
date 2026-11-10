@@ -1,0 +1,94 @@
+name: Branch Pull Request
+
+on:
+  push:
+    branches-ignore:
+      - main
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch: {}
+  pull_request:
+    types:
+      - closed
+
+permissions: {} # No token beyond the job grants below.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  open-pull-request:
+    name: Open a pull request for each branch without one
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # Needed to delete a branch that has no commits ahead of main.
+      pull-requests: write # Needed to open pull requests.
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      EVENT_NAME: ${{ github.event_name }}
+      PUSHED_BRANCH: ${{ github.ref_name }}
+      PUSHED_SHA: ${{ github.sha }}
+      SPEC_URL: ${{ github.server_url }}/${{ github.repository }}/blob/main/intent/branch-pull-request/spec.md
+    steps:
+      - name: Open a pull request or delete each branch
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = push ]; then
+            merged="$(gh pr list --head "$PUSHED_BRANCH" --state merged --json number --jq length)"
+            if [ "$merged" -eq 0 ]; then
+              echo "$PUSHED_BRANCH has no merged pull request; its author opens the first one."
+              exit 0
+            fi
+            branches="$(printf '%s\t%s\n' "$PUSHED_BRANCH" "$PUSHED_SHA")"
+          else
+            branches="$(gh api --paginate "repos/$GH_REPO/branches" --jq '.[] | [.name, .commit.sha] | @tsv')"
+          fi
+          cutoff="$(date -u -d '1 hour ago' +%s)"
+
+          while IFS=$'\t' read -r -u 3 branch sha; do
+            case "$branch" in
+              main | dependabot/* | renovate/*) continue ;;
+            esac
+            if [ "$(gh pr list --head "$branch" --state open --json number --jq length)" -gt 0 ]; then
+              continue
+            fi
+            IFS=$'\t' read -r committed subject < <(
+              gh api "repos/$GH_REPO/commits/$sha" --jq '[.commit.committer.date, (.commit.message | split("\n")[0])] | @tsv'
+            )
+            if [ "$EVENT_NAME" != push ] && [ "$(date -u -d "$committed" +%s)" -gt "$cutoff" ]; then
+              continue
+            fi
+            if [ "$(gh api "repos/$GH_REPO/compare/main...$sha" --jq .ahead_by)" -eq 0 ]; then
+              gh api --method DELETE "repos/$GH_REPO/git/refs/heads/$branch"
+              echo "Deleted $branch: it has no commits ahead of main."
+              continue
+            fi
+            gh pr create --base main --head "$branch" --title "$subject" --body "The system opened this pull request because \`$branch\` had no open pull request. Every branch ends in a merged pull request ($SPEC_URL)."
+          done 3<<<"$branches"
+
+  reopen-closed-unmerged:
+    name: Reopen a pull request closed without merging
+    if: >-
+      github.event_name == 'pull_request' &&
+      !github.event.pull_request.merged &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !startsWith(github.event.pull_request.head.ref, 'dependabot/') &&
+      !startsWith(github.event.pull_request.head.ref, 'renovate/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write # Needed to reopen and comment on the pull request.
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      NUMBER: ${{ github.event.pull_request.number }}
+      SPEC_URL: ${{ github.server_url }}/${{ github.repository }}/blob/main/intent/branch-pull-request/spec.md
+    steps:
+      - name: Reopen the pull request
+        run: |
+          gh pr reopen "$NUMBER" --comment "A pull request ends only by merging. To reject a change, set \`Status: rejected.\` and merge ($SPEC_URL)."

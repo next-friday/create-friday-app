@@ -34,8 +34,11 @@ export function initGit(directory: string): GitResult {
     return "existing";
   }
 
+  const environment = projectGitEnvironment();
+
   const inside = spawnSync("git", ["rev-parse", "--is-inside-work-tree"], {
     cwd: directory,
+    env: environment,
     stdio: "ignore",
   });
 
@@ -45,6 +48,7 @@ export function initGit(directory: string): GitResult {
 
   const init = spawnSync("git", ["init", "--initial-branch=main"], {
     cwd: directory,
+    env: environment,
     stdio: "ignore",
   });
 
@@ -61,7 +65,29 @@ export function didInstallDependencies(directory: string): boolean {
     cwd: directory,
     stdio: "inherit",
     shell: true,
+    env: projectGitEnvironment(),
   });
 
   return result.status === 0;
+}
+
+/**
+ * The environment without the repository variables that `git rev-parse --local-env-vars` lists.
+ * An inherited `GIT_DIR`, as Git sets for its hooks, would point Git, and the install's Git hook
+ * setup, at another repository. `git -c` options stay, as Git keeps them for another repository.
+ * @returns Environment for commands that run Git in the project directory.
+ */
+function projectGitEnvironment(): NodeJS.ProcessEnv {
+  const localVariables = new Set(
+    spawnSync("git", ["rev-parse", "--local-env-vars"], {
+      encoding: "utf8",
+    }).stdout?.split("\n"),
+  );
+
+  localVariables.delete("GIT_CONFIG_PARAMETERS");
+  localVariables.delete("GIT_CONFIG_COUNT");
+
+  return Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => !localVariables.has(name)),
+  );
 }

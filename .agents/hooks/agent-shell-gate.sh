@@ -12,6 +12,13 @@ block() {
   exit 2
 }
 
+irreversible=""
+
+# Record the first irreversible command, so the gate asks the person once a block has been ruled out.
+pause() {
+  [[ -n $irreversible ]] || irreversible=$1
+}
+
 trap 'block ".agents/hooks/agent-shell-gate.sh failed. Stop and report this error to the user; agents may not edit the gate."' ERR
 command -v jq > /dev/null || block "jq is required to read the hook input. Install it: https://jqlang.org/download/"
 input=$(cat)
@@ -23,6 +30,7 @@ redirect=$'\x1e'
 protected_names='(\.husky|\.agents|\.cursor|\.claude/rules|\.claude/settings(\.local)?\.json|\.git/hooks|\.git/config(\.worktree)?|\.lintstagedrc\.json|\.gitleaks\.toml|\.commitlintrc\.json|\.prettierrc\.json|prettier\.config\.ts|eslint\.config\.ts|scripts/(sync-agent-rules|check-agent-gates)\.ts)'
 protected="(^|[/=])$protected_names(/|$)"
 policy="Hooks and agent policy files are company policy; stop and ask the user."
+human_gate="A code owner approves a pull request and a person merges it. Do not approve or merge; report that the pull request waits on that review."
 in_protected=0
 
 # Split a command line into words as the shell does: quotes and backslashes are removed, and
@@ -239,13 +247,140 @@ check_git() {
       ;;
     commit-tree | update-ref) block "git commit-tree and git update-ref are blocked, because they create commits without hooks. Use git commit." ;;
     checkout | restore | rm | mv | apply)
+      local staged=0 worktree=0
       for word in ${rest[@]+"${rest[@]}"}; do
         if [[ $word =~ $protected ]]; then
           writes_protected "$word"
         fi
+        [[ $word == --staged || $word =~ ^-[a-zA-Z]*S ]] && staged=1
+        [[ $word == --worktree || $word =~ ^-[a-zA-Z]*W ]] && worktree=1
+      done
+      if [[ $subcommand =~ ^(checkout|restore)$ ]] && ! ((staged == 1 && worktree == 0)); then
+        for word in ${rest[@]+"${rest[@]}"}; do
+          case $word in
+            . | ./ | :/) pause "git $subcommand $word discards uncommitted changes." ;;
+            --force) [[ $subcommand == checkout ]] && pause "git checkout --force discards uncommitted changes." ;;
+            --*) ;;
+            -*f*) [[ $subcommand == checkout ]] && pause "git checkout $word discards uncommitted changes." ;;
+          esac
+        done
+      fi
+      ;;
+    switch)
+      for word in ${rest[@]+"${rest[@]}"}; do
+        case $word in
+          --discard-changes | --force | -f) pause "git switch $word discards uncommitted changes." ;;
+        esac
       done
       ;;
+    push)
+      local dry_run=0
+      for word in ${rest[@]+"${rest[@]}"}; do
+        [[ $word == --dry-run || $word =~ ^-[a-zA-Z]*n[a-zA-Z]*$ ]] && dry_run=1
+      done
+      if ((dry_run == 0)); then
+        for word in ${rest[@]+"${rest[@]}"}; do
+          case $word in
+            --force | --force=* | --mirror | --delete | --prune) pause "git push $word overwrites or deletes work on the remote." ;;
+            --*) ;;
+            -*[fd]*) pause "git push $word overwrites or deletes work on the remote." ;;
+            +* | :*) pause "git push $word overwrites or deletes work on the remote." ;;
+          esac
+        done
+      fi
+      ;;
+    reset)
+      for word in ${rest[@]+"${rest[@]}"}; do
+        [[ $word == --hard || $word == --merge ]] && pause "git reset $word discards uncommitted changes."
+      done
+      ;;
+    clean)
+      local dry_run=0
+      for word in ${rest[@]+"${rest[@]}"}; do
+        [[ $word == --dry-run || $word =~ ^-[a-zA-Z]*n ]] && dry_run=1
+      done
+      ((dry_run == 1)) || pause "git clean deletes untracked files."
+      ;;
+    branch)
+      local delete=0 force=0
+      for word in ${rest[@]+"${rest[@]}"}; do
+        case $word in
+          --delete) delete=1 ;;
+          --force) force=1 ;;
+          --*) ;;
+          -*D*) delete=1 force=1 ;;
+          -*)
+            [[ $word == *d* ]] && delete=1
+            [[ $word == *f* ]] && force=1
+            ;;
+        esac
+      done
+      ((delete == 1 && force == 1)) && pause "Force-deleting a branch loses commits that no other branch holds."
+      ;;
+    stash)
+      [[ ${rest[0]:-} =~ ^(drop|clear)$ ]] && pause "git stash ${rest[0]} deletes stashed work."
+      ;;
+    worktree)
+      if [[ ${rest[0]:-} == remove ]]; then
+        for word in "${rest[@]:1}"; do
+          [[ $word == --force || $word == -f ]] && pause "git worktree remove $word deletes uncommitted work in that worktree."
+        done
+      fi
+      ;;
   esac
+  return 0
+}
+
+# Merging and approving are human gates. Read gh's words with their flags and flag values set aside.
+check_gh() {
+  local -a args=(${@+"$@"}) positional=()
+  local count=${#args[@]} index=0 word
+  while ((index < count)); do
+    word=${args[index]}
+    case $word in
+      -R | --repo | --hostname | -b | --body | -F | --body-file | -t | --title | -B | --base | -H | --head | -X | --method | -f | --field | --raw-field | -H | --header | -q | --jq | --template | --input)
+        index=$((index + 2))
+        continue
+        ;;
+      -*) ;;
+      *) positional+=("$word") ;;
+    esac
+    index=$((index + 1))
+  done
+  local first=${positional[0]:-} second=${positional[1]:-}
+  if [[ $first =~ ^(repo|issue|release)$ && $second == delete ]]; then
+    block "gh $first delete is blocked. Stop and ask the user."
+  fi
+  [[ $first == alias && $second =~ ^(set|import)$ ]] && block "gh aliases are blocked, because an alias can hide a merge or an approval. Run the gh command directly."
+  [[ $first == pr && $second == merge ]] && block "$human_gate"
+  if [[ $first == pr && $second == review ]]; then
+    index=0
+    while ((index < count)); do
+      word=${args[index]}
+      case $word in
+        -b | --body | -F | --body-file | -R | --repo) index=$((index + 1)) ;;
+        --approve | --approve=*) block "$human_gate" ;;
+        --*) ;;
+        -*a*) block "$human_gate" ;;
+      esac
+      index=$((index + 1))
+    done
+  fi
+  if [[ $first == api ]]; then
+    local joined=" ${args[*]} "
+    if [[ $joined =~ pulls/[^/[:space:]]+/merge/?[[:space:]?] || $joined =~ repos/[^/[:space:]]+/[^/[:space:]]+/merges[/[:space:]?] || $joined == *mergePullRequest* || $joined == *enablePullRequestAutoMerge* || $joined == *enqueuePullRequest* || $joined =~ =[\"\']?APPROVE([^A-Za-z_]|$) || $joined =~ event[\"\']?:[[:space:]]*[\"\']?APPROVE ]]; then
+      block "$human_gate"
+    fi
+    if [[ $joined == *pending_deployments* && $joined =~ state=[\"\']?approved ]]; then
+      block "A release manager approves a deployment. Do not approve it; report that the deployment waits on that approval."
+    fi
+    if [[ $joined =~ (query|event|state)=@ ]]; then
+      block "gh api reading a query, a review event, or a deployment state from a file is blocked, because the gate cannot read it. Pass the value inline."
+    fi
+    if [[ $joined =~ [[:space:]]--input([[:space:]]|=) && ($joined =~ [[:space:]]graphql[[:space:]] || $joined =~ pulls/[^/[:space:]]+/(reviews|merge) || $joined == *pending_deployments*) ]]; then
+      block "gh api reading this request body from a file or stdin is blocked, because the gate cannot read it. Pass the fields inline."
+    fi
+  fi
   return 0
 }
 
@@ -288,17 +423,28 @@ check_command() {
   done
   ((${#args[@]} > 0)) || return 0
   name=${args[0]##*/}
+  # A wrapper such as timeout, xargs, or find -exec runs the command named after it.
+  case $name in
+    git | gh | bash | sh | zsh | dash | ksh | eval) ;;
+    *)
+      for ((index = 1; index < ${#args[@]}; index++)); do
+        case ${args[index]##*/} in
+          git | gh | bash | sh | zsh | dash | ksh | eval)
+            check_command "${args[@]:index}"
+            break
+            ;;
+        esac
+      done
+      ;;
+  esac
 
   case $name in
     git) check_git "${args[@]:1}" ;;
-    gh)
-      if [[ ${args[1]:-} =~ ^(repo|issue|release)$ && ${args[2]:-} == delete ]]; then
-        block "gh ${args[1]} delete is blocked. Stop and ask the user."
-      fi
-      ;;
+    gh) check_gh "${args[@]:1}" ;;
     bash | sh | zsh | dash | ksh)
       for ((index = 1; index < ${#args[@]}; index++)); do
         if [[ ${args[index]} =~ ^-[a-zA-Z]*c[a-zA-Z]*$ ]]; then
+          [[ ${args[index + 1]:-} == -- ]] && index=$((index + 1))
           gate_line "${args[index + 1]:-}"
           break
         fi
@@ -363,4 +509,13 @@ gate_line() {
 }
 
 gate_line "$command"
+if [[ -n $irreversible ]]; then
+  message="$irreversible It cannot be undone, so ask the person before running it."
+  if [[ $(jq -r '.hook_event_name // empty' <<< "$input") == PreToolUse ]]; then
+    jq -n --arg message "$message" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"ask",permissionDecisionReason:$message}}'
+  else
+    jq -n --arg message "$message" '{permission:"ask",user_message:$message,agent_message:$message}'
+  fi
+  exit 0
+fi
 allow

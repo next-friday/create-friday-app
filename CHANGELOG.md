@@ -1,5 +1,23 @@
 # @next-friday/create-app
 
+## 6.0.1
+
+### Patch Changes
+
+- ecfaf2d: The CLI no longer follows a Git repository named by an inherited `GIT_DIR`, as Git sets when the CLI runs from a Git hook. It used to treat the new project as inside that repository and skip `git init`, and `pnpm install` set the Git hooks path in that repository's config. Both now act on the new project's own repository.
+
+## 6.0.0
+
+### Major Changes
+
+- 6f20a84: The CLI's command `create-friday-app` is now `next-friday-create-app`, matching the repository name. `pnpm create @next-friday/app`, `npm init @next-friday/app`, and `npx @next-friday/create-app` work as before. If you installed the package globally or call the command by name in a script, run `next-friday-create-app` instead.
+
+## 5.0.3
+
+### Patch Changes
+
+- 6fb83e6: Generated projects start agent work only when a person asks: the `write-intent` skill runs only through `/write-intent` and interviews the originator in rounds before it writes and commits the intent, `babysit-pr` drives a pull request to code owner review without merging it, and each stack's `AGENTS.md` lists when the agent stops.
+
 ## 5.0.2
 
 ### Patch Changes

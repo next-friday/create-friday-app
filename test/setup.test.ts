@@ -7,7 +7,7 @@ import {didInstallDependencies, initGit} from "../src/setup.ts";
 
 const manifest = "package.json";
 const localTool = "local-tool";
-const root = mkdtempSync(path.join(tmpdir(), "create-friday-app-"));
+const root = mkdtempSync(path.join(tmpdir(), "create-app-test-"));
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -38,6 +38,15 @@ describe("initGit", () => {
 
     mkdirSync(nested);
     expect(initGit(nested)).toBe("parent");
+  });
+
+  it("ignores a repository that the inherited GIT_DIR names", () => {
+    const outside = path.join(root, "outside");
+
+    mkdirSync(outside);
+    vi.stubEnv("GIT_DIR", path.join(project, ".git"));
+    expect(initGit(outside)).toBe("initialized");
+    expect(existsSync(path.join(outside, ".git", "HEAD"))).toBe(true);
   });
 
   it("reports a failure when Git is missing", () => {
@@ -78,6 +87,36 @@ describe("didInstallDependencies", () => {
 
     expect(didInstallDependencies(project)).toBe(true);
     expect(existsSync(path.join(project, "node_modules", localTool, manifest))).toBe(true);
+  });
+
+  it("runs install scripts in the project's own repository", () => {
+    const project = path.join(root, "own-repository");
+    const other = path.join(root, "other-repository");
+
+    mkdirSync(project);
+    mkdirSync(other);
+    expect(initGit(project)).toBe("initialized");
+    expect(initGit(other)).toBe("initialized");
+
+    writeFileSync(
+      path.join(project, manifest),
+      JSON.stringify({
+        name: "own-repository",
+        version: "1.0.0",
+        scripts: {
+          prepare: "git config core.hooksPath .husky/_",
+        },
+      }),
+    );
+
+    vi.stubEnv("GIT_DIR", path.join(other, ".git"));
+    expect(didInstallDependencies(project)).toBe(true);
+
+    expect(readFileSync(path.join(project, ".git", "config"), "utf8")).toContain(
+      "hooksPath = .husky/_",
+    );
+
+    expect(readFileSync(path.join(other, ".git", "config"), "utf8")).not.toContain("hooksPath");
   });
 
   it("reports a failed install", () => {

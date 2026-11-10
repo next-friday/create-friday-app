@@ -34,12 +34,13 @@ If a test fails, fix the code, not the test.
 3. **Read configuration from environment variables and fail when one is missing**, as `parsePort` does. Document each variable in `.env.example`; `pnpm start` and `pnpm start:dev` load `.env`.
 4. **Start from the accepted spec, in plan mode.** Claude Code starts every session in plan mode (`.claude/settings.json`); in Cursor, switch to Plan Mode before the first edit. Give the plan the change's `intent/<change>/intent.md` and `spec.md`, and have it name the files that change, the order of the work, and the tests that prove it. Commit the approved plan as `intent/<change>/plan.md`. When implementation departs from the plan, update `plan.md` in the same commit.
 5. **Start a bug fix with a failing test.** Reproduce the bug as a test, run it, and confirm it fails for the reason you expect. Commit that test. Then create `.git/bug-fix-in-progress`, so `.agents/hooks/agent-test-edit-gate.sh` blocks test edits, and make the test pass without editing it. Delete `.git/bug-fix-in-progress` when the fix is done.
+6. **Start work only when a person asks or a trigger runs it, and stop only at the human gates, before an irreversible action, or for a decision only a person can make.** A question or a statement gets an answer, not a file, a commit, or a pull request. Once a task starts, carry it to the next gate without asking; `.agents/rules/agent-owned-work.md` lists the gates.
 
 ## Things Claude gets wrong
 
 When Claude makes a mistake twice, add the correction here.
 
-- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that writes to a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`. It is a convenience, not a security boundary: CI and code-owner review are the boundary.
+- **Agent shell gate**: `.agents/hooks/agent-shell-gate.sh` blocks a shell command that writes to a protected path such as `.agents`, `.cursor`, `.claude/rules`, or `.husky`. It also blocks merging or approving a pull request, approving a deployment, and gh aliases, and asks the person before an irreversible git command such as a force push or a hard reset. It is a convenience, not a security boundary: CI and code-owner review are the boundary.
 
 ## Related documentation
 

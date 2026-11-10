@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 5.0.1
+
+### Patch Changes
+
+- fc7a388: The generated `.husky/pre-push` hook refuses a push that recreates a branch the remote deleted after its pull request merged or closed. The hook treats a branch as pushed before when `refs/remotes/<remote>/<branch>` exists or the branch upstream points at it, and the push of a new branch name still works.
+
 ## 5.0.0
 
 ### Major Changes

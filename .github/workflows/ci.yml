@@ -235,7 +235,7 @@ jobs:
           npm init --yes >/dev/null
           npm install --ignore-scripts --no-audit --no-fund ./*.tgz
 
-          if output="$(npx --no-install create-friday-app my-app --stack unknown 2>&1)"; then
+          if output="$(npx --no-install next-friday-create-app my-app --stack unknown 2>&1)"; then
             echo "Expected an unknown stack to fail." >&2
             exit 1
           fi
@@ -271,7 +271,7 @@ jobs:
         run: |
           tarball_dir="$(mktemp -d)"
           pnpm pack --pack-destination "$tarball_dir"
-          npm exec --yes --package "$(ls "$tarball_dir"/*.tgz)" -- create-friday-app "ci-$STACK" --stack "$STACK" </dev/null
+          npm exec --yes --package "$(ls "$tarball_dir"/*.tgz)" -- next-friday-create-app "ci-$STACK" --stack "$STACK" </dev/null
           if grep --recursive --files-with-matches --exclude-dir=node_modules --exclude-dir=.git "next-friday-template-$STACK" "ci-$STACK"; then
             echo "The template name was not replaced." >&2
             exit 1

@@ -18,7 +18,7 @@ afterEach(() => {
 
 describe("renameProject", () => {
   it("replaces the template name in nested text files and skips binary files", async () => {
-    const directory = mkdtempSync(path.join(tmpdir(), "create-friday-app-"));
+    const directory = mkdtempSync(path.join(tmpdir(), "create-app-test-"));
 
     directories.push(directory);
 

@@ -8,13 +8,13 @@
     "template",
     "next-friday"
   ],
-  "homepage": "https://github.com/next-friday/create-next-friday-app#readme",
+  "homepage": "https://github.com/next-friday/next-friday-create-app#readme",
   "bugs": {
-    "url": "https://github.com/next-friday/create-next-friday-app/issues"
+    "url": "https://github.com/next-friday/next-friday-create-app/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/next-friday/create-next-friday-app.git"
+    "url": "git+https://github.com/next-friday/next-friday-create-app.git"
   },
   "license": "MIT",
   "author": "Next Friday",
@@ -24,7 +24,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "create-friday-app": "./dist/main.mjs"
+    "next-friday-create-app": "./dist/main.mjs"
   },
   "files": [
     "dist",

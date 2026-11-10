@@ -1,6 +1,6 @@
 {
   "name": "@next-friday/create-app",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Create a Next Friday project from a template.",
   "keywords": [
     "create",

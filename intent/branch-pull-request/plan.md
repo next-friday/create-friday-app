@@ -59,3 +59,7 @@ For each candidate, the job reads `ahead_by` from `gh api repos/$GH_REPO/compare
 - **A person must start CI:** CI on a pull request that `GITHUB_TOKEN` opens or reopens waits for **Approve workflows to run**. The spec accepted this.
 - **The Actions setting is not in git:** **Allow GitHub Actions to create and approve pull requests** is a repository setting. Until an admin enables it, `gh pr create` in the workflow fails, and the failure shows in the Actions log.
 - **Every push starts a short job:** about two API calls on most branches. The schedule runs once a day.
+
+## Departure: the workflow is removed
+
+On 2026-11-10, after #75 merged, the product owner removed `.github/workflows/branch-pull-request.yml` and its `templates/base/` copy. The workflow ran on `GITHUB_TOKEN`, so each pull request it opened needed a person to select **Approve workflows to run** and **Update branch**. Those are steps outside the playbook's gates: "Human attention concentrates at the gates" (page 9). The playbook has the agent act "under the agent's own identity" (page 46), so spec requirements 3 and 4 wait for that identity. Requirements 1, 2, and 5 stand. The **Allow GitHub Actions to create and approve pull requests** setting had no other use, so `CONTRIBUTING.md` and `templates/base/SETUP.md` no longer ask for it, and an admin turns it off in the root.

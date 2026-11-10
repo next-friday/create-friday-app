@@ -55,6 +55,7 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 
 - **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**. Every workflow requests the extra permissions it needs.
 - **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
+- **General → Pull Requests → Allow squash merging:** set the default commit message to the pull request title alone ([configure commit squashing](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests)). Each commit on `main` is then the pull request title and number, with only co-author trailers in the body; the pull request description holds the why.
 - **Advanced Security:** enable private vulnerability reporting, Dependabot alerts, Dependabot security updates, secret scanning, and push protection. `SECURITY.md` sends reporters to private vulnerability reporting.
 - **Rules → Rulesets:** protect `main` with:
   - squash merges only, a linear history, and no force pushes or deletion;

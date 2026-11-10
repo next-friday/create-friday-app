@@ -98,7 +98,7 @@ To try a pull request before release, add the `preview` label. [`.github/workflo
 A repository admin sets these once in the GitHub repository settings. Git does not record them.
 
 - **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
-- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs. Also select **Allow GitHub Actions to create and approve pull requests**.
+- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs.
 
 ## Pull requests
 

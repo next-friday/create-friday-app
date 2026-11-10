@@ -24,8 +24,8 @@ From the repository root:
 
 ```sh
 corepack enable
-git clone https://github.com/next-friday/create-next-friday-app.git
-cd create-next-friday-app
+git clone https://github.com/next-friday/next-friday-create-app.git
+cd next-friday-create-app
 pnpm install
 ```
 
@@ -91,7 +91,7 @@ Two cases need a maintainer, because CI cannot see what npm has staged:
 - **Staged, but the run failed before it created the tag.** Every later run fails at `npm stage publish`. Create the tag and release from the commit the run built: `gh release create v<version> --target <commit> --title v<version> --notes-file <file>`, where the file holds that version's `CHANGELOG.md` section without its heading.
 - **A maintainer rejected the staged version.** Delete its release and tag with `gh release delete v<version> --cleanup-tag --yes`, then ship the fix as a new version through a changeset.
 
-The package's trusted publisher on npmjs.com is `next-friday/create-next-friday-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
+The package's trusted publisher on npmjs.com is `next-friday/next-friday-create-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.
 

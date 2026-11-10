@@ -7,7 +7,7 @@ import {didInstallDependencies, initGit} from "../src/setup.ts";
 
 const manifest = "package.json";
 const localTool = "local-tool";
-const root = mkdtempSync(path.join(tmpdir(), "create-friday-app-"));
+const root = mkdtempSync(path.join(tmpdir(), "create-app-test-"));
 
 afterEach(() => {
   vi.unstubAllEnvs();

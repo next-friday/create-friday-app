@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Questions and usage help
-    url: https://github.com/next-friday/create-next-friday-app/discussions/categories/q-a
+    url: https://github.com/next-friday/next-friday-create-app/discussions/categories/q-a
     about: Ask usage questions in GitHub Discussions.
   - name: Ideas and design discussion
-    url: https://github.com/next-friday/create-next-friday-app/discussions/categories/ideas
+    url: https://github.com/next-friday/next-friday-create-app/discussions/categories/ideas
     about: Discuss early ideas before filing a feature request.

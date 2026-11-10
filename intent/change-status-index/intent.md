@@ -22,28 +22,37 @@ Other proposal processes keep status where a machine can read it, and generate t
 
 ## Proposed outcome
 
-- Each change's stage lives in one machine-readable record in its own folder, so a script reads it without a model. The stages are intent drafted, intent accepted, spec drafted, spec accepted, built, and done, plus `withdrawn` and `replaced`. This amends the per-file **Status values** of `intent/playbook-plays/spec.md`.
-- A script generates one status table from the repository's records alone, with no model and no network. For each change, the table shows the stage, the next step, and who takes it, with links to the change's files. It sits at one path that anyone can open on GitHub without tools. Proposal for the product owner to accept or correct in review: a generated section of `intent/README.md`, which also replaces line 6's conflicting rule.
-- A check fails when the table does not match the records. It runs in CI and in the `git push` hook group of `intent/pre-push-review/intent.md`. This follows the playbook: "A policy that must always hold needs something deterministic behind the skill" (page 26). The check depends on that hook group.
-- Live state that only GitHub holds stays with the `loop-status` skill, which still reads pull requests and runs with `gh`: an open pull request, or runs waiting for **Approve workflows to run**. The skill reads the table for everything else, so it no longer opens every folder. The `SessionStart` reminder prints the table. This amends **Status skill** and **Reminder** of `intent/playbook-plays/spec.md`.
-- The same holds in this repository and in every generated project. Every generated project has `apps/docs` (`intent/monorepo-apps/spec.md`, requirement 1), where "Documentation for people lives" (requirement 11). Proposal: the docs app renders the table as a page from the same records.
+- Anyone, without an agent and without opening each folder, sees in one place every change, the stage it is in, what it waits on, and who acts next.
+- Seeing it costs no model call, so it costs no tokens.
+- What it shows matches the repository.
+- The same holds in this repository and in every generated project.
+
+The product owner has not chosen how. The spec compares these options, each with a source, and the product owner accepts or corrects the choice in review:
+
+- **An index generated from a record in each change.** Each change keeps its stage in a field a script can read, and a tool builds one overview page from those fields, as Python builds PEP 0 from each PEP's headers (source above). Maintained tools do this for decision records, and `platform-and-library-first.md` puts them before custom code: log4brains offers "Static site generation to publish to GitHub/GitLab Pages or S3", with statuses "Proposed, accepted, deprecated, superseded" ([thomvaill/log4brains](https://github.com/thomvaill/log4brains)), and adr-tools has `adr generate toc`, which "Generates a table of contents in Markdown format" ([npryce/adr-tools](https://github.com/npryce/adr-tools)).
+- **A tracking issue per change, shown on a board.** Kubernetes keeps a `status` in each `kep.yaml` (source above), and its overview is a board: "Enhancement Tracking Issues provide a checklist", and "enhancements from this repo are visualized in the Enhancements Tracking Boards" ([kubernetes/enhancements](https://github.com/kubernetes/enhancements)). On GitHub the board is a project: "A project is an adaptable table, board, and roadmap that integrates with your issues and pull requests", and "Information is synced automatically to your project as you make changes" ([GitHub Docs: About Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects)). Built-in workflows "automatically add items from repositories that match a filter" ([GitHub Docs: Adding items automatically](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/adding-items-automatically)). Each stage of a change opens its own pull request, so something has to open one issue per change. A project belongs to a user or an organization, not to the repository, and a project template copies "configured workflows (except any auto-add workflows)" (About Projects), so `templates/` cannot ship one and each generated project sets its own up. `intent/playbook-plays/spec.md` (accepted) proposes that "the root uses no other tracker" (**Sources of truth**).
+- **A dashboard tool that reads the spec files.** spec-view installs with `pip install spec-view`, reads an optional `status:` field at the top of each file, and offers `spec-view list` ("Simple text table of specs + status") and `spec-view serve` ("Start web dashboard at localhost:8080") ([spec-view 0.3.0](https://pypi.org/project/spec-view/0.3.0/)). It runs on a person's machine, so a reader needs a clone and Python.
+- **A page in the docs app** of each generated project, once `intent/monorepo-apps/spec.md` is built: it adds `apps/docs` (requirement 1), where "Documentation for people lives" (requirement 11). A deployed site is readable without a GitHub account. This repository has no docs app ("deploys no app", requirement 15), so the root needs another page, as `intent/playbook-plays/spec.md` puts the loop guide in "`apps/docs`; `CONTRIBUTING.md` in the root".
+
+Today's accepted design, the `loop-status` skill in `intent/playbook-plays/spec.md`, is the baseline: it needs an agent and reads every folder on each run, which is the cost this intent names.
+
+Whatever the option, `intent/README.md` line 6 changes, because its rule conflicts with `intent/playbook-plays/spec.md`. Depending on the option, that spec's **Status values**, **Status skill**, and **Reminder** change too. The stages a change can be in are that spec's **Status values** (`draft`, `accepted`, `done`, `withdrawn`, `replaced`) plus `rejected` from `intent/README.md`; whether the record adds plan and build stages is open.
 
 ## Affected users and systems
 
 - Executives, sales, business analysts, product owners, engineers, and agents, in this repository and in every generated project.
-- `intent/` and its README, the `write-intent` and `write-spec` skills, and `intent/playbook-plays/spec.md` (Status values, Status skill, Reminder).
-- `.husky/`, the agent hook configuration, and CI, in the root and in `templates/base/`, and the docs app in generated projects.
+- `intent/` and its README, and `intent/playbook-plays/spec.md`.
+- Depending on the option: the `write-intent` and `write-spec` skills, which would write the record; `.husky/`, the agent hook configuration, and CI, in the root and in `templates/base/`, for a check that the index matches the records; a GitHub project per repository; the docs app in generated projects.
 
 ## Constraints
 
 - The product owner decided on 2026-11-10: the change applies in this repository and in every generated project.
-- The repository stays the one source of truth: "name one system as the source of truth, with everything else holding a copy or a link to the original" (page 22). The table is generated from the records and never edited by hand.
-- Generating the table and checking it use no model and no network, so they cost no tokens and can run in every hook and CI job.
-- The check needs the `git push` hook group that `intent/pre-push-review/intent.md` adds, so it lands with or after that change.
+- The repository is the source of truth for intents, specs, and plans (`intent/playbook-plays/spec.md`, **Sources of truth**, from page 22: "name one system as the source of truth, with everything else holding a copy or a link to the original").
 - A changed hook or CI rule goes through `constitution-changes.md`.
 
 ## Open questions
 
-- Where does the record live: front matter at the top of each file, or one small file per change, like Kubernetes' `kep.yaml`?
-- Which pull request writes each stage, so that "built" and "done" are recorded by the change that causes them and not by memory?
-- Should a stage update in the same pull request as the work, so the record does not lag the merge the way `Status:` does today?
+- Which option above, or which mix of them?
+- Where does a change's stage live, and which pull request writes each stage, so that "built" and "done" are recorded by the change that causes them and not by memory?
+- Should a stage change in the same pull request as the work, so the record does not lag the merge, which `intent/playbook-plays/spec.md` accepts today?
+- Who reads it: does an executive or a salesperson open GitHub, or does the status need to reach them somewhere else?

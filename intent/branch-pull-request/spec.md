@@ -10,8 +10,8 @@ Written at `b76ed2c` with the `write-spec` skill. GitHub Docs claims are read fr
 2. GitHub deletes a branch when its pull request merges, in the root and in every generated project.
 3. When a branch other than `main` exists with no open pull request, the system opens one for it.
 4. When a pull request closes without merging, the system reopens it.
-5. A rejected intent or spec is recorded by merging its pull request with `Status: rejected.`, and every file that says closing rejects says this instead.
-6. Requirements 1 to 5 hold in this repository and in every generated project. No person and no agent deletes a branch or closes a pull request by hand.
+
+Requirements 3 and 4 are not built: the product owner removed their workflow on 2026-11-10, as `plan.md` records under **Departure: the workflow is removed**. They wait for the agent's own identity. 5. A rejected intent or spec is recorded by merging its pull request with `Status: rejected.`, and every file that says closing rejects says this instead. 6. Requirements 1 to 5 hold in this repository and in every generated project. No person and no agent deletes a branch or closes a pull request by hand.
 
 ## Design
 

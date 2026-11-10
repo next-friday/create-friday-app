@@ -53,7 +53,7 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 
 **Who:** a repository admin.
 
-- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**. Every workflow requests the extra permissions it needs. Also select **Allow GitHub Actions to create and approve pull requests**, so `branch-pull-request.yml` can open a pull request for a branch that has none.
+- **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**. Every workflow requests the extra permissions it needs. Also select **Allow GitHub Actions to create and approve pull requests**.
 - **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
 - **Advanced Security:** enable private vulnerability reporting, Dependabot alerts, Dependabot security updates, secret scanning, and push protection. `SECURITY.md` sends reporters to private vulnerability reporting.
 - **Rules → Rulesets:** protect `main` with:

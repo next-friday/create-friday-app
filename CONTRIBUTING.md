@@ -83,13 +83,10 @@ Use [`.changeset/README.md`](.changeset/README.md) to decide whether the change 
 
 1. A pull request that adds a changeset merges into `main`.
 2. [`.github/workflows/release.yml`](.github/workflows/release.yml) opens or updates the `chore(release): version package` pull request, which bumps the version and writes `CHANGELOG.md`.
-3. Merging that pull request runs `pnpm verify`, publishes to npm with provenance from the `Release` environment, and creates a GitHub release.
+3. Merging that pull request runs `pnpm verify`, stages the package on npm with provenance from the `Release` environment, and creates a GitHub release, before the version is on npm.
+4. A package maintainer approves the staged version, with 2FA, under **Staged Packages** on the package's npmjs.com page. The new version reaches the registry only then. This is the production gate: CI can stage a release but cannot publish it.
 
-npm attaches a trusted publisher only to an existing package, so the first release publishes with an npm automation token:
-
-1. Store the token as the `NPM_BOOTSTRAP_TOKEN` secret of the `Release` environment.
-2. After the first publish, add `next-friday/create-next-friday-app` with workflow `release.yml` and environment `Release` as the package's trusted publisher on npmjs.com.
-3. Delete the secret and the `NODE_AUTH_TOKEN` line from `release.yml`.
+The package's trusted publisher on npmjs.com is `next-friday/create-next-friday-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.
 

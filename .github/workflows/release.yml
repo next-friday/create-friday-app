@@ -126,11 +126,11 @@ jobs:
             const { readFileSync, writeFileSync } = require("node:fs");
             const [planPath, notesPath] = process.argv.slice(1);
             const [release, ...others] = JSON.parse(readFileSync(planPath, "utf8")).plan.flat().filter(({ kind }) => kind === "publish");
-            if (!release || others.length > 0) throw new Error(`Expected one release in ${planPath}`);
-            const [, entry] = readFileSync("CHANGELOG.md", "utf8").split(`\n## ${release.version}\n`);
-            if (entry === undefined) throw new Error(`CHANGELOG.md has no entry for ${release.version}`);
+            if (!release || others.length > 0) throw new Error("Expected one release in " + planPath);
+            const [, entry] = readFileSync("CHANGELOG.md", "utf8").split("\n## " + release.version + "\n");
+            if (entry === undefined) throw new Error("CHANGELOG.md has no entry for " + release.version);
             writeFileSync(notesPath, entry.split("\n## ")[0].trim());
-            console.log(`v${release.version} ${release.tarball.path} ${release.access} ${release.tag}`);
+            console.log(["v" + release.version, release.tarball.path, release.access, release.tag].join(" "));
           ' "$PACK_DIR/publish-plan.json" "$RUNNER_TEMP/release-notes.md")"
           read -r tag tarball access dist_tag <<< "$release"
           tag_status=0

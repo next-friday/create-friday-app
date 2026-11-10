@@ -1,6 +1,6 @@
 # Spec: Adopt the AI-native SDLC Playbook in the templates and the root
 
-From `intent/playbook-plays/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: draft.
+From `intent/playbook-plays/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: accepted.
 
 Written at `main` `dfac1fc` with the `write-spec` skill as committed there. The agent wrote it as the next step of the loop, under `AGENTS.md`'s "Asking the product owner"; no product owner prompt added a constraint to the skill's prompt.
 

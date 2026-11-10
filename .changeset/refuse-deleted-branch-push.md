@@ -2,4 +2,4 @@
 "@next-friday/create-app": patch
 ---
 
-The generated `.husky/pre-push` hook refuses a push to a branch that this clone pushed before and that the remote no longer has. This happens when GitHub deletes the branch after its pull request merges, with **Automatically delete head branches** on, as `SETUP.md` asks. Push the follow-up work to a new branch from the latest `main` and open a pull request.
+The generated `.husky/pre-push` hook's refusal for a deleted branch no longer guesses that the branch's pull request merged or closed, since the remote branch may have been deleted by hand. It says the branch no longer exists on the remote, how to continue on a new branch from the latest `main`, and that `git fetch --prune` followed by `git branch --unset-upstream` lets you reuse the name.

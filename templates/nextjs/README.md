@@ -49,7 +49,7 @@ On Vercel, deploy without the image; the Next.js preset takes precedence over th
    - the `RAILWAY_SERVICE` variable: the service name;
    - the `APP_URL` variable: the public `https://` URL.
 
-   Limit `dev`, `uat`, and `prod` to the `main` branch and add required reviewers. Environment secrets and variables in a private repository need GitHub Pro, Team, or Enterprise; required reviewers in a private repository need GitHub Enterprise.
+   Limit `dev`, `uat`, and `prod` to the `main` branch. Add the release managers as required reviewers on `prod` only; `dev` deploys on every push to `main`, so a reviewer there would hold each push. Environment secrets and variables in a private repository need GitHub Pro, Team, or Enterprise; required reviewers in a private repository need GitHub Enterprise.
 
 3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health`.

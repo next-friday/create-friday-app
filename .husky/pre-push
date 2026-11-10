@@ -1,9 +1,17 @@
 #!/usr/bin/env sh
 set -e
 
-while read -r _ _ remote_ref _; do
+while read -r local_ref _ remote_ref remote_oid; do
   if [ "$remote_ref" = refs/heads/main ]; then
     echo "pre-push: do not push to main. Push your branch and open a pull request." >&2
+    exit 1
+  fi
+  # A branch this clone pushed before that the remote no longer has was deleted when its pull request merged or closed.
+  branch="${remote_ref#refs/heads/}"
+  if [ "$branch" != "$remote_ref" ] && [ -z "$(printf '%s' "$remote_oid" | tr -d 0)" ] \
+    && { git rev-parse --verify --quiet "refs/remotes/$1/$branch" > /dev/null \
+      || [ "$(git config "branch.${local_ref#refs/heads/}.merge" || true)" = "$remote_ref" ]; }; then
+    echo "pre-push: $branch no longer exists on $1, so its pull request merged or closed. Branch from the latest $1/main, push the new branch, and open a new pull request." >&2
     exit 1
   fi
 done

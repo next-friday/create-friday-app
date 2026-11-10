@@ -47,7 +47,7 @@ const nestModule = "src/app.module.ts";
 const packageManifest = "package.json";
 const renameError = "EACCES: permission denied";
 const cancelled = "Cancelled.";
-const cwd = mkdtempSync(path.join(tmpdir(), "create-friday-app-"));
+const cwd = mkdtempSync(path.join(tmpdir(), "create-app-test-"));
 
 const nextStepsTail =
   '  pnpm start:dev\nBefore the first commit, follow "After creating a project from this template" in';

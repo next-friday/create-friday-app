@@ -24,7 +24,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "create-friday-app": "./dist/main.mjs"
+    "create-next-friday-app": "./dist/main.mjs"
   },
   "files": [
     "dist",

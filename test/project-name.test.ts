@@ -6,7 +6,7 @@ import {tmpdir} from "node:os";
 
 import {packageName, validateProjectName} from "../src/project-name.ts";
 
-const cwd = mkdtempSync(path.join(tmpdir(), "create-friday-app-"));
+const cwd = mkdtempSync(path.join(tmpdir(), "create-app-test-"));
 
 afterAll(() => {
   rmSync(cwd, {

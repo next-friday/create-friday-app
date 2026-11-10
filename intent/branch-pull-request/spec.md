@@ -1,6 +1,6 @@
 # Spec: Every branch has an open pull request, and every pull request ends in a merge
 
-From `intent/branch-pull-request/intent.md` (accepted 2026-11-10 by the merge of pull request #72). Status: draft.
+From `intent/branch-pull-request/intent.md` (accepted 2026-11-10 by the merge of pull request #72). Status: accepted.
 
 Written at `b76ed2c` with the `write-spec` skill. GitHub Docs claims are read from the `github/docs` repository at `f309096` (2026-11-09), because `docs.github.com` is not reachable from this session; each cites the file under `content/` or `data/`.
 
@@ -25,13 +25,15 @@ GitHub's setting: "You can have head branches automatically deleted after pull r
 
 ### 3. A pull request for every branch
 
-A new workflow, `.github/workflows/branch-pull-request.yml`, in the root and in `templates/base/`, with two jobs.
+A new workflow, `.github/workflows/branch-pull-request.yml`, in the root and in `templates/base/`. Its job **`open-pull-request`** runs on `push` to any branch except `main`, on `schedule`, and on `workflow_dispatch`.
 
-**`open-for-pushed-branch`** runs on `push` to any branch except `main`. It acts only when the branch had a pull request that merged and has no open one, which is the 2026-11-10 case: `gh pr list --head "$BRANCH" --state merged` returns a pull request and `--state open` returns none. It then opens a pull request at once. A new branch with no pull request history is left alone, because its author usually opens the pull request moments later. Pull request #72 opened about a minute after its branch was first pushed.
+**On a push**, it acts only when the branch had a pull request that merged and has no open one, which is the 2026-11-10 case: `gh pr list --head "$BRANCH" --state merged` returns a pull request and `--state open` returns none. It then opens a pull request at once. A new branch with no pull request history is left alone, because its author usually opens the pull request moments later. Pull request #72 opened about a minute after its branch was first pushed.
 
-**`open-for-every-branch`** runs on `schedule`, once a day. It lists the remote branches other than `main`. For each one with no open pull request and a last commit older than one hour, it opens a pull request. Proposal for the product owner to accept or correct in review: once a day, and one hour. The schedule runs at most once a day, and the hour leaves the author room to open the pull request first.
+**On the schedule**, once a day, or a manual dispatch, it lists the remote branches other than `main`. For each one with no open pull request and a last commit older than one hour, it opens a pull request. Proposal for the product owner to accept or correct in review: once a day, and one hour. The schedule runs at most once a day, and the hour leaves the author room to open the pull request first.
 
-The pull request either job opens:
+Before it opens a pull request, the job reads `ahead_by` from `gh api repos/$GH_REPO/compare/main...<sha>`. A branch with no commits ahead of `main` holds nothing that `main` lacks, and GitHub cannot open a pull request for it, so the job deletes the branch instead. That is the "deleted by the system" outcome the intent names. This was added in `plan.md` and accepted with it.
+
+The pull request the job opens:
 
 - targets `main` and is ready for review, because CI skips drafts (`.agents/skills/git-workflow/SKILL.md`, line 12);
 - takes its title from the branch's last commit subject, so `validate-pr-title.yml` applies to it as to any other;
@@ -46,12 +48,12 @@ The alternative is a GitHub App installation token, which starts CI without the 
 
 **Branches the workflow skips.**
 
-- **Bot branches.** Branches whose names start with `dependabot/` or `renovate/` are skipped. Dependabot names its branches `dependabot/PACKAGE-MANAGER/DEPENDENCY` (`content/code-security/reference/supply-chain-security/dependabot-options-reference.md`, line 631), and the bot that made the branch owns its pull request. Renovate's prefix is unverified, because Renovate's documentation was not read in this session. The plan confirms it.
+- **Bot branches.** Branches whose names start with `dependabot/` or `renovate/` are skipped. Dependabot names its branches `dependabot/PACKAGE-MANAGER/DEPENDENCY` (`content/code-security/reference/supply-chain-security/dependabot-options-reference.md`, line 631), and the bot that made the branch owns its pull request. Renovate's default is the same kind of prefix: "change `branchPrefix` from the default `renovate/` value" (`renovatebot/renovate` `docs/usage/configuration-options.md`, line 513, at `0c61367`).
 - **Branches pushed by `GITHUB_TOKEN`.** These start no `push` run, because "events triggered by the `GITHUB_TOKEN` will not create a new workflow run" (same reusable). Changesets' version branch in `release.yml` is one such branch. Its pull request is opened by the same action, so the daily job finds an open pull request and does nothing.
 
 ### 4. Reopen a pull request closed without merging
 
-A third job in the same workflow, **`reopen-closed-unmerged`**, runs on `pull_request` `closed`. GitHub Docs: "To run a workflow when a pull request merges, use the `pull_request` `closed` event type along with a conditional that checks the `merged` value of the event" (`content/actions/reference/workflows-and-actions/events-that-trigger-workflows.md`, line 579). When `merged` is false, the job reopens the pull request with `gh pr reopen`. It then comments that a pull request ends only by merging, and that a rejection merges with `Status: rejected.`.
+A second job in the same workflow, **`reopen-closed-unmerged`**, runs on `pull_request` `closed`. GitHub Docs: "To run a workflow when a pull request merges, use the `pull_request` `closed` event type along with a conditional that checks the `merged` value of the event" (`content/actions/reference/workflows-and-actions/events-that-trigger-workflows.md`, line 579). When `merged` is false, the job reopens the pull request with `gh pr reopen`. It then comments that a pull request ends only by merging, and that a rejection merges with `Status: rejected.`.
 
 - The job skips pull requests from `dependabot/` and `renovate/` branches. Dependabot's own commands close pull requests. For example, `@dependabot ignore this dependency` "Closes the pull request and prevents Dependabot from creating any more pull requests for this dependency" (`content/code-security/reference/supply-chain-security/dependabot-pull-request-comment-commands.md`, line 23).
 - A reopen by `GITHUB_TOKEN` starts CI in the same approval-required state as above.
@@ -75,7 +77,7 @@ The rendered skill copies in `.claude/skills/` and `.cursor/skills/` follow with
 | File                                                                       | Change                                                                                     |
 | :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
 | `.husky/pre-push`, `templates/base/.husky/pre-push`                        | Issue #73, in its own pull request                                                         |
-| `.github/workflows/branch-pull-request.yml` and its `templates/base/` copy | New, with the three jobs above                                                             |
+| `.github/workflows/branch-pull-request.yml` and its `templates/base/` copy | New, with the two jobs above                                                               |
 | `templates/base/SETUP.md`                                                  | Step 3: automatic deletion and the Actions setting. Line 7: as in **Rejection is a merge** |
 | The files in **Rejection is a merge**, and their rendered skill copies     | As that table says                                                                         |
 | `intent/branch-pull-request/intent.md`                                     | `Status: accepted.` (#72 merged)                                                           |
@@ -106,7 +108,6 @@ The root's repository settings change outside git: an admin turns on **Allow Git
 - **The Actions setting allows approving too:** the one setting lets `GITHUB_TOKEN` "create and approve pull requests". A workflow could approve a pull request. The `main` ruleset in `templates/base/SETUP.md` step 3 requires "review from Code Owners", and the workflow's identity is not a code owner, so its approval cannot satisfy that rule. That reading follows from the ruleset, not from a GitHub Docs statement, and is unverified.
 - **CI waits for a click:** a pull request the system opens or reopens runs CI only after a person selects **Approve workflows to run**. That click is a person at the review gate (page 39), but it is one more step. A GitHub App token removes it, at the cost of an App and two secrets per project. Proposal: `GITHUB_TOKEN` now. The product owner can choose the App in review.
 - **Fork pull requests:** the reopen job cannot reopen a fork's pull request on `pull_request`. A generated project may be public (`intent/github-files/spec.md`, **Areas of concern**, "A public generated project"). A public project that takes fork pull requests would need a second `pull_request_target` exception, which this spec does not add.
-- **Renovate's branch prefix:** unverified, see **Branches the workflow skips**.
 - **`claude/spec-github-files`:** the daily job will open a pull request for this branch. Its one sentence is already on `main` from #72, so the pull request may show no file changes. Whether GitHub merges a squash with an empty diff is unverified. The plan checks it before the workflow's first run.
 - **Overlapping specs:** `intent/ci/spec.md` adds the workflow rule this workflow follows and removes template scanners from `SETUP.md` step 3. `intent/github-files/spec.md` rewrites `SETUP.md` line 57 in step 3. `intent/monorepo-apps/spec.md` restructures `templates/base/`. The plans need one order for step 3 of `SETUP.md`.
 

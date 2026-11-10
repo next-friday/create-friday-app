@@ -1,6 +1,6 @@
 {
   "agent-owned-work": {
-    "description": "Agent-owned work: do what an agent, script, or API can do instead of asking the user"
+    "description": "Agent-owned work: do every step an agent can do, start only when asked, and stop at the human gates"
   },
   "automation-owned-checks": {
     "description": "Owned checks: hooks and CI define what must pass; run checks by hand to verify"

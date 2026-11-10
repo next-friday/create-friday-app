@@ -2,14 +2,18 @@ import {spawnSync} from "node:child_process";
 
 type GateCase = {
   expectedExit: 0 | 2;
+  expectedPermission?: "allow" | "ask";
   gate: string;
   input: Record<string, unknown>;
   name: string;
+  releaseApproval?: string;
 };
 
 const shellGate = ".agents/hooks/agent-shell-gate.sh";
 const suppressionGate = ".agents/hooks/agent-suppression-gate.sh";
 const constitutionGate = ".cursor/hooks/agent-constitution-gate.sh";
+const mcpGate = ".agents/hooks/agent-mcp-gate.sh";
+const productionGate = ".agents/hooks/agent-production-gate.sh";
 const sourceFile = "src/example.ts";
 
 const blockedCommands = [
@@ -80,6 +84,68 @@ const blockedCommands = [
   "while true; do git commit -n -m x; done",
   "if git commit -n -m x; then true; fi",
   "printf x > .git/config.worktree",
+  "gh pr merge 1 --squash",
+  "gh pr merge 1 --auto",
+  "gh -R next-friday/example pr merge 1",
+  "gh pr -R next-friday/example merge 1",
+  "timeout 5 gh pr merge 1",
+  "nice -n 5 gh pr merge 1",
+  "xargs gh pr merge",
+  "gh pr review 1 --approve",
+  "gh pr review 1 --approve=true",
+  "gh pr review 1 -a",
+  "gh -R next-friday/example pr review 1 -a",
+  "gh alias set m 'pr merge'",
+  "gh api repos/next-friday/example/pulls/1/merge -X PUT",
+  "gh api graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'",
+  "gh api graphql -f query=@query.graphql",
+  "gh api repos/next-friday/example/pulls/1/reviews -f event=APPROVE",
+  "gh api -X POST repos/next-friday/example/actions/runs/1/pending_deployments -f state=approved",
+  "gh pr review 1 -ca",
+  "gh alias import aliases.yml",
+  "gh api graphql -Fquery=@query.graphql",
+  "gh api graphql --input query.json",
+  "gh api -X POST repos/next-friday/example/pulls/1/reviews --input review.json",
+  "gh api repos/next-friday/example/actions/runs/1/pending_deployments -F state=@state.txt",
+  "gh api graphql -f query='mutation { enablePullRequestAutoMerge(input: {}) { clientMutationId } }'",
+  "gh api graphql -f query='mutation { enqueuePullRequest(input: {}) { clientMutationId } }'",
+  "gh api graphql -f query='mutation($e: PullRequestReviewEvent!) { addPullRequestReview(input: {event: $e}) { clientMutationId } }' -f e=APPROVE",
+  "gh api -X POST repos/next-friday/example/merges -f base=main -f head=feature",
+  "gh api -X PUT repos/next-friday/example/pulls/1/merge/",
+  "timeout 5 bash -c 'gh pr merge 1'",
+  "find . -exec sh -c 'gh pr merge 1' ;",
+  "sudo -u me bash -c 'gh pr merge 1'",
+  "bash -c -- 'gh pr merge 1'",
+];
+
+const irreversibleCommands = [
+  "git push --force",
+  "git push -f origin x",
+  "git push origin x -f",
+  "git push -uf origin x",
+  "git push origin +x",
+  "git push origin :x",
+  "git push -d origin x",
+  "git push --delete origin x",
+  "git push --mirror",
+  "git reset --hard HEAD~1",
+  "git -C . reset --hard",
+  "git clean -fd",
+  "git clean -xdf",
+  "git branch -D x",
+  "git branch -df x",
+  "git branch --delete --force x",
+  "git checkout .",
+  "git checkout -- .",
+  "git checkout -f main",
+  "git restore .",
+  "git restore --worktree .",
+  "git switch --discard-changes main",
+  "git stash drop",
+  "git worktree remove --force x",
+  "git restore :/",
+  "timeout 5 git push --force",
+  "xargs git reset --hard",
 ];
 
 const allowedCommands = [
@@ -104,7 +170,131 @@ const allowedCommands = [
   'gh pr create --title "ci(x): remove HUSKY=0 usage"',
   "git push -n",
   "node scripts/check-agent-gates.ts",
+  "git push -u origin x",
+  "git push --dry-run --force",
+  "git push --force-with-lease origin x",
+  'gh pr create --title "fix(x): y" --body z',
+  "gh pr comment 1 --body x",
+  'gh pr review 1 -c -b "fix -a flag"',
+  'gh api repos/next-friday/example/issues/1/comments -f body="Please APPROVE"',
+  "gh api repos/next-friday/example/pulls/1",
+  "gh pr checks 1 --watch",
+  "git branch -d x",
+  "git checkout feature",
+  "git checkout .changeset/x.md",
+  "git restore --staged .",
+  "git clean -n",
+  "git reset --soft HEAD~1",
+  "git stash pop",
+  "timeout 60 pnpm test",
+  'gh api graphql -f query="query { viewer { login } }"',
+  'gh api repos/next-friday/example/issues/1/comments -f body="APPROVED by QA"',
 ];
+
+const productionCommands = [
+  "gh workflow run deploy.yml -f environment=prod -f commit_sha=abc",
+  "gh workflow run Deploy --field 'environment=prod'",
+  "gh workflow run deploy.yml -fenvironment=prod",
+  "gh workflow run deploy.yml --field=environment=prod",
+  'gh workflow run deploy.yml -f "environment=prod"',
+  "gh workflow run deploy.yml -F environment=@environment.txt",
+  "gh workflow run deploy.yml --json",
+  "gh workflow run deploy.yml --json=true",
+  "for e in uat prod; do gh workflow run deploy.yml -f environment=$e -f commit_sha=abc; done",
+  "env=prod; gh workflow run deploy.yml -f environment=$env",
+  "gh workflow run deploy.yml -f environment=$(echo prod)",
+  'gh workflow run deploy.yml -f "environment=$TARGET"',
+  "gh api -X POST repos/o/r/actions/workflows/deploy.yml/dispatches -f ref=main -f 'inputs[environment]=prod'",
+  "gh api repos/o/r/actions/workflows/deploy.yml/dispatches/ -f inputs[environment]=prod",
+  "gh api -f 'inputs[environment]=prod' repos/o/r/actions/workflows/deploy.yml/dispatches",
+  "gh api repos/o/r/actions/workflows/1/dispatches --input body.json",
+  "gh api repos/o/r/actions/workflows/1/dispatches -f inputs[environment]=$E",
+  "bash -c 'gh workflow run deploy.yml -f environment=prod'",
+  "railway up --ci --environment prod",
+  "railway up -e prod",
+  "railway up -e=prod",
+  "railway up -eprod",
+  "railway up -ce prod",
+  "railway up -ceprod",
+  "railway redeploy -ye prod",
+  "railway up -s api -e prod",
+  "railway up --environment=prod",
+  'railway up -e "$ENV"',
+  "for e in uat prod; do railway up -e $e; done",
+  "railway env prod",
+  "railway env link prod",
+  "railway environment prod",
+  "railway environment delete prod --yes",
+  "railway link -e prod",
+  "railway logs -e prod",
+  "railway variables --set A=b -e prod",
+  "npx @railway/cli up -e prod",
+  "pnpm dlx @railway/cli up -e prod",
+  "/usr/local/bin/railway up -e prod",
+  "timeout 60 railway up -e prod",
+  "eval railway up -e prod",
+  "git push origin v1.0.0",
+  "git push origin HEAD:refs/tags/v1.0.0",
+  "git push --tags",
+  "git push --follow-tags origin main",
+  "git -C . push origin v2.3.4",
+  "npx @railway/cli@5.71.0 up -e prod",
+  "npx @railway/cli@latest up --environment prod",
+  "railway up -e pr''od",
+  "gh workflow run deploy.yml -f environment=pr''od",
+  "gh workflow run deploy.yml -f environment=p\\rod",
+  'gh workflow run deploy.yml -f "envi"ronment=prod',
+  "git push origin 'refs/tags/*'",
+  'git push origin "refs/tags/v*"',
+  "git push --mirror",
+  "git -c push.followTags=true push origin main",
+  "git config push.followTags true && git push",
+  "gh workflow run deploy.yml 2>&1 -f environment=prod",
+  "railway up 2>&1 -e prod",
+  "git push origin tags/v1.0.0",
+  "git --git-dir .git push origin v1.0.0",
+  "gh workflow run deploy.yml \\\n  -f environment=prod \\\n  -f commit_sha=abc",
+  "railway up \\\n  --environment prod",
+  "git push \\\n  origin v1.0.0",
+  "railway up &>/dev/null -e prod",
+  "git push &>/dev/null origin v1.0.0",
+  "cd a\\\\\ngit push origin v1.0.0",
+];
+
+const nonProductionCommands = [
+  "gh workflow run deploy.yml -f environment=uat -f commit_sha=abc",
+  "gh api repos/o/r/actions/workflows/deploy.yml/dispatches -f 'inputs[environment]=uat'",
+  "railway up -e uat",
+  "railway up -e prod-eu",
+  "railway environment uat",
+  "railway status",
+  "gh workflow list",
+  "gh run list --workflow deploy.yml",
+  "gh api repos/o/r/environments/prod",
+  "git push -u origin feature/v2-ui",
+  "git push origin main",
+  'git commit -m "release v1.0" && git push',
+  'git commit -m "docs(x): deploy to production"',
+  'gh pr create --title "ci(x): promote to prod" --body "run gh workflow run later"',
+  "echo railway",
+  "git tag v1.0.0",
+  'git stash push -m "wip v2"',
+  'git commit -m "fix(ci): push v2 images"',
+  'git commit -m "fix: railway env uat and prod split"',
+  "git push -u origin HEAD",
+  "git push origin feature/push-v2",
+  "pnpm verify 2>&1 | tail && git push",
+];
+
+const mcpTools = {
+  blocked: [
+    "mcp__github__merge_pull_request",
+    "github__merge_pull_request",
+    "github__enable_pr_auto_merge",
+    "github__pull_request_review_write",
+  ],
+  allowed: ["github__create_pull_request", "github__add_issue_comment"],
+};
 
 const protectedPaths = [
   ".agents/rules/code-comments.md",
@@ -148,13 +338,97 @@ const cases: GateCase[] = [
       name: `Claude Bash: ${command}`,
     },
   ]),
+  ...irreversibleCommands.flatMap(command => [
+    {
+      gate: shellGate,
+      input: {
+        command,
+      },
+      expectedExit: 0 as const,
+      expectedPermission: "ask" as const,
+      name: `Cursor shell asks first: ${command}`,
+    },
+    {
+      gate: shellGate,
+      input: {
+        hook_event_name: "PreToolUse",
+        tool_input: {
+          command,
+        },
+      },
+      expectedExit: 0 as const,
+      expectedPermission: "ask" as const,
+      name: `Claude Bash asks first: ${command}`,
+    },
+  ]),
   ...allowedCommands.map(command => ({
     gate: shellGate,
     input: {
       command,
     },
     expectedExit: 0 as const,
+    expectedPermission: "allow" as const,
     name: `shell: ${command}`,
+  })),
+  ...productionCommands.flatMap(command => [
+    {
+      gate: productionGate,
+      input: {
+        command,
+      },
+      expectedExit: 2 as const,
+      name: `Cursor production: ${command}`,
+    },
+    {
+      gate: productionGate,
+      input: {
+        tool_input: {
+          command,
+        },
+      },
+      expectedExit: 2 as const,
+      name: `Claude production: ${command}`,
+    },
+  ]),
+  {
+    gate: productionGate,
+    releaseApproval: "CHG-1",
+    expectedPermission: "allow",
+    name: "production with RELEASE_APPROVAL: railway up -e prod",
+    expectedExit: 0,
+    input: {
+      tool_input: {
+        command: "railway up -e prod",
+      },
+    },
+  },
+  ...nonProductionCommands.map(command => ({
+    gate: productionGate,
+    input: {
+      command,
+    },
+    expectedExit: 0 as const,
+    expectedPermission: "allow" as const,
+    name: `production: ${command}`,
+  })),
+  ...mcpTools.blocked.map(tool => ({
+    gate: mcpGate,
+    input: {
+      tool_name: tool,
+      tool_input: "{}",
+    },
+    expectedExit: 2 as const,
+    name: `MCP: ${tool}`,
+  })),
+  ...mcpTools.allowed.map(tool => ({
+    gate: mcpGate,
+    input: {
+      tool_name: tool,
+      tool_input: "{}",
+    },
+    expectedExit: 0 as const,
+    expectedPermission: "allow" as const,
+    name: `MCP: ${tool}`,
   })),
   {
     gate: suppressionGate,
@@ -235,23 +509,55 @@ const cases: GateCase[] = [
   },
 ];
 
+/**
+ * Reads the permission a gate printed in the format its tool reads: Claude Code's
+ * `hookSpecificOutput` for a `PreToolUse` input, and Cursor's `permission` otherwise.
+ * @param gateCase - The case whose input decides the format.
+ * @param stdout - The gate's standard output.
+ * @returns The permission, or undefined when the output is not JSON.
+ */
+function permissionOf(gateCase: GateCase, stdout: string): string | undefined {
+  try {
+    const output = JSON.parse(stdout) as {
+      hookSpecificOutput?: {permissionDecision?: string};
+      permission?: string;
+    };
+
+    return gateCase.input.hook_event_name === "PreToolUse" && gateCase.expectedPermission === "ask"
+      ? output.hookSpecificOutput?.permissionDecision
+      : output.permission;
+  } catch {
+    return undefined;
+  }
+}
+
 const failures = cases.filter(gateCase => {
   const result = spawnSync(gateCase.gate, {
     env: {
       ...process.env,
       CLAUDE_PROJECT_DIR: process.cwd(),
       CURSOR_PROJECT_DIR: process.cwd(),
+      RELEASE_APPROVAL: gateCase.releaseApproval,
     },
     input: JSON.stringify(gateCase.input),
   });
 
-  return result.status !== gateCase.expectedExit;
+  const isPermissionWrong =
+    gateCase.expectedPermission !== undefined &&
+    permissionOf(gateCase, result.stdout.toString()) !== gateCase.expectedPermission;
+
+  return result.status !== gateCase.expectedExit || isPermissionWrong;
 });
 
 if (failures.length > 0) {
-  const failureLines = failures.map(
-    gateCase => `- ${gateCase.name} (expected exit ${gateCase.expectedExit})`,
-  );
+  const failureLines = failures.map(gateCase => {
+    const permission =
+      gateCase.expectedPermission === undefined
+        ? ""
+        : ` and permission ${gateCase.expectedPermission}`;
+
+    return `- ${gateCase.name} (expected exit ${gateCase.expectedExit}${permission})`;
+  });
 
   process.stderr.write(`Agent gate checks failed:\n${failureLines.join("\n")}\n`);
   process.exitCode = 1;

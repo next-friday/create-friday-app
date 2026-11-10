@@ -24,8 +24,8 @@ From the repository root:
 
 ```sh
 corepack enable
-git clone https://github.com/next-friday/create-next-friday-app.git
-cd create-next-friday-app
+git clone https://github.com/next-friday/next-friday-create-app.git
+cd next-friday-create-app
 pnpm install
 ```
 
@@ -86,7 +86,7 @@ Use [`.changeset/README.md`](.changeset/README.md) to decide whether the change 
 3. Merging that pull request runs `pnpm verify`, stages the package on npm with provenance from the `Release` environment, and creates a GitHub release, before the version is on npm.
 4. A package maintainer approves the staged version, with 2FA, under **Staged Packages** on the package's npmjs.com page. The new version reaches the registry only then. This is the production gate: CI can stage a release but cannot publish it.
 
-The package's trusted publisher on npmjs.com is `next-friday/create-next-friday-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
+The package's trusted publisher on npmjs.com is `next-friday/next-friday-create-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.
 

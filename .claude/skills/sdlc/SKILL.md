@@ -10,16 +10,16 @@ Do these steps in order.
 
 1. **Match the request** to the first row that fits, and read that row's file before you act.
 
-   | The request                                                                                             | What to do                                                                                                                     |
-   | :------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
-   | A question, or a request to explain or check without changing things                                    | Follow [`playbooks/question.md`](playbooks/question.md).                                                                       |
-   | A finding from a job or a monitor, with no person to interview: an alert, a failing run, or an incident | Follow [`playbooks/maintain.md`](playbooks/maintain.md).                                                                       |
-   | An idea, a problem, a ticket, or an incident, whether asked for or only reported                        | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                               |
-   | A spec for an intent, or a path to an `intent.md`                                                       | Follow [`playbooks/design.md`](playbooks/design.md).                                                                           |
-   | A build for a spec, a path to a `spec.md`, or a plan the engineer accepted                              | Follow [`playbooks/build.md`](playbooks/build.md).                                                                             |
-   | A review of a pull request, or a pull request to drive to green                                         | Follow [`playbooks/review.md`](playbooks/review.md).                                                                           |
-   | A deploy, or a question about what is deployed where                                                    | Follow [`playbooks/deploy.md`](playbooks/deploy.md).                                                                           |
-   | Anything else                                                                                           | Say which of the rows above is closest and why it does not fit, answer what you can as `playbooks/question.md` says, and stop. |
+   | The request                                                                                                    | What to do                                                                                                                     |
+   | :------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+   | A question, or a request to explain or check without changing things                                           | Follow [`playbooks/question.md`](playbooks/question.md).                                                                       |
+   | A spec for an intent, or a path to an `intent.md`                                                              | Follow [`playbooks/design.md`](playbooks/design.md).                                                                           |
+   | A build for a spec, a path to a `spec.md`, or a plan the engineer accepted                                     | Follow [`playbooks/build.md`](playbooks/build.md).                                                                             |
+   | A review of a pull request or a branch, a failing check on a pull request, or a pull request to drive to green | Follow [`playbooks/review.md`](playbooks/review.md).                                                                           |
+   | A deploy, a promotion to an environment, or a release to production                                            | Follow [`playbooks/deploy.md`](playbooks/deploy.md).                                                                           |
+   | A finding sent by a job, a monitor, or a trigger, or one the message says no person can answer questions about | Follow [`playbooks/maintain.md`](playbooks/maintain.md).                                                                       |
+   | An idea, a problem, a ticket, or an incident that a person describes, whether asked for or only reported       | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                               |
+   | Anything else                                                                                                  | Say which of the rows above is closest and why it does not fit, answer what you can as `playbooks/question.md` says, and stop. |
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line.
 

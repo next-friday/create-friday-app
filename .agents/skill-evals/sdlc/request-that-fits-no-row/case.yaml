@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: request-that-fits-no-row
+expected_outcome: |
+  The request matches no row of the /sdlc table. The agent says which row is closest and why it does not fit, answers in a few lines, and stops. It writes no file and commits nothing.

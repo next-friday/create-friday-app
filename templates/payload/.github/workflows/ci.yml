@@ -98,7 +98,7 @@ jobs:
         run: pnpm gates:check
       - name: Check human gates
         run: pnpm human-gates:check
-      - name: Check the intent template
+      - name: Self-test the intent checker
         run: pnpm intent:check
       - name: Check lint
         run: pnpm lint:check

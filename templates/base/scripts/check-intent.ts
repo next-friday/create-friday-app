@@ -29,7 +29,7 @@ const requiredHeadings = [
 ];
 
 const titlePattern = /^# Intent: \S/;
-const statusPattern = /Status: (?:draft|accepted|rejected)\./;
+const statusPattern = /Status: (?:draft|accepted|rejected)\.$/;
 
 /**
  * Blank every line of a fenced code block, keeping line numbers.
@@ -75,15 +75,31 @@ function findTitleProblems(lines: string[]): Problem[] {
  * @returns At most one problem.
  */
 function findAuthorProblems(lines: string[]): Problem[] {
-  const authorLine = lines.find(line => line.startsWith("Author: ") && line.includes("Status: "));
+  const authorLines = lines
+    .map((text, index) => ({
+      line: index + 1,
+      text: text.trimEnd(),
+    }))
+    .filter(({text}) => text.startsWith("Author: "));
 
-  return authorLine !== undefined && statusPattern.test(authorLine)
+  if (authorLines.length > 1) {
+    return [
+      {
+        message: 'only one author line is allowed; remove the extra "Author: " line',
+        line: authorLines.at(1)?.line ?? 1,
+      },
+    ];
+  }
+
+  const authorLine = authorLines.at(0);
+
+  return authorLine !== undefined && statusPattern.test(authorLine.text)
     ? []
     : [
         {
           message:
             'an author line must start with "Author: " and end with "Status: draft.", "Status: accepted." or "Status: rejected."; write "Author: <name> (<team>). Status: draft."',
-          line: Math.max(lines.findIndex(line => line.startsWith("Author: ")) + 1, 1),
+          line: authorLine?.line ?? 1,
         },
       ];
 }
@@ -141,12 +157,17 @@ function findEmptySectionProblems(lines: string[], headings: Heading[]): Problem
 }
 
 /**
- * Find a Problem section that holds no digit.
+ * Find a Problem section that holds no digit outside fenced code blocks.
  * @param lines Intent lines.
+ * @param maskedLines Intent lines with fenced code blocks emptied.
  * @param headings The level-2 headings with their line numbers.
  * @returns At most one problem.
  */
-function findProblemNumberProblems(lines: string[], headings: Heading[]): Problem[] {
+function findProblemNumberProblems(
+  lines: string[],
+  maskedLines: string[],
+  headings: Heading[],
+): Problem[] {
   const index = headings.findIndex(({text}) => text === problemHeading);
   const start = headings.at(index)?.line;
 
@@ -156,8 +177,9 @@ function findProblemNumberProblems(lines: string[], headings: Heading[]): Proble
 
   const end = headings.at(index + 1)?.line ?? lines.length + 1;
   const body = lines.slice(start, end - 1).join("\n");
+  const unfencedBody = maskedLines.slice(start, end - 1).join("\n");
 
-  return body.trim() === "" || /\d/.test(body)
+  return body.trim() === "" || /\d/.test(unfencedBody)
     ? []
     : [
         {
@@ -173,7 +195,11 @@ function findProblemNumberProblems(lines: string[], headings: Heading[]): Proble
  * @returns Every problem found.
  */
 function checkIntent(text: string): Problem[] {
-  const lines = text.replaceAll("\r\n", "\n").split("\n");
+  const lines = text
+    .replace(/^\u{FEFF}/u, "")
+    .replaceAll("\r\n", "\n")
+    .split("\n");
+
   const maskedLines = maskFencedBlocks(lines.join("\n")).split("\n");
 
   const headings = maskedLines
@@ -188,7 +214,7 @@ function checkIntent(text: string): Problem[] {
     ...findAuthorProblems(maskedLines),
     ...findHeadingProblems(headings),
     ...findEmptySectionProblems(lines, headings),
-    ...findProblemNumberProblems(lines, headings),
+    ...findProblemNumberProblems(lines, maskedLines, headings),
   ];
 }
 
@@ -198,6 +224,7 @@ const problemText = "GET /health returned 500 on 12 of 12 requests, from the ale
 const constraintsSection = `${constraintsHeading}\n\nNone.\n\n`;
 const headingsPart = "level-2 headings";
 const authorPart = "author line";
+const statusDraft = "Status: draft.";
 
 const validIntent = [
   titleLine,
@@ -257,12 +284,12 @@ const selfTestCases: SelfTestCase[] = [
   {
     expectedMessagePart: authorPart,
     name: "status is not a known value",
-    text: validIntent.replace("Status: draft.", "Status: open."),
+    text: validIntent.replace(statusDraft, "Status: open."),
   },
   {
     expectedMessagePart: authorPart,
     name: "status has no final period",
-    text: validIntent.replace("Status: draft.", "Status: draft"),
+    text: validIntent.replace(statusDraft, "Status: draft"),
   },
   {
     expectedMessagePart: headingsPart,
@@ -288,6 +315,20 @@ const selfTestCases: SelfTestCase[] = [
     text: `${validIntent}\n## Extra\n\nText.\n`,
   },
   {
+    name: "a BOM before the title",
+    text: `\u{FEFF}${validIntent}`,
+  },
+  {
+    expectedMessagePart: authorPart,
+    name: "status is not at the end of the author line",
+    text: validIntent.replace(statusDraft, "Status: draft. Reviewed."),
+  },
+  {
+    expectedMessagePart: authorPart,
+    name: "a second author line",
+    text: `${validIntent}\nAuthor: second. Status: draft.\n`,
+  },
+  {
     expectedMessagePart: "is empty",
     name: "a section is empty",
     text: validIntent.replace("None.", ""),
@@ -296,6 +337,11 @@ const selfTestCases: SelfTestCase[] = [
     expectedMessagePart: "has no number",
     name: "problem has no digit",
     text: validIntent.replace(problemText, "GET /health fails."),
+  },
+  {
+    expectedMessagePart: "has no number",
+    name: "problem has a digit only inside a fenced block",
+    text: validIntent.replace(problemText, "GET /health fails.\n\n```\n500\n```"),
   },
 ];
 

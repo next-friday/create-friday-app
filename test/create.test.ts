@@ -344,7 +344,7 @@ describe("create interruptions and edge cases", () => {
     expect(process.exitCode).toBe(0);
   });
 
-  it("leaves a script in an existing .git without the executable bit", async () => {
+  it("leaves the mode of a script in an existing .git unchanged", async () => {
     const current = enterClone("dot-hooks");
     const sample = path.join(current, gitDirectory, "pre-commit.sample");
 
@@ -352,8 +352,10 @@ describe("create interruptions and edge cases", () => {
       mode: 0o644,
     });
 
+    const modeBefore = statSync(sample).mode;
+
     await create([".", "--stack", "nodejs"]);
-    expect(statSync(sample).mode % 0o1000).toBe(0o644);
+    expect(statSync(sample).mode).toBe(modeBefore);
   });
 
   it("validates the name typed into the prompt", async () => {

@@ -22,6 +22,5 @@
 
 <!-- Select one option. -->
 
-- [ ] This pull request completes a piece of work that needs a release, and a pending or new `.changeset/*.md` entry covers the whole.
-- [ ] No changeset: a later pull request of the same piece of work carries it.
-- [ ] No changeset: only agent instructions, comments, documentation, CI, or repository tooling changed.
+- [ ] This pull request changes a file under `src/` or `templates/`, and adds a changeset of the type `.changeset/README.md` gives.
+- [ ] No changeset: nothing under `src/` or `templates/` changed.

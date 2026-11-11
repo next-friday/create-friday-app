@@ -7,4 +7,4 @@
 5. Sweep the pull request: read every unresolved review comment and every failing check, fix what each one reports, push, and answer the comment. Repeat until every check passes and no comment is unanswered. Never skip, disable, or weaken a test to pass a check. When a review flags the same mistake a second time, add the correction to `AGENTS.md` under **Things Claude gets wrong** in the same push. When a check fails for a cause outside this change, such as an outage, say which check and why in one comment, and go to step 6.
 6. **Gate: a code owner approves the pull request, and a person merges it.** You never approve it and never merge it. Report the pull request's URL, or the branch's name when there is none, and that it waits only on the code owner. When a new comment or a failing check arrives, go back to step 5.
 
-**Next:** none; the project's deploy workflow; when the pull request is merged.
+**Next:** `.agents/skills/sdlc/playbooks/deploy.md`; the project's deploy workflow, or an agent when a person asks; when the pull request is merged.

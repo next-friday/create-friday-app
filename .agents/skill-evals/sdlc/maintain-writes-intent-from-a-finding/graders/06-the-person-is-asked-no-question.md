@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-No file is created or changed
+The session asks the person no question

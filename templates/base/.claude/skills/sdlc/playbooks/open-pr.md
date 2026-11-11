@@ -12,4 +12,6 @@ The `build` playbook ends here. Nothing in it stops for a person.
 
    When you cannot open a pull request from this session, say so and give the pushed branch's name. When you cannot push either, say so; the review then reads the local branch's diff.
 
+5. Go on in the same turn, without asking: follow `.agents/skills/sdlc/playbooks/review.md`.
+
 **Next:** `.agents/skills/sdlc/playbooks/review.md`; an agent; in the same turn, as soon as step 4 is done.

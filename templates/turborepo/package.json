@@ -22,6 +22,7 @@
     "generate:importmap": "pnpm --filter ./apps/backoffice generate:importmap",
     "generate:types": "pnpm --filter ./apps/backoffice generate:types",
     "human-gates:check": "node scripts/check-human-gates.ts",
+    "intent:check": "node scripts/check-intent.ts",
     "knip": "knip",
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
@@ -42,7 +43,7 @@
     "test:watch": "turbo run test:watch --filter=./apps/*",
     "typecheck": "tsc --noEmit -p tsconfig.json && turbo run typecheck ${TURBO_FILTER:-\"--filter=./apps/*\"}",
     "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
-    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
+    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

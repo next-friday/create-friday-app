@@ -120,6 +120,8 @@ jobs:
         run: pnpm gates:check
       - name: Check human gates
         run: pnpm human-gates:check
+      - name: Self-test the intent checker
+        run: pnpm intent:check
       - name: Check lint
         run: pnpm lint:check
       - name: Check formatting

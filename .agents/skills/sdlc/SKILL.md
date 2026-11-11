@@ -38,6 +38,8 @@ For `question` and for a later step, leave out **Steps** and put the answer in i
 **Status:** <what is done, what comes next, and which gate it waits on and for whom.>
 ```
 
+A step you have not reached yet is `open`. Use `skip` only for a step you decide never to do.
+
 When the evidence rules out the change the person asked for, show the evidence under **Request** and stop.
 
 "new task" starts again at step 1. "don't change anything" keeps the session on `question`.

@@ -62,7 +62,7 @@ GitHub adds issue form labels only when they exist: "If a label does not already
 
 - `documentation` is a default label: "GitHub provides default labels in every new repository", including `documentation` ([GitHub Docs: Managing labels](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/managing-labels)).
 - `needs triage` is created by `templates/base/SETUP.md` line 65.
-- The root has both: the GitHub API returns `documentation` and `needs triage` for `next-friday/create-next-friday-app` on 2026-11-09.
+- The root has both: the GitHub API returns `documentation` and `needs triage` for this repository on 2026-11-09.
 
 So the setup step needs no change; see **Areas of concern** for an organization that edits its default labels.
 

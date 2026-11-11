@@ -21,6 +21,7 @@
     "gates:check": "node scripts/check-agent-gates.ts",
     "generate:importmap": "payload generate:importmap",
     "generate:types": "payload generate:types",
+    "human-gates:check": "node scripts/check-human-gates.ts",
     "knip": "node --env-file-if-exists=.env node_modules/knip/bin/knip.js",
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
@@ -42,7 +43,7 @@
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.json",
     "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
-    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
+    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.92.1",

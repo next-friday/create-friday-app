@@ -4,7 +4,7 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 
 ## How a change flows
 
-1. **Plan:** the originator of an idea, a ticket, or an incident sends it with `/sdlc`, which interviews them and writes `intent/<change>/intent.md`. The product owner merges it with `Status: accepted.` or `Status: rejected.`
+1. **Plan:** the originator of an idea, a ticket, or an incident sends it with `/sdlc`, which interviews them and writes `intent/<change>/intent.md`. The product owner accepts it by merging it with `Status: accepted.`, or rejects it by closing its pull request.
 2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (`write-spec` skill). The product owner resolves concerns with the policy owners.
 3. **Build:** the engineer starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.

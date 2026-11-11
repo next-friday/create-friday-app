@@ -118,6 +118,8 @@ jobs:
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
+      - name: Check human gates
+        run: pnpm human-gates:check
       - name: Check lint
         run: pnpm lint:check
       - name: Check formatting

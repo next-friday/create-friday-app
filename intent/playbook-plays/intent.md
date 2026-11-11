@@ -94,3 +94,7 @@ Across the plays:
 - The agent may act up to the production gate and cannot pass it (page 46).
 - Agent jobs in CI hold no production credentials (page 45, step 3). Their Claude API key is the one departure from that step's short-lived, scoped tokens.
 - CI work that is not a playbook play, such as Turborepo, the scanners, and how the root's CI jobs are laid out, belongs to `intent/ci/intent.md`; how CI builds images with Turborepo belongs to `intent/ci/intent.md`, and deploying them by digest to `intent/monorepo-apps/intent.md`; who may promote to each environment, and the gate before `prod`, belong here.
+
+## Open questions
+
+Not recorded when this intent was written.

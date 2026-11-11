@@ -100,6 +100,6 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 
 ## 7. Later, as the guardrails mature
 
-- Send the intent's path with `/sdlc` by hand first, then as an organization-level slash command, then as a job that commits `spec.md` as a pull request when an `intent.md` merges.
+- Send the intent's path with `/sdlc` by hand first. Then run it as a job when an `intent.md` merges. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git *)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job's runner pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
 - Replace `bands.yaml` with this project's metric, add a unit-tested detection script that reads it, and add the trigger that runs it.

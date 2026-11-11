@@ -28,3 +28,7 @@ The templates ship a full set of GitHub files: README, contributing guide, secur
 ## Constraints
 
 - A generated project must still pass its own `pnpm verify`.
+
+## Open questions
+
+Not recorded when this intent was written.

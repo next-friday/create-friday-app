@@ -52,3 +52,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 - Each instruction, rule, skill, and subagent has one source; a file rendered from it is not edited by hand.
 - Every agent feature used is checked against that agent's official documentation before it is relied on.
 - A change to hooks, rules, or agent settings goes through a pull request that code owners approve.
+
+## Open questions
+
+Not recorded when this intent was written.

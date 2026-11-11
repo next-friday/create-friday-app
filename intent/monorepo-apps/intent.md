@@ -81,3 +81,7 @@ intent/
 - A generated monorepo passes its own `pnpm verify` for any combination of apps.
 - Templates use framework and platform features before custom code: Turborepo package configurations, and Starlight for the docs site.
 - Known limits for later templates: a monorepo holds one React Native version, and native Android and iOS builds under Turborepo are not yet proven.
+
+## Open questions
+
+Not recorded when this intent was written. The problem gives no number or source.

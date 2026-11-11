@@ -28,3 +28,7 @@ The repository was renamed from `next-friday/create-friday-app` to `next-friday/
 ## Constraints
 
 - Release history stays as it was written.
+
+## Open questions
+
+Not recorded when this intent was written.

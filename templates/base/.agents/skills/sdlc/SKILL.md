@@ -28,7 +28,7 @@ Do these steps in order.
 
 ## Reply shape
 
-Write every part in the language of the person's message; keep paths, commands, copied step text, and a draft file's own text as they are. For `question` and for a request no row fits, leave out **Steps** and put the answer in its place.
+Reply in the language the person wrote in. A message written in a language other than English gets a reply in that language, even when it also holds a command, a path, or English technical terms. Only paths, commands, copied step text, and a draft file's own text stay as they are; your own words after each step, and the **Request** and **Status** parts, are in the person's language. For `question` and for a request no row fits, leave out **Steps** and put the answer in its place.
 
 ```markdown
 **Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>

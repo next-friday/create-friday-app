@@ -5,7 +5,7 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 ## How a change flows
 
 1. **Plan:** the originator of an idea, a ticket, or an incident sends it with `/sdlc`, which interviews them and writes `intent/<change>/intent.md`. The product owner accepts it by merging it with `Status: accepted.`, or rejects it by closing its pull request.
-2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (`write-spec` skill). The product owner resolves concerns with the policy owners.
+2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (send the intent's path with `/sdlc`). The product owner resolves concerns with the policy owners.
 3. **Build:** the engineer starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
 5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
@@ -93,13 +93,13 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 
 - **Sources of truth (engineering lead):** for each artifact, name one system as the source of truth: this repository, an existing tool such as Jira, or, as the minimum, a link both ways (the record id in the file and the commit SHA in the record).
 - **Higher risk (engineering lead):** decide which changes count as higher risk. A tech lead or architect approves their specs and plans.
-- **Policies (each policy owner, with an engineer):** write the policy in `.agents/skills/<area>-policy/SKILL.md` from the owner's source of truth, then run `pnpm rules:sync`. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time. The policy owner approves every later change as its code owner.
+- **Policies (each policy owner, with an engineer):** each `.agents/skills/<area>-policy/SKILL.md` ships a default (security: OWASP ASVS 5.0.0 Level 1; UX: WCAG 2.2 Level AA; compliance: the OECD privacy principles; brand: one declared source for every brand value). Review it, replace or add the organization's own rules, then run `pnpm rules:sync`. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time. The policy owner approves every later change as its code owner.
 - **Production gate (engineering leadership, with change management and compliance):** name the release managers and add them as required reviewers on the `prod` environment, as the README's deploy section describes. `.agents/hooks/agent-production-gate.sh` blocks an agent's shell commands that dispatch a `prod` deploy, run a Railway command with `prod` as its environment, or push a release tag. It does not read MCP tools. A release manager whose own agent session must do one of these starts the agent with `RELEASE_APPROVAL` set to the approval record, for example `RELEASE_APPROVAL=CHG-123 claude`.
 - **Review (tech lead):** replace `src/gen/` in `.agents/review.md` with this project's generated paths, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
 - **People without Git experience:** connect GitHub to Claude (claude.ai or Cowork), so Claude commits `intent.md` for them.
 
 ## 7. Later, as the guardrails mature
 
-- Run the `write-spec` skill by hand first, then as an organization-level slash command, then as a job that commits `spec.md` as a pull request when an `intent.md` merges.
+- Send the intent's path with `/sdlc` by hand first, then as an organization-level slash command, then as a job that commits `spec.md` as a pull request when an `intent.md` merges.
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
 - Replace `bands.yaml` with this project's metric, add a unit-tested detection script that reads it, and add the trigger that runs it.

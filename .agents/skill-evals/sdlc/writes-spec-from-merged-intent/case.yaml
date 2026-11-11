@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: writes-spec-from-merged-intent
+expected_outcome: |
+  The intent intent/csv-export/intent.md is merged and has no spec. The agent follows the design playbook: it reads the four policies, writes intent/csv-export/spec.md from the template, pushes a branch, and waits at the gate for the product owner. It does not merge.

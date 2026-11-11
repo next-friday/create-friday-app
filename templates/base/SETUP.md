@@ -10,7 +10,7 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
 5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
 6. **Deploy:** once `DEPLOY_ENABLED` is `true`, each push to `main` that passes CI deploys to `dev`, and the Deploy workflow promotes a commit to `uat` and then `prod`. `agent-production-gate.sh` blocks an agent's shell commands that deploy to `prod`, run a Railway command with `prod` as its environment, or push a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set.
-7. **Maintain:** larger work becomes a new `intent.md`.
+7. **Maintain:** a job or a person sends a finding with `/sdlc`, which diagnoses it and writes `intent.md`. The service owner triages it.
 
 ## 1. First commit and push
 

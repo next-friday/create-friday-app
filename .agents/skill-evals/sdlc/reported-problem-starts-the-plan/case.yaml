@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: reported-problem-starts-the-plan
+expected_outcome: |
+  The message reports a problem through /sdlc without asking a question. The agent follows the plan playbook: it lists the steps and asks its first round. It does not tell the person to send /sdlc again.

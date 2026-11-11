@@ -1,4 +1,6 @@
-# Plan: write `intent.md`
+# Plan phase: write `intent.md`
+
+This playbook writes the intent. The build plan, `intent/<change>/plan.md`, comes later and is not written here.
 
 1. Let the originator describe the problem in their own words: what they cannot do today, who is affected, what better looks like, and what is out of scope.
 2. Read the code, the docs, and the existing `intent/` folders. Never ask what a file or a command can tell you: the author, for one, is `git config user.name`.
@@ -8,7 +10,7 @@
 4. Write `intent/<change>/intent.md` from the template below, where `<change>` is a short kebab-case name. Write the file in the language of the files already in `intent/`. Use exactly the template's five headings; what is out of scope goes under **Proposed outcome**. Anything else that is unknown, unverified, or not yet decided goes under **Open questions**; write "None" only when nothing is, and never list what the originator already answered. Show the whole draft, and name the file only as `intent/<change>/intent.md`.
 5. **Gate: the originator corrects the draft.** Ask whether it matches what they meant, and revise until they say yes. Commit nothing, push nothing, and open no pull request before that yes.
 6. Commit `intent.md` on a new branch, push it, and open a pull request ready for review, as `AGENTS.md` says for branches and pull requests.
-7. **Gate: the product owner accepts or rejects the intent.** Merging the pull request with `Status: accepted.` accepts it; setting `Status: rejected.` and merging rejects it. Report the pull request's URL and stop.
+7. **Gate: the product owner accepts or rejects the intent.** The product owner sets `Status: accepted.` or `Status: rejected.` and merges the pull request; you do neither. Report the pull request's URL, keep it green as `AGENTS.md` says, and wait.
 
 ## Template
 

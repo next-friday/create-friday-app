@@ -16,6 +16,7 @@ disable-model-invocation: true
 ## Map
 
 - **How the workflow runs, and starting work:** `intent/README.md` and the table in `.agents/skills/sdlc/SKILL.md`.
+- **Keeping `/sdlc` on for a session:** a person starts it; nothing routes work into it. In Claude Code, an invoked skill's content stays in the conversation across later turns, and after a compaction a person types `/sdlc` again to restore it. In Cursor, pick `/sdlc` from the `/` menu and press Option+Enter (Mac) or Alt+Enter (Windows) instead of Enter, which makes it a custom mode that stays in context until the person exits it. Plain Enter attaches it to one message.
 - **Fixing a defect in behaviour that already exists:** `.agents/skills/sdlc/playbooks/fix.md` is the short path with no intent, spec, or plan. Every other change runs intent, spec, plan, then build.
 - **Who decides:** `.agents/rules/agent-owned-work.md` and `.github/CODEOWNERS`.
 - **A mistake the agent repeats:** **Things Claude gets wrong** in `AGENTS.md`.

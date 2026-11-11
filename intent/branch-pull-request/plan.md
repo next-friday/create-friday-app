@@ -4,8 +4,6 @@ Accepted by: @joetakara.
 
 From `intent/branch-pull-request/intent.md` and `spec.md`.
 
-## Context
-
 A push to a branch whose pull request has merged recreates the branch with no pull request. Requirement 1, the pre-push hook, stops that push. This plan builds requirement 2; requirements 3 and 4 are met by the `sdlc` playbooks.
 
 ## Files that change
@@ -25,13 +23,12 @@ A push to a branch whose pull request has merged recreates the branch with no pu
 2. Generate a project (`AGENTS.md`, template check) and run its `pnpm verify`.
 3. Commit `plan.md` with the change. Run `pnpm verify` in the root, open the pull request, and drive it to green (page 38).
 
-## Verification
+## Risks
 
-- `pnpm verify` passes in the root and in the generated project. Its output goes in the pull request.
-- `git grep -n "Automatically delete head branches" -- CONTRIBUTING.md templates/base/SETUP.md` finds both bullets.
+- **Departure: the workflow is removed, and the agent opens the pull request.** No workflow opens or reopens a pull request. A workflow that ran on `GITHUB_TOKEN` needed a person to select **Approve workflows to run** and **Update branch** on each pull request it opened, which are steps outside the human gates. The agent opens each pull request (spec requirement 3), and closing a pull request rejects an intent or a spec (spec requirement 4).
 
-## Departure: the workflow is removed
+## Proof
 
-## Departure: the agent opens the pull request
-
-No workflow opens or reopens a pull request. A workflow that ran on `GITHUB_TOKEN` needed a person to select **Approve workflows to run** and **Update branch** on each pull request it opened, which are steps outside the human gates. The agent opens each pull request (spec requirement 3), and closing a pull request rejects an intent or a spec (spec requirement 4).
+- 1, 3, 4: the pre-push hook and the `sdlc` playbooks carry them; this plan does not change them.
+- 2: `git grep -n "Automatically delete head branches" -- CONTRIBUTING.md templates/base/SETUP.md` finds both bullets.
+- 5: `pnpm verify` passes in the root and in the generated project. Its output goes in the pull request.

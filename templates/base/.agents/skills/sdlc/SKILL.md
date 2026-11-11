@@ -24,27 +24,27 @@ Do these steps in order.
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line.
 
-2. **Do the playbook's steps yourself,** stopping only as `.agents/rules/agent-owned-work.md` says. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file in the same turn, read that file and continue without asking.
-3. **Write the reply in the shape below.**
+2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out.
+3. **Do the playbook's steps yourself,** stopping only as `.agents/rules/agent-owned-work.md` says. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file in the same turn, read that file and continue without asking. Mark each step done in the task list as you finish it.
+4. **Write the reply in the shape below.**
 
 ## Reply shape
 
-Reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, copied step text, and a draft file's own text stay as they are. For `question` and for a request no row fits, leave out **Steps** and put the answer in its place.
+Reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, and a draft file's own text stay as they are.
 
 ```markdown
 **Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>
 
-**Steps:**
+**Steps:** <only when the session has no task-list tool, and never for the `question` playbook. One line for each numbered step of the playbook: `1. <the step, copied word for word>: done | open | skip: <reason>`.>
 
-1. <the first sentence of step 1 of the playbook, copied word for word>: done | open | skip: <reason>
-2. <and so on for every numbered step of the playbook>
-
-<What the current step produces: the round of questions, or the whole draft.>
+<What the current step produces: the round of questions, or the whole draft. For a question or a request no row fits, the answer.>
 
 **Status:** <what is done, what comes next, and which gate it waits on and for whom.>
 ```
 
-A step that is not finished is `open`, including one at its Gate. When one turn runs more than one playbook, list the steps of each under its file name. A reply that ends before a **Gate** step says which step stopped it and why. "Waiting for an instruction" is not a reason. Use `skip` only for a step you decide never to do.
+When one turn runs more than one playbook, list each one's steps under its file name. A step that is not finished is `open`, including one at its Gate.
+
+A reply that ends before a **Gate** step says which step stopped it and why. "Waiting for an instruction" is not a reason.
 
 When the evidence shows that the change cannot be made in this project, say so under **Request**. In the `plan` playbook, the first round then asks the one question that settles where the change belongs.
 

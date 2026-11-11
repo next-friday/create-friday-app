@@ -4,7 +4,7 @@ This project runs an AI-native software development loop in Claude Code and Curs
 
 ## How a change flows
 
-Send a request with `/sdlc`. `intent/README.md` and the playbooks in `.agents/skills/sdlc/playbooks/` say who acts and who decides at each stage.
+Send a request with `/sdlc`. Only a person starts it; nothing routes work into it by itself. In Claude Code, an invoked skill stays in the conversation across later turns, and after a compaction you type `/sdlc` again. In Cursor, pick `/sdlc` from the `/` menu and press Option+Enter (Mac) or Alt+Enter (Windows) instead of Enter to keep it on as a custom mode until you exit it. `intent/README.md` and the playbooks in `.agents/skills/sdlc/playbooks/` say who acts and who decides at each stage.
 
 ## 1. First commit and push
 

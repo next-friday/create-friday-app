@@ -13,3 +13,5 @@ The review instructions in `.agents/review.md` and `REVIEW.md` name the generate
 Every generated project gets `pnpm bands:check <file>`. It reads `bands.yaml` and a JSON file `{"baseline": [...], "recent": [...]}`, applies the Western Electric rules to the metric, and prints one JSON line with the tier, its action, tools, and routes. A `2sigma` or `3sigma` result goes to `/sdlc` as a finding. With no argument it runs its self-tests, and `pnpm verify` runs them. Each stack gains the `yaml` dev dependency.
 
 `pnpm intent:check` also accepts `Status: done.`, which an agent sets in `intent.md` once the tree meets every requirement of the spec; `intent/README.md` says when and who.
+
+Every generated project gets `pnpm plan:check`. It checks each `intent/<change>/plan.md`: the headings of the plan template, the `Accepted by:` line once the branch changes a file outside `intent/`, a `spec.md` beside the plan, and a Proof section that names every numbered requirement of that spec; it also reports a spec with `Status: done.` that has no plan.

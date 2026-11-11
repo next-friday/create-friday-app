@@ -29,6 +29,7 @@
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
     "peers:check": "pnpm peers check",
+    "plan:check": "node scripts/check-plan.ts",
     "prepare": "husky",
     "rules:check": "node scripts/sync-agent-rules.ts --check",
     "rules:sync": "node scripts/sync-agent-rules.ts",
@@ -47,7 +48,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
-    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm bands:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
+    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm plan:check && pnpm bands:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "dependencies": {
     "@nestjs/common": "12.3.2",

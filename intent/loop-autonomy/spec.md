@@ -1,6 +1,6 @@
 # Spec: The agent carries each step of the loop without asking for permission
 
-From `intent/loop-autonomy/intent.md`. Status: done.
+From `intent/loop-autonomy/intent.md`. Status: accepted.
 
 ## Requirements
 

@@ -1,6 +1,6 @@
 # Intent: GitHub files that fit private client projects
 
-Author: Joe Takara (Developer Productivity). Status: done.
+Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 

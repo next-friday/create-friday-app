@@ -205,11 +205,10 @@ The edit-time hook goes: its entries leave `.claude/settings.json` (lines 51–5
 
 ### Root housekeeping
 
-| File                       | Change                                                                                                                                                                                                 |
-| :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CONTRIBUTING.md`          | Lines 88, 90, and 92, the first-publish token, go. Line 91, adding the trusted publisher, stays: the npm owner repeats it whenever the connection is recreated (`intent/repository-rename/intent.md`). |
-| `.github/file-filters.yml` | `!docs/**` (line 4), `!.vscode/**` (line 14), and the image globs (lines 19–21) go.                                                                                                                    |
-| `.github/dependabot.yml`   | `vite` (line 42) leaves `test-build-tooling`.                                                                                                                                                          |
+| File                       | Change                                                                              |
+| :------------------------- | :---------------------------------------------------------------------------------- |
+| `.github/file-filters.yml` | `!docs/**` (line 4), `!.vscode/**` (line 14), and the image globs (lines 19–21) go. |
+| `.github/dependabot.yml`   | `vite` (line 42) leaves `test-build-tooling`.                                       |
 
 `intent/ci/spec.md` rewrites `ci.yml` and uses `file-filters.yml`; these lines go whichever lands first.
 

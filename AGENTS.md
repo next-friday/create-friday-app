@@ -9,7 +9,7 @@
 | Every check (pre-push runs it) | `pnpm verify`                                               |
 | Tests                          | `pnpm test`, or `pnpm test:coverage`                        |
 | One test                       | `pnpm vitest run test/stacks.test.ts -t "<test name>"`      |
-| Lint, types, unused code       | `pnpm lint`, `pnpm typecheck`, `pnpm knip`                  |
+| Lint, types, unused code       | `pnpm lint:check`, `pnpm typecheck`, `pnpm knip`            |
 | Build `dist/main.mjs`          | `pnpm build`                                                |
 | Render agent rules             | `pnpm rules:sync`; `pnpm rules:check` fails on stale copies |
 | Release note, when one is due  | `pnpm changeset` (see `.changeset/README.md`)               |
@@ -35,13 +35,13 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 - `src/main.ts` calls `create()` in `src/create.ts`, which copies `templates/base`, then `templates/<stack>`, renames the project, and installs.
 - A stack is an entry in `src/stacks.ts` plus `templates/<stack>/`, whose `package.json` is named `next-friday-template-<stack>`.
-- Agent rules: `.agents/rules/*.md` and `.agents/rules.json` are the source; `pnpm rules:sync` renders them.
+- Agent rules, skills, subagents, `review.md`, and `mcp.json`: the files under `.agents/` are the source; `pnpm rules:sync` renders them into `.claude/`, `.cursor/`, `REVIEW.md`, and the MCP configs. Never edit a rendered copy.
 
 ## Conventions
 
 1. **Edit `src/`, `test/`, and `templates/`; never edit generated `dist/`.**
 2. **Preserve CLI arguments, prompts, and stack names** unless a major changeset declares the break. `.changeset/README.md` says when a change needs a changeset.
-3. **A stack replaces a `base` file only when that stack needs different content.** Today these replace `base`: `knip.json` in `nextjs` and `turborepo`, and `pnpm-workspace.yaml`, `.github/dependabot.yml`, and `.github/workflows/deploy.yml` in `turborepo`. When you change one of those `base` files, make the same change in each replacement.
+3. **A stack replaces a `base` file only when that stack needs different content.** Today these replace `base`: `knip.json`, `pnpm-workspace.yaml`, `.github/dependabot.yml`, and `.github/workflows/deploy.yml` in `turborepo`. When you change one of those `base` files, make the same change in each replacement.
 4. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 5. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.**
 6. **After changing a template, generate a project and run its `pnpm verify`.**
@@ -55,11 +55,11 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 When Claude makes a mistake twice, add the correction here.
 
-- **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back.
+- **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back with your file-editing tool, because the shell gate blocks `cp` and `rsync` into `.agents`, `.claude/rules`, and `.cursor` paths.
 - **Commit messages**: commitlint accepts only `Co-Authored-By` trailers.
 - **Issues**: open an issue only to hand work to another person, never to give a pull request a number to close. A pull request closes an issue that already exists with `Closes #<issue>`.
 - **Testing a skill**: test a skill with Claude Code itself, in a generated project: `claude -p "/sdlc <request>" --model <small model> --strict-mcp-config`.
 - **Accepted is not built**: a spec with `Status: accepted.` is not built. Check each requirement against the tree before you call a change done.
 - **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
-- **CI-only jobs**: Template, Consumer Smoke, and Compatibility run only in CI. Do not report them as local results.
-- **Playbook claims**: add a requirement to an intent, spec, or plan only when the user decided it or a source says it: the playbook page, an official document, or a named community repository. This includes a requirement a review bot suggests. Quote the passage with its page number from the PDF's page breaks. When the user did not decide it and no source says it, leave it out and answer the thread with that.
+- **CI-only jobs**: Template, Consumer Smoke, Compatibility, Dependency Audit, and Release Integrity run only in CI, as do the scorecard, secret-scan, zizmor, and dependency-review workflows. Do not report them as local results.
+- **Playbook claims**: add a requirement to an intent, spec, or plan only when the user decided it or a source says it: an official document or a named community repository. This includes a requirement a review bot suggests. Quote the passage and say where it is. When the user did not decide it and no source says it, leave it out and answer the thread with that.

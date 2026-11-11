@@ -21,7 +21,7 @@ pnpm install
 
 - Fix lint, type, and test failures at their root cause.
 - Put unit tests next to the code as `*.test.ts` and Playwright end-to-end tests in `test/` as `*.e2e.test.ts`.
-- Change the database schema only through collections, then run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>` and commit the generated files. Production applies pending migrations when the server starts.
+- Change the database schema only through collections, then run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>` and commit the generated files. Production applies pending migrations when Payload first initialises, which `/health` triggers.
 - Treat `coverage/` as generated output.
 - Do not commit `.env` files or credentials.
 

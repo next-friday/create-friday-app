@@ -1,19 +1,21 @@
 import {cancel, intro, isCancel, log, outro, select, text} from "@clack/prompts";
-import {chmod, cp, readdir, readFile, rename} from "node:fs/promises";
-import {existsSync, readdirSync, readFileSync, rmSync} from "node:fs";
+import {chmod, cp, readFile, rename} from "node:fs/promises";
+import {existsSync, readdirSync, readFileSync, realpathSync, rmSync} from "node:fs";
 import {fileURLToPath} from "node:url";
 import path from "node:path";
 
-import {developmentScripts, stacks, templateName} from "./stacks.ts";
 import {didInstallDependencies, initGit, writeEnvironmentFile} from "./setup.ts";
+import {listProjectFiles} from "./project-files.ts";
 import {packageName, validateProjectName} from "./project-name.ts";
 import {parseCliArguments, usage} from "./arguments.ts";
 import {renameProject} from "./rename.ts";
+import {stackById, stacks, templateName} from "./stacks.ts";
 import type {CliOptions} from "./arguments.ts";
 import type {GitResult} from "./setup.ts";
 import type {StackId} from "./stacks.ts";
 
 const templatesDirectory = fileURLToPath(new URL("../templates", import.meta.url));
+const interruptSignals = ["SIGINT", "SIGTERM", "SIGHUP"] as const;
 
 class CancelledError extends Error {
   override message = "Cancelled.";
@@ -24,9 +26,8 @@ class CancelledError extends Error {
  * @param cliArguments - Arguments after the executable and script path.
  */
 export async function create(cliArguments: string[]): Promise<void> {
-  const cwd = process.cwd();
-
   try {
+    const cwd = process.cwd();
     const options = parseCliArguments(cliArguments);
 
     if (options.help) {
@@ -41,11 +42,10 @@ export async function create(cliArguments: string[]): Promise<void> {
       return;
     }
 
-    intro("Create a Next Friday project");
-
     const {name, stack} = await resolveProject(options, cwd);
     const manifestName = packageName(name, cwd);
-    const directory = path.resolve(cwd, name);
+    const target = path.resolve(cwd, name);
+    const directory = existsSync(target) ? realpathSync(target) : target;
 
     log.step(`Copying the ${stack} template.`);
     await writeProject(stack, directory, manifestName);
@@ -55,14 +55,19 @@ export async function create(cliArguments: string[]): Promise<void> {
 
     outro(nextSteps(name, stack, git, isInstalled));
   } catch (error) {
-    cancel(error instanceof Error ? error.message : String(error));
-    process.exitCode = error instanceof CancelledError ? 130 : 1;
+    if (error instanceof CancelledError) {
+      cancel(error.message);
+      process.exitCode = 130;
+    } else {
+      process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+      process.exitCode = 1;
+    }
   }
 }
 
 /**
- * Copy, rename, and write `.env`, removing what was written when a step fails or Ctrl+C arrives.
- * Ctrl+C waits for the running step, so the removal does not race the copy.
+ * Copy, rename, and write `.env`, removing what was written when a step fails or Ctrl+C, SIGTERM, or SIGHUP arrives.
+ * An interrupt waits for the running step, so the removal does not race the copy.
  * @param stack - Supported stack id.
  * @param directory - Project directory.
  * @param manifestName - Package name for `package.json`.
@@ -79,7 +84,9 @@ async function writeProject(
     isInterrupted = true;
   };
 
-  process.on("SIGINT", interrupt);
+  for (const signal of interruptSignals) {
+    process.on(signal, interrupt);
+  }
 
   try {
     await copyTemplate(stack, directory);
@@ -94,7 +101,9 @@ async function writeProject(
 
     throw isInterrupted ? new CancelledError() : error;
   } finally {
-    process.off("SIGINT", interrupt);
+    for (const signal of interruptSignals) {
+      process.off(signal, interrupt);
+    }
   }
 }
 
@@ -112,21 +121,40 @@ async function resolveProject(
     throw new Error(`Pass the project name and --stack when not running in a terminal.\n${usage}`);
   }
 
+  if (options.name !== undefined) {
+    assertUsableName(options.name, cwd);
+  }
+
+  intro("Create a Next Friday project");
+
   const name = options.name ?? (await askName(cwd));
+  const stack = options.stack ?? (await askStack());
+
+  assertUsableName(name, cwd);
+
+  return {
+    name,
+    stack,
+  };
+}
+
+/**
+ * Throw when the project name is unusable or its directory is taken, as a prompt may have left a
+ * directory in place since the name was checked.
+ * @param name - Project name, or `.` for the current directory.
+ * @param cwd - Directory the project is created in.
+ */
+function assertUsableName(name: string, cwd: string): void {
   const nameError = validateProjectName(name, cwd);
 
   if (nameError !== undefined) {
     throw new Error(nameError);
   }
-
-  return {
-    name,
-    stack: options.stack ?? (await askStack()),
-  };
 }
 
 const gitWarnings: Partial<Record<GitResult, string>> = {
-  failed: "git init failed. Install Git 2.28 or later, then run the steps below.",
+  failed:
+    "git init failed. Check that Git 2.28 or later is installed and the directory is writable, then run the steps below.",
   parent:
     "Skipped git init inside an existing Git repository. The Git hooks install only at a repository root.",
 };
@@ -141,7 +169,7 @@ function setUpProject(
   directory: string,
   options: CliOptions,
 ): {git: GitResult | undefined; isInstalled: boolean} {
-  const git = options.skipGit ? undefined : initGit(directory);
+  const git = options.skipGit ? existingGit(directory) : initGit(directory);
   const warning = git === undefined ? undefined : gitWarnings[git];
 
   if (warning !== undefined) {
@@ -161,7 +189,7 @@ function setUpProject(
 
   if (!isInstalled) {
     log.error(
-      "pnpm install failed. Fix the error above, then run the steps below. The project needs pnpm and the Node.js version in .nvmrc.",
+      "pnpm install failed. Fix the error above, then run the steps below. The project needs pnpm and the Node.js version in package.json#engines.",
     );
 
     process.exitCode = 1;
@@ -174,12 +202,29 @@ function setUpProject(
 }
 
 /**
+ * Report a repository that skipping `git init` leaves in place.
+ * @param directory - Project directory.
+ * @returns `existing` when the directory holds `.git`, otherwise `undefined`.
+ */
+function existingGit(directory: string): GitResult | undefined {
+  return existsSync(path.join(directory, ".git")) ? "existing" : undefined;
+}
+
+/**
  * Copy the shared template files, then the stack's files, into the project directory.
  * npm leaves `.gitignore` out of published packages, so the template keeps it as `_gitignore`.
  * @param stack - Supported stack id.
  * @param directory - Project directory.
  */
 async function copyTemplate(stack: StackId, directory: string): Promise<void> {
+  for (const template of ["base", stack]) {
+    if (!existsSync(path.join(templatesDirectory, template))) {
+      throw new Error(
+        `The ${template} template is missing from ${templatesDirectory}. Reinstall @next-friday/create-app.`,
+      );
+    }
+  }
+
   await cp(path.join(templatesDirectory, "base"), directory, {
     recursive: true,
   });
@@ -198,22 +243,16 @@ async function copyTemplate(stack: StackId, directory: string): Promise<void> {
  * @param directory - Project directory.
  */
 async function markScriptsExecutable(directory: string): Promise<void> {
-  const entries = await readdir(directory, {
-    recursive: true,
-    withFileTypes: true,
-  });
+  const files = await listProjectFiles(directory);
 
   await Promise.all(
-    entries
-      .filter(entry => entry.isFile())
-      .map(async entry => {
-        const file = path.join(entry.parentPath, entry.name);
-        const content = await readFile(file);
+    files.map(async file => {
+      const content = await readFile(file);
 
-        if (content.subarray(0, 2).toString() === "#!") {
-          await chmod(file, 0o755);
-        }
-      }),
+      if (content.subarray(0, 2).toString() === "#!") {
+        await chmod(file, 0o755);
+      }
+    }),
   );
 }
 
@@ -252,17 +291,18 @@ function nextSteps(
   git: GitResult | undefined,
   isInstalled: boolean,
 ): string {
+  const {developmentScript, requiresDatabase} = stackById[stack];
   const hasGit = git !== undefined && git !== "failed";
 
   const commands = [
     name === "." ? [] : [`cd ${name}`],
     hasGit ? [] : ["git init --initial-branch=main"],
     hasGit && isInstalled ? [] : ["pnpm install"],
-    [`pnpm ${developmentScripts[stack]}`],
+    [`pnpm ${developmentScript}`],
   ].flat();
 
-  const database = stacks.find(item => item.id === stack)?.requiresDatabase
-    ? `Set DATABASE_URL in .env to your PostgreSQL database before pnpm ${developmentScripts[stack]}.\n`
+  const database = requiresDatabase
+    ? `Set DATABASE_URL in .env to your PostgreSQL database before pnpm ${developmentScript}.\n`
     : "";
 
   const readme = name === "." ? "README.md" : `${name}/README.md`;

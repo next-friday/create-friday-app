@@ -8,8 +8,7 @@ on:
       - reopened
       - synchronize
 
-permissions:
-  pull-requests: read # Needed to read the pull request title for semantic validation.
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
@@ -21,6 +20,8 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      pull-requests: read # Needed to read the pull request title for semantic validation.
     steps:
       - name: Validate pull request title
         uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1

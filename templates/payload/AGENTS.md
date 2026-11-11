@@ -4,34 +4,34 @@ Payload CMS on Next.js App Router and PostgreSQL, in TypeScript on pnpm and Node
 
 ## Commands
 
-| Task                          | Command                                                    |
-| :---------------------------- | :--------------------------------------------------------- |
-| Start with reload             | `pnpm dev`                                                 |
-| One test                      | `pnpm vitest run src/environment.test.ts -t "<test name>"` |
-| Unit tests                    | `pnpm test`, or `pnpm test:coverage`                       |
-| End-to-end tests              | `pnpm test:e2e`                                            |
-| Regenerate after a collection | `pnpm generate:types`, `pnpm generate:importmap`           |
-| Create a migration            | `pnpm migrate:create <name>`                               |
-| What `pre-push` runs          | `pnpm check`                                               |
-| Every check                   | `pnpm verify`                                              |
-| Render rules after a change   | `pnpm rules:sync`                                          |
+| Task                               | Command                                                    |
+| :--------------------------------- | :--------------------------------------------------------- |
+| Start with reload                  | `pnpm dev`                                                 |
+| One test                           | `pnpm vitest run src/environment.test.ts -t "<test name>"` |
+| Unit tests                         | `pnpm test`, or `pnpm test:coverage`                       |
+| End-to-end tests                   | `pnpm test:e2e`                                            |
+| Regenerate after a collection      | `pnpm generate:types`, `pnpm generate:importmap`           |
+| Create a migration                 | `pnpm migrate:create <name>`                               |
+| What `pre-push` runs               | `pnpm check`                                               |
+| Every check except `pnpm test:e2e` | `pnpm verify`                                              |
+| Render rules after a change        | `pnpm rules:sync`                                          |
 
 ## Verifying your work
 
 - Build: `pnpm build` (prints the `Route (app)` table)
 - Test: `pnpm test:coverage` (all green, then the coverage summary; never skip or delete a failing test)
-- Lint: `pnpm verify:static` (ESLint allows zero warnings; prints `✔ no dependency violations found`)
+- Static checks: `pnpm verify:static` (ESLint allows zero warnings; every check must pass)
 
 Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
 
 ## Architecture
 
-- `src/payload.config.ts` wires the collections in `src/collections/` to PostgreSQL. The site lives in `src/app/(frontend)/`, and `src/app/health/route.ts` serves `/health`.
-- In development, Payload applies collection changes to the database directly. In production, the server applies the migrations in `src/migrations/` when it starts.
+- `src/payload.config.ts` wires the collections in `src/collections/` to PostgreSQL. The site lives in `src/app/(frontend)/`, and `src/app/health/route.ts` serves `/health`. `next.config.ts` builds `output: "standalone"` and leaves Cache Components off.
+- In development, Payload applies collection changes to the database directly. In production, Payload applies the migrations in `src/migrations/` when it first initialises, which is the first request that needs it, not when the server starts.
 
 ## Conventions
 
-1. **Change the schema only through collections, then regenerate and commit.** Payload generates `src/app/(payload)/`, `src/payload-types.ts`, and `src/migrations/`; run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>`. Do not edit those files by hand.
+1. **Change the schema only through collections, then regenerate and commit.** Payload generates `src/payload-types.ts`, `src/migrations/`, and `src/app/(payload)/admin/importMap.ts`; run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>`. Do not edit those files by hand.
 2. **Put unit tests next to the code as `src/**/*.test.{ts,tsx}` and Playwright end-to-end tests in `test/` as `*.e2e.test.ts`.** Vitest collects only the first pattern.
 3. **Component tests need a DOM test environment, and Vitest runs in Node.js.** Add that environment with the first component test.
 4. **Read configuration through `requireEnvironment` in `src/environment.ts`.** Document each variable in `.env.example`.

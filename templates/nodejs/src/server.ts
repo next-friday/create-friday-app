@@ -2,12 +2,12 @@ import {createServer} from "node:http";
 import type {Server} from "node:http";
 
 /**
- * Create the HTTP server. `GET` or `HEAD` `/health` reports that the process is up; every other request gets 404.
+ * Create the HTTP server. `GET` or `HEAD` `/health` reports that the process is up; every other request, including one whose target is not a valid URL, gets 404.
  * @returns A server that is not listening yet.
  */
 export function createAppServer(): Server {
   return createServer((request, response) => {
-    const {pathname} = new URL(request.url ?? "/", "http://localhost");
+    const pathname = URL.parse(request.url ?? "/", "http://localhost")?.pathname;
 
     if (pathname === "/health" && (request.method === "GET" || request.method === "HEAD")) {
       response.writeHead(200, {

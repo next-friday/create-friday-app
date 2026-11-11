@@ -55,14 +55,16 @@ export function parseCliArguments(cliArguments: string[]): CliOptions {
     },
   });
 
-  if (positionals.length > 1) {
+  const {help, stack, version} = values;
+  const isInformational = help || version;
+
+  if (!isInformational && positionals.length > 1) {
     throw new Error(`Pass one project name, not ${positionals.length}: ${positionals.join(" ")}.`);
   }
 
   const [name] = positionals;
-  const {help, stack, version} = values;
 
-  if (stack !== undefined && !isStackId(stack)) {
+  if (!isInformational && stack !== undefined && !isStackId(stack)) {
     const ids = stacks.map(supported => supported.id).join(", ");
 
     throw new Error(`Unknown stack "${stack}". Use one of: ${ids}.`);
@@ -71,8 +73,8 @@ export function parseCliArguments(cliArguments: string[]): CliOptions {
   return {
     help,
     name,
-    stack,
     version,
+    stack: stack !== undefined && isStackId(stack) ? stack : undefined,
     skipGit: values["skip-git"],
     skipInstall: values["skip-install"],
   };

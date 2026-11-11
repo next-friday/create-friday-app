@@ -75,7 +75,7 @@ jobs:
           require-lockfile: true
       - name: Reject suppression directives
         run: pnpm suppressions:check
-      - name: Check Cursor rules match .agents/rules
+      - name: Check rendered agent rules match .agents/rules
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
@@ -83,6 +83,10 @@ jobs:
         run: pnpm human-gates:check
       - name: Self-test the intent checker
         run: pnpm intent:check
+      - name: Check plans
+        run: pnpm plan:check
+      - name: Check bands
+        run: pnpm bands:check
       - name: Check lint
         run: pnpm lint:check
       - name: Check formatting

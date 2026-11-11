@@ -4,21 +4,21 @@ Next.js App Router web app with React and Tailwind CSS, in TypeScript on pnpm an
 
 ## Commands
 
-| Task                        | Command                                                     |
-| :-------------------------- | :---------------------------------------------------------- |
-| Start with reload           | `pnpm dev`                                                  |
-| One test                    | `pnpm vitest run app/health/route.test.ts -t "<test name>"` |
-| Unit tests                  | `pnpm test`, or `pnpm test:coverage`                        |
-| End-to-end tests            | `pnpm test:e2e`                                             |
-| What `pre-push` runs        | `pnpm check`                                                |
-| Every check                 | `pnpm verify`                                               |
-| Render rules after a change | `pnpm rules:sync`                                           |
+| Task                               | Command                                                     |
+| :--------------------------------- | :---------------------------------------------------------- |
+| Start with reload                  | `pnpm dev`                                                  |
+| One test                           | `pnpm vitest run app/health/route.test.ts -t "<test name>"` |
+| Unit tests                         | `pnpm test`, or `pnpm test:coverage`                        |
+| End-to-end tests                   | `pnpm test:e2e`                                             |
+| What `pre-push` runs               | `pnpm check`                                                |
+| Every check except `pnpm test:e2e` | `pnpm verify`                                               |
+| Render rules after a change        | `pnpm rules:sync`                                           |
 
 ## Verifying your work
 
 - Build: `pnpm build` (prints the `Route (app)` table)
 - Test: `pnpm test:coverage` (all green, then the coverage summary; never skip or delete a failing test)
-- Lint: `pnpm verify:static` (ESLint allows zero warnings; prints `✔ no dependency violations found`)
+- Static checks: `pnpm verify:static` (ESLint allows zero warnings; every check must pass)
 
 Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
 

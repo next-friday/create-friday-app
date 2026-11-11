@@ -22,6 +22,7 @@ const proofHeading = "## Proof";
 const requirementsHeading = "## Requirements";
 const acceptancePlaceholder = "@<engineer>";
 const acceptedByPrefix = "Accepted by: ";
+const acceptedByPattern = /^Accepted by: @[\dA-Za-z][\dA-Za-z-]*\.$/;
 const requiredHeadings = ["## Files that change", "## Order of work", "## Risks", proofHeading];
 
 /**
@@ -72,11 +73,13 @@ function requiresAcceptance(branchChanges: BranchChanges | undefined): boolean {
 /**
  * Say why the acceptance rule cannot run.
  * @param branchChanges What the branch changed, or undefined when no merge base was found.
- * @returns A note when the default branch is not available, otherwise undefined.
+ * @returns A problem when the default branch is not available, otherwise undefined.
  */
-function describeAcceptanceSkip(branchChanges: BranchChanges | undefined): string | undefined {
+function describeMissingDefaultBranch(
+  branchChanges: BranchChanges | undefined,
+): string | undefined {
   return branchChanges === undefined
-    ? `${defaultBranch} cannot be found, so the "${acceptedByPrefix}" rule was skipped; run "git fetch origin main" to apply it`
+    ? `${defaultBranch} cannot be found, so the "${acceptedByPrefix}" rule cannot be applied; run "git fetch origin main" to apply it`
     : undefined;
 }
 
@@ -161,13 +164,13 @@ function findHeadingProblems(maskedLines: string[]): string[] {
  * @returns At most one message.
  */
 function findAcceptanceProblems(maskedLines: string[], isAcceptanceRequired: boolean): string[] {
-  const acceptedLine = maskedLines.find(line => line.startsWith(acceptedByPrefix));
+  const acceptedLine = maskedLines.slice(1).find(line => line.trim() !== "");
 
   return !isAcceptanceRequired ||
-    (acceptedLine !== undefined && !acceptedLine.includes(acceptancePlaceholder))
+    (acceptedLine !== undefined && acceptedByPattern.test(acceptedLine.trimEnd()))
     ? []
     : [
-        `the plan has no "${acceptedByPrefix}<engineer>." line under its title, or it still holds ${acceptancePlaceholder}, and this branch changes a file outside ${intentDirectory}/; write the engineer who accepted the plan`,
+        `the plan has no "${acceptedByPrefix}<engineer>." line directly under its title, or it holds ${acceptancePlaceholder} or no GitHub login, and this branch changes a file outside ${intentDirectory}/; write the engineer who accepted the plan`,
       ];
 }
 
@@ -452,6 +455,24 @@ const selfTestCases: SelfTestCase[] = [
     ),
   },
   {
+    expectedMessagePart: acceptedByPrefix,
+    name: "the accepting engineer is empty",
+    problems: checkAgainstProofSpec(
+      buildPlan({
+        accepted: `${acceptedByPrefix}.`,
+      }),
+    ),
+  },
+  {
+    expectedMessagePart: acceptedByPrefix,
+    name: "the accepting line is not directly under the title",
+    problems: checkAgainstProofSpec(
+      buildPlan({
+        accepted: `From the spec.\n\n${engineerLine}`,
+      }),
+    ),
+  },
+  {
     name: "a placeholder is allowed when acceptance is not required",
     problems: checkAgainstProofSpec(
       buildPlan({
@@ -579,11 +600,11 @@ const selfTestCases: SelfTestCase[] = [
   {
     name: "a missing default branch is reported",
     expectedMessagePart: "cannot be found",
-    problems: [describeAcceptanceSkip(undefined) ?? "no note"],
+    problems: [describeMissingDefaultBranch(undefined) ?? "no note"],
   },
   {
     name: "no note when the default branch is found",
-    problems: describeAcceptanceSkip(branchWithCode) === undefined ? [] : ["unexpected note"],
+    problems: describeMissingDefaultBranch(branchWithCode) === undefined ? [] : ["unexpected note"],
   },
   {
     name: "a done spec has no plan",
@@ -702,12 +723,12 @@ function findPlanFileLines(planPath: string, isAcceptanceRequired: boolean): str
  */
 function findPlanLines(planPaths: string[]): string[] {
   const branchChanges = planPaths.length > 0 ? findBranchChanges() : undefined;
-  const skipNote = planPaths.length > 0 ? describeAcceptanceSkip(branchChanges) : undefined;
-  const isAcceptanceRequired = requiresAcceptance(branchChanges);
 
-  if (skipNote !== undefined) {
-    process.stderr.write(`${skipNote}\n`);
-  }
+  const missingBranchMessage =
+    planPaths.length > 0 ? describeMissingDefaultBranch(branchChanges) : undefined;
+
+  const missingBranchLines = missingBranchMessage === undefined ? [] : [missingBranchMessage];
+  const isAcceptanceRequired = requiresAcceptance(branchChanges);
 
   const missingLines = planPaths
     .filter(planPath => !existsSync(planPath))
@@ -720,7 +741,7 @@ function findPlanLines(planPaths: string[]): string[] {
     .filter(planPath => existsSync(planPath))
     .flatMap(planPath => findPlanFileLines(planPath, isAcceptanceRequired));
 
-  return [...missingLines, ...checkedLines];
+  return [...missingBranchLines, ...missingLines, ...checkedLines];
 }
 
 if (selfTestFailures.length > 0) {

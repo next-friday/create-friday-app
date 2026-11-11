@@ -1,4 +1,4 @@
-import {lstatSync, readdirSync} from "node:fs";
+import {lstatSync, readdirSync, statSync} from "node:fs";
 import path from "node:path";
 
 const packageNamePattern = /^[a-z0-9][a-z0-9._-]*$/;
@@ -52,7 +52,13 @@ export function validateProjectName(name: string, cwd: string): string | undefin
     return undefined;
   }
 
-  if (!stats.isDirectory()) {
+  const resolved = stats.isSymbolicLink()
+    ? statSync(target, {
+        throwIfNoEntry: false,
+      })
+    : stats;
+
+  if (!resolved?.isDirectory()) {
     return `${target} already exists and is not a directory.`;
   }
 

@@ -1,3 +1,4 @@
+import {describe, expect, it} from "vitest";
 import {TerminusModule} from "@nestjs/terminus";
 import {Test} from "@nestjs/testing";
 

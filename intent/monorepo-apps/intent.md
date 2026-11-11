@@ -6,7 +6,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 - The company is an enterprise software house being set up. Its projects include customer web apps, LINE LIFF apps, backoffices, CMSs, corporate sites, landing pages, event sites, other marketing sites, APIs, and background services. Later projects may need other frameworks, such as Medusa, React Native, or native Android and iOS apps.
 - The CLI generates one stack per repository (`--stack nodejs|nestjs|nextjs|payload|turborepo`). The only monorepo stack, `turborepo`, has two fixed apps, `apps/app` and `apps/backoffice`. A team cannot choose which apps a product has, add an app later, or name an app by what it is for.
-- Documentation is Markdown spread across many files. People find it hard to read, and there is no single place that both people and AI agents read.
+- Documentation is Markdown spread across many files: a project generated with `--stack turborepo` from this tree holds 96 Markdown files, 12 of them outside `.agents/`, `.claude/`, and `.cursor/` (`git ls-files '*.md'` in the generated project). People find it hard to read, and there is no single place that both people and AI agents read.
 
 ## Proposed outcome
 

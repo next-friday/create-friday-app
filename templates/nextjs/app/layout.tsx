@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Next Friday Next.js template",
-  description: "Starter application for Next Friday Next.js projects.",
+  title: "Next.js application",
+  description: "A Next.js application.",
 };
 
 export default function RootLayout(props: LayoutProps<"/">) {

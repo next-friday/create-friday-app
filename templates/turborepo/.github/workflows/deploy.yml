@@ -51,6 +51,7 @@ jobs:
           persist-credentials: false
       - name: Require the commit on main with passing CI and a deployment to the previous environment
         if: github.event_name == 'workflow_dispatch'
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -115,10 +116,10 @@ jobs:
           require-lockfile: true
       - name: List affected apps
         id: affected
+        shell: bash
         env:
           COMMIT_SHA: ${{ inputs.commit_sha }}
           GH_TOKEN: ${{ github.token }}
-          RAILWAY_ENVIRONMENT: ${{ inputs.environment }}
           REPOSITORY: ${{ github.repository }}
         run: |
           previous=""
@@ -147,17 +148,11 @@ jobs:
           done < <(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?event=push&branch=main&status=success&per_page=50" --jq '.workflow_runs[] | [.id, .head_sha] | @tsv')
           if [[ -n "$previous" ]]; then
             git cat-file -e "$previous^{commit}" 2>/dev/null || git fetch --no-tags origin "$previous"
-            mapfile -t apps < <(bash .github/scripts/affected-apps.sh "$previous" "$COMMIT_SHA")
+            apps="$(bash .github/scripts/affected-apps.sh "$previous" "$COMMIT_SHA")"
           else
-            mapfile -t apps < <(bash .github/scripts/affected-apps.sh)
+            apps="$(bash .github/scripts/affected-apps.sh)"
           fi
-          {
-            echo "app=false"
-            echo "backoffice=false"
-            for app in "${apps[@]}"; do
-              echo "$app=true"
-            done
-          } >> "$GITHUB_OUTPUT"
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
       - name: Install verified Railway CLI
         run: |
           archive="railway-v${RAILWAY_CLI_VERSION}-x86_64-unknown-linux-musl.tar.gz"
@@ -169,34 +164,38 @@ jobs:
       - name: Deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          DEPLOY_APP: ${{ steps.affected.outputs.app }}
-          DEPLOY_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
+          DEPLOY_APPS: ${{ steps.affected.outputs.apps }}
         run: |
-          if [[ "$DEPLOY_APP" == "true" ]]; then
+          affected() {
+            jq --exit-status --arg app "$1" 'index($app) != null' <<< "$DEPLOY_APPS" > /dev/null
+          }
+          if affected app; then
             railway up --ci --service "$RAILWAY_SERVICE_APP" --environment "$RAILWAY_ENVIRONMENT"
           fi
-          if [[ "$DEPLOY_BACKOFFICE" == "true" ]]; then
+          if affected backoffice; then
             railway up --ci --service "$RAILWAY_SERVICE_BACKOFFICE" --environment "$RAILWAY_ENVIRONMENT"
           fi
       - name: Require a healthy deployment
         env:
-          DEPLOY_APP: ${{ steps.affected.outputs.app }}
-          DEPLOY_BACKOFFICE: ${{ steps.affected.outputs.backoffice }}
+          DEPLOY_APPS: ${{ steps.affected.outputs.apps }}
         run: |
+          affected() {
+            jq --exit-status --arg app "$1" 'index($app) != null' <<< "$DEPLOY_APPS" > /dev/null
+          }
           wait_health() {
-            url="$1"
+            health_url="${1%/}/health"
             for _ in $(seq 30); do
-              if curl --silent --fail --output /dev/null "$url/health"; then
+              if curl --silent --fail --output /dev/null "$health_url"; then
                 return 0
               fi
               sleep 10
             done
-            echo "::error::$url/health did not respond"
+            echo "::error::$health_url did not respond"
             return 1
           }
-          if [[ "$DEPLOY_APP" == "true" ]]; then
+          if affected app; then
             wait_health "$APP_URL"
           fi
-          if [[ "$DEPLOY_BACKOFFICE" == "true" ]]; then
+          if affected backoffice; then
             wait_health "$BACKOFFICE_URL"
           fi

@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: unknown-playbook-is-not-invented
 expected_outcome: |
-  The project has no deploy playbook. The agent says so and does not describe one.
+  The project has no rollback playbook. The agent says so and does not describe one.

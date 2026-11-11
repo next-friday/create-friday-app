@@ -92,7 +92,7 @@ jobs:
           require-lockfile: true
       - name: Reject suppression directives
         run: pnpm suppressions:check
-      - name: Check Cursor rules match .agents/rules
+      - name: Check rendered agent rules match .agents/rules
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
@@ -100,6 +100,10 @@ jobs:
         run: pnpm human-gates:check
       - name: Self-test the intent checker
         run: pnpm intent:check
+      - name: Check plans
+        run: pnpm plan:check
+      - name: Check bands
+        run: pnpm bands:check
       - name: Check lint
         run: pnpm lint:check
       - name: Check formatting
@@ -143,7 +147,23 @@ jobs:
     if: needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payload
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready --username postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/payload
+      PAYLOAD_SECRET: ci-only-secret
+      APP_URL: http://localhost:3000
       HADOLINT_VERSION: 2.15.1
       HADOLINT_SHA256: c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507
       TRIVY_VERSION: 0.76.1
@@ -165,7 +185,7 @@ jobs:
       - name: Smoke test image
         id: smoke
         run: |
-          docker run --detach --name app --env PORT=3000 --publish 3000:3000 app:ci
+          docker run --detach --name app --network host --env PORT=3000 --env DATABASE_URL --env PAYLOAD_SECRET --env APP_URL app:ci
           curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3000/health
       - name: Show container logs
         if: failure() && steps.smoke.outcome == 'failure'

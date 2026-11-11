@@ -24,6 +24,21 @@ body:
       placeholder: 769e0ef
     validations:
       required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Affected area
+      description: Select the area where the problem appears.
+      options:
+        - App pages and routes
+        - Backoffice collections and admin panel
+        - Components and styling
+        - Configuration and environment
+        - Tooling / CI
+        - Documentation
+        - Repository governance
+    validations:
+      required: true
   - type: textarea
     id: environment
     attributes:

@@ -4,24 +4,24 @@ Turborepo workspace in TypeScript on pnpm and Node.js `>=24.22.1 <25`. `apps/app
 
 ## Commands
 
-| Task                          | Command                                                                                    |
-| :---------------------------- | :----------------------------------------------------------------------------------------- |
-| Start both apps with reload   | `pnpm dev`                                                                                 |
-| One test                      | `pnpm --filter ./apps/backoffice exec vitest run src/environment.test.ts -t "<test name>"` |
-| Tests in one app              | `TURBO_FILTER=--filter=./apps/app pnpm test`                                               |
-| Unit tests                    | `pnpm test`, or `pnpm test:coverage`                                                       |
-| End-to-end tests              | `pnpm test:e2e`                                                                            |
-| Regenerate after a collection | `pnpm generate:types`, `pnpm generate:importmap`                                           |
-| Create a migration            | `pnpm migrate:create <name>`                                                               |
-| What `pre-push` runs          | `pnpm check`                                                                               |
-| Every check                   | `pnpm verify`                                                                              |
-| Render rules after a change   | `pnpm rules:sync`                                                                          |
+| Task                               | Command                                                                                    |
+| :--------------------------------- | :----------------------------------------------------------------------------------------- |
+| Start both apps with reload        | `pnpm dev`                                                                                 |
+| One test                           | `pnpm --filter ./apps/backoffice exec vitest run src/environment.test.ts -t "<test name>"` |
+| Tests in one app                   | `TURBO_FILTER=--filter=./apps/app pnpm test`                                               |
+| Unit tests                         | `pnpm test`, or `pnpm test:coverage`                                                       |
+| End-to-end tests                   | `pnpm test:e2e`                                                                            |
+| Regenerate after a collection      | `pnpm generate:types`, `pnpm generate:importmap`                                           |
+| Create a migration                 | `pnpm migrate:create <name>`                                                               |
+| What `pre-push` runs               | `pnpm check`                                                                               |
+| Every check except `pnpm test:e2e` | `pnpm verify`                                                                              |
+| Render rules after a change        | `pnpm rules:sync`                                                                          |
 
 ## Verifying your work
 
 - Build: `pnpm build` (prints `Tasks:    2 successful, 2 total`)
 - Test: `pnpm test:coverage` (all green, and prints `Tasks:    2 successful, 2 total`; never skip or delete a failing test)
-- Lint: `pnpm verify:static` (ESLint allows zero warnings; the dependency check prints `Tasks:    2 successful, 2 total`)
+- Static checks: `pnpm verify:static` (ESLint allows zero warnings; every check must pass)
 
 Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
 
@@ -29,11 +29,11 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 - Root scripts run lint, format, Knip, and the agent checks once for the workspace, and hand `build`, `test`, `typecheck`, and `depcruise` to Turborepo for each app. `TURBO_FILTER` narrows them; the default is every app.
 - The site lives in `apps/app/app/`. The backoffice site lives in `apps/backoffice/src/app/(frontend)/`, its collections in `apps/backoffice/src/collections/`, and its config in `apps/backoffice/src/payload.config.ts`. The root `generate:*` and `migrate*` scripts run in the backoffice.
-- In development, Payload applies collection changes to the database directly. In production, the backoffice applies the migrations in `apps/backoffice/src/migrations/` when it starts.
+- In development, Payload applies collection changes to the database directly. In production, the backoffice applies the migrations in `apps/backoffice/src/migrations/` when Payload first initialises, which is the first request that needs it, not when the server starts.
 
 ## Conventions
 
-1. **Change the backoffice schema only through collections, then regenerate and commit.** Payload generates `apps/backoffice/src/app/(payload)/`, `apps/backoffice/src/payload-types.ts`, and `apps/backoffice/src/migrations/`; run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>`. Do not edit those files by hand.
+1. **Change the backoffice schema only through collections, then regenerate and commit.** Payload generates `apps/backoffice/src/payload-types.ts`, `apps/backoffice/src/migrations/`, and `apps/backoffice/src/app/(payload)/admin/importMap.ts`; run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>`. Do not edit those files by hand.
 2. **Put unit tests next to the code and Playwright end-to-end tests in `apps/app/test/` and `apps/backoffice/test/` as `*.e2e.test.ts`.** Vitest collects `apps/app/app/**/*.test.{ts,tsx}` and `apps/backoffice/src/**/*.test.{ts,tsx}`.
 3. **Component tests need a DOM test environment, and Vitest runs in Node.js.** Add that environment with the first component test.
 4. **Read backoffice configuration through `requireEnvironment` in `apps/backoffice/src/environment.ts`.** Document each variable in `.env.example`.

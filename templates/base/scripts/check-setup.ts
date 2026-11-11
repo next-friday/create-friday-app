@@ -20,28 +20,39 @@ type SelfTestCase = {
 const codeownersPath = ".github/CODEOWNERS";
 const securityPath = "SECURITY.md";
 const zizmorPath = ".github/zizmor.yml";
-const securityPlaceholder = "example.com";
+const securityPlaceholder = "security@example.com";
 const ownerPlaceholder = "@your-org/your-team";
+const ownerPlaceholderPattern = /@(?:your-org\/your-team|the-[\da-z-]+)(?![\w/-])/;
 const ownersStep = "step 2 (Owners) of SETUP.md";
 
 /**
- * Find the CODEOWNERS problem: no line that is neither blank nor a comment.
+ * Find the CODEOWNERS problems: no owner line, or an owner line that still names a placeholder owner.
  * @param codeowners Content of `.github/CODEOWNERS`.
  * @returns At most one problem.
  */
 function findCodeownersProblems(codeowners: string): Problem[] {
-  const hasRule = codeowners.split("\n").some(line => {
-    const trimmed = line.trim();
+  const ownerLines = codeowners
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line !== "" && !line.startsWith("#"));
 
-    return trimmed !== "" && !trimmed.startsWith("#") && !trimmed.includes(ownerPlaceholder);
-  });
+  if (ownerLines.length === 0) {
+    return [
+      {
+        file: codeownersPath,
+        message: `has no owner line; add the lines ${ownersStep} lists`,
+      },
+    ];
+  }
 
-  return hasRule
+  const placeholderLine = ownerLines.find(line => ownerPlaceholderPattern.test(line));
+
+  return placeholderLine === undefined
     ? []
     : [
         {
           file: codeownersPath,
-          message: `has no owner line; add the lines ${ownersStep} lists`,
+          message: `still names a placeholder owner in "${placeholderLine}"; replace it as ${ownersStep} says`,
         },
       ];
 }
@@ -111,6 +122,38 @@ const selfTestCases: SelfTestCase[] = [
     files: {
       ...configuredFiles,
       codeowners: "# Owners\r\n  * @acme/platform\r\n",
+    },
+  },
+  {
+    name: "CODEOWNERS keeps a placeholder owner on one line",
+    expectedFiles: [codeownersPath],
+    files: {
+      ...configuredFiles,
+      codeowners: "* @acme/platform\n/intent/ @the-product-owner\n",
+    },
+  },
+  {
+    name: "CODEOWNERS keeps the team placeholder on one line",
+    expectedFiles: [codeownersPath],
+    files: {
+      ...configuredFiles,
+      codeowners: "* @acme/platform\n/intent/ @your-org/your-team\n",
+    },
+  },
+  {
+    name: "an owner whose name starts with the-",
+    expectedFiles: [],
+    files: {
+      ...configuredFiles,
+      codeowners: "* @acme/the-platform\n/intent/ @the-hague/owners\n",
+    },
+  },
+  {
+    name: "SECURITY.md has a real address in a subdomain of example.com",
+    expectedFiles: [],
+    files: {
+      ...configuredFiles,
+      security: "Email `security@acme.example.com`.\n",
     },
   },
   {

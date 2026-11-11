@@ -4,7 +4,7 @@ This project runs an AI-native software development loop in Claude Code and Curs
 
 ## How a change flows
 
-Send a request with `/sdlc`. Only a person starts it; nothing routes work into it by itself. In Claude Code, an invoked skill stays in the conversation across later turns, and after a compaction you type `/sdlc` again. In Cursor, pick `/sdlc` from the `/` menu and press Option+Enter (Mac) or Alt+Enter (Windows) instead of Enter to keep it on as a custom mode until you exit it. `intent/README.md` and the playbooks in `.agents/skills/sdlc/playbooks/` say who acts and who decides at each stage.
+Send a request with `/sdlc`. Only a person starts it; nothing routes work into it by itself. `.agents/skills/sdlc-help/SKILL.md` says how to keep `/sdlc` on for a session in Claude Code and Cursor. `intent/README.md` and the playbooks in `.agents/skills/sdlc/playbooks/` say who acts and who decides at each stage.
 
 ## 1. First commit and push
 
@@ -12,7 +12,7 @@ Send a request with `/sdlc`. Only a person starts it; nothing routes work into i
 
 1. Install gitleaks and jq (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 2. Replace the template's description and owner: `package.json#description`, `repository.url`, and `author`, and any template text that `README.md` → **After creating a project from this template** lists. Change `license` from `UNLICENSED` if the project is open source.
-3. Create an empty repository on GitHub. Make the first commit on `main` and push it there. The Git hooks allow only this first commit and push on `main`; work on branches after that.
+3. Create an empty repository on GitHub. If the project is not a Git repository yet, run `git init --initial-branch=main`. Make the first commit on `main` and push it there. The Git hooks allow only this first commit and push on `main`; work on branches after that.
 
    ```sh
    git add --all
@@ -39,13 +39,13 @@ In `.github/CODEOWNERS`, add these lines in this order. GitHub uses the last mat
 /.agents/skills/ux-policy/ @the-ux-policy-owner
 ```
 
-Also replace the owner placeholder in `.github/zizmor.yml`.
+Replace every owner above with a GitHub user or team that has write access to the repository. Also replace the owner placeholder in `.github/zizmor.yml`.
 
 Replace `security@example.com` in `SECURITY.md` with the contact the security policy owner names, such as the security email of the company or of the client.
 
 **Check:** on GitHub, open `.github/CODEOWNERS`; GitHub shows no errors in the file. `grep example.com SECURITY.md` prints nothing.
 
-Run `pnpm setup:check`. It names each file that still holds a template placeholder, and passes when none does.
+Run `pnpm setup:check`. It names each of `.github/CODEOWNERS`, `SECURITY.md`, and `.github/zizmor.yml` that still holds a template placeholder, and passes when none does.
 
 ## 3. GitHub repository settings
 
@@ -62,6 +62,7 @@ Run `pnpm setup:check`. It names each file that still holds a template placehold
 
   Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
 
+- **Secrets and variables → Actions → Variables:** in a private repository, set `CODE_SCANNING` to `true` to run CodeQL, Scorecard, and Dependency Review, which need GitHub Code Security there; public repositories run them without it. Set `DEPLOY_ENABLED` to `true` when each push to `main` that passes CI should deploy to `dev`; the README's deploy section sets up the environments.
 - Create the `needs triage` label, which the issue forms apply: `gh label create "needs triage"`.
 
 **Check:** a test pull request shows the two required checks and asks for a code owner's review.
@@ -70,7 +71,7 @@ Run `pnpm setup:check`. It names each file that still holds a template placehold
 
 **Who:** an Owner of the Claude organization, with an owner of the GitHub organization.
 
-- **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow.
+- **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow. Anyone with write access can also comment `@claude review` on a pull request to start a review ([comment commands](https://code.claude.com/docs/en/code-review-pull-requests#comment-commands)).
 - **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the example in `.claude/managed-settings.example.json`. Engineers cannot override them.
 - **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage).
 
@@ -98,6 +99,25 @@ Run `pnpm setup:check`. It names each file that still holds a template placehold
 
 ## 7. Later, as the guardrails mature
 
-- Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git log:*)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
+- Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch *)" "Bash(git add *)" "Bash(git commit *)" "Bash(git status *)" "Bash(git log *)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
 - Set the metric in `bands.yaml`, then run `pnpm bands:check <file>` from a scheduled job with the metric's values, and send a `2sigma` or `3sigma` result to `/sdlc` as a finding.
+
+## References
+
+- [Set up Claude Code for your organization](https://code.claude.com/docs/en/admin-setup)
+- [Settings reference and precedence](https://code.claude.com/docs/en/settings)
+- [Server-managed settings](https://code.claude.com/docs/en/server-managed-settings)
+- [Permissions](https://code.claude.com/docs/en/permissions)
+- [Sandboxing](https://code.claude.com/docs/en/sandboxing)
+- [Hooks guide](https://code.claude.com/docs/en/hooks-guide)
+- [Hooks reference](https://code.claude.com/docs/en/hooks)
+- [Skills](https://code.claude.com/docs/en/skills)
+- [Plugins and private marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
+- [Managed MCP](https://code.claude.com/docs/en/managed-mcp)
+- [Enterprise deployment overview](https://code.claude.com/docs/en/third-party-integrations)
+- [Enterprise network configuration](https://code.claude.com/docs/en/network-config)
+- [Monitoring with OpenTelemetry](https://code.claude.com/docs/en/monitoring-usage)
+- [Analytics dashboard](https://code.claude.com/docs/en/analytics)
+- [Compliance API](https://platform.claude.com/docs/en/manage-claude/compliance-api)
+- [Security model](https://code.claude.com/docs/en/security)

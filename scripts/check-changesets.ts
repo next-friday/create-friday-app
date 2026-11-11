@@ -3,12 +3,13 @@ import {readFileSync} from "node:fs";
 
 type Change = {
   paths: string[];
+  removedLines: number;
   status: string;
 };
 
 type SelfTestCase = {
+  actor?: string;
   addedChangesets?: Record<string, string>;
-  authors?: string[];
   changedManifestFields?: string[];
   changes: Change[];
   expectedMessagePart?: string;
@@ -27,6 +28,7 @@ const majorDeclaration = new RegExp(
   "m",
 );
 
+const frontMatter = /^---\r?\n([\s\S]*?)\r?\n---/;
 const changesetFile = /^\.changeset\/(?!README\.md$)[^/]+\.md$/;
 const stackManifest = /^templates\/(?!base\/)[^/]+\/package\.json$/;
 const publishedPrefixes = ["src/", "templates/"];
@@ -46,6 +48,8 @@ const publishedManifestFields = [
 
 const breakingManifestFields = new Set(["bin", "engines", "name"]);
 const dependencyBot = "dependabot[bot]";
+const templateManifest = "templates/nestjs/package.json";
+const contractMessagePart = "only for a removed or renamed CLI argument";
 
 const dependencyFile =
   /(?:(?:^|\/)(?:package\.json|pnpm-workspace\.yaml|Dockerfile|\.nvmrc)(?: \(.*)?|\/\.github\/workflows\/[^/]+\.ya?ml)$/;
@@ -60,7 +64,7 @@ function isPublished(changedPath: string): boolean {
 }
 
 /**
- * Tell whether the diff changes a CLI argument, a prompt, or a stack, removes or renames a stack's directory, or changes the command name or the Node.js versions the CLI runs on.
+ * Tell whether the diff removes lines from the CLI argument, prompt, or stack source, removes a stack's directory, or changes the command name or the Node.js versions the CLI runs on.
  * @param changes Changed paths with their git status.
  * @param changedManifestFields Published `package.json` fields the branch changes.
  * @returns True when a major release can be justified.
@@ -69,10 +73,12 @@ function hasCliContractChange(changes: Change[], changedManifestFields: string[]
   return (
     changedManifestFields.some(field => breakingManifestFields.has(field)) ||
     changes.some(
-      ({paths, status}) =>
-        paths.some(changedPath => [argumentsFile, promptsFile, stacksFile].includes(changedPath)) ||
-        (/^[DR]/.test(status) &&
-          paths.slice(0, 1).some(changedPath => stackManifest.test(changedPath))),
+      ({paths, removedLines, status}) =>
+        (removedLines > 0 &&
+          paths.some(changedPath =>
+            [argumentsFile, promptsFile, stacksFile].includes(changedPath),
+          )) ||
+        (status.startsWith("D") && paths.some(changedPath => stackManifest.test(changedPath))),
     )
   );
 }
@@ -81,14 +87,14 @@ function hasCliContractChange(changes: Change[], changedManifestFields: string[]
  * Find the problems a branch's changes have with the changesets it adds.
  * @param changes Changed paths with their git status.
  * @param addedChangesets Text of each changeset the branch adds, by path.
- * @param authors Author name of each commit on the branch.
+ * @param actor The GitHub account that triggered the run, or undefined outside GitHub Actions.
  * @param changedManifestFields Published `package.json` fields the branch changes.
  * @returns One message per problem.
  */
 function findChangesetProblems(
   changes: Change[],
   addedChangesets: Record<string, string>,
-  authors: string[],
+  actor: string | undefined,
   changedManifestFields: string[],
 ): string[] {
   const addedPaths = Object.keys(addedChangesets);
@@ -100,8 +106,7 @@ function findChangesetProblems(
 
   if (addedPaths.length === 0) {
     const isDependencyUpdate =
-      authors.length > 0 &&
-      authors.every(author => author === dependencyBot) &&
+      actor === dependencyBot &&
       publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
 
     return isDependencyUpdate || publishedPaths.length === 0
@@ -120,7 +125,7 @@ function findChangesetProblems(
   }
 
   const majorPaths = addedPaths.filter(addedPath =>
-    majorDeclaration.test(addedChangesets[addedPath] ?? ""),
+    majorDeclaration.test(frontMatter.exec(addedChangesets[addedPath] ?? "")?.at(1) ?? ""),
   );
 
   if (majorPaths.length > 0 && !hasCliContractChange(changes, changedManifestFields)) {
@@ -135,9 +140,10 @@ function findChangesetProblems(
 /**
  * Parse `git diff --name-status` output.
  * @param output Tab-separated status lines.
+ * @param removedLinesByPath Removed lines by path, from `git diff --numstat`.
  * @returns One change per line.
  */
-function parseNameStatus(output: string): Change[] {
+function parseNameStatus(output: string, removedLinesByPath: Map<string, number>): Change[] {
   return output
     .split("\n")
     .filter(line => line !== "")
@@ -147,8 +153,30 @@ function parseNameStatus(output: string): Change[] {
       return {
         paths,
         status,
+        removedLines: paths.reduce(
+          (sum, changedPath) => sum + (removedLinesByPath.get(changedPath) ?? 0),
+          0,
+        ),
       };
     });
+}
+
+/**
+ * Parse `git diff --numstat` output.
+ * @param output Tab-separated lines of added lines, removed lines, and path.
+ * @returns The number of removed lines by path; a binary file counts zero.
+ */
+function parseRemovedLines(output: string): Map<string, number> {
+  return new Map(
+    output
+      .split("\n")
+      .filter(line => line !== "")
+      .map(line => {
+        const [, removed = "", changedPath = ""] = line.split("\t", 3);
+
+        return [changedPath, Number(removed) || 0];
+      }),
+  );
 }
 
 /**
@@ -174,7 +202,7 @@ function findChangedManifestFields(baseCommit: string): string[] {
     unknown
   >;
 
-  const after = JSON.parse(readFileSync(manifestFile, "utf8")) as Record<string, unknown>;
+  const after = JSON.parse(runGit(["show", `HEAD:${manifestFile}`])) as Record<string, unknown>;
 
   return publishedManifestFields.filter(
     field => JSON.stringify(before[field]) !== JSON.stringify(after[field]),
@@ -197,17 +225,29 @@ function findMergeBase(): string | undefined {
  * Build a self-test change for one path.
  * @param status Git status letter.
  * @param changedPath Path from the project root.
+ * @param removedLines Lines the change removes.
  * @returns The change.
  */
-function changeOf(status: string, changedPath: string): Change {
+function changeOf(status: string, changedPath: string, removedLines = 0): Change {
   return {
     status,
+    removedLines,
     paths: [changedPath],
   };
 }
 
 const addedFile = (changedPath: string): Change => changeOf("A", changedPath);
-const modifiedFile = (changedPath: string): Change => changeOf("M", changedPath);
+
+/**
+ * Build a self-test change that modifies one path.
+ * @param changedPath Path from the project root.
+ * @param removedLines Lines the change removes.
+ * @returns The change.
+ */
+function modifiedFile(changedPath: string, removedLines = 0): Change {
+  return changeOf("M", changedPath, removedLines);
+}
+
 const minorChangesetPath = ".changeset/quiet-owls-sing.md";
 const majorChangesetPath = ".changeset/loud-owls-sing.md";
 const patchChangesetPath = ".changeset/calm-owls-sing.md";
@@ -235,6 +275,10 @@ function majorChangesetOf(declaration: string): Record<string, string> {
 
 const majorChangeset = majorChangesetOf(`"${packageName}": major`);
 
+const minorChangesetWithMajorBody = {
+  [minorChangesetPath]: `---\n"${packageName}": minor\n---\n\n"${packageName}": major\n`,
+};
+
 const templateOnlyChanges = [
   addedFile(majorChangesetPath),
   modifiedFile("templates/nestjs/src/main.ts"),
@@ -257,14 +301,20 @@ const selfTestCases: SelfTestCase[] = [
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
+    actor: dependencyBot,
     name: "no changeset on a dependency bot's commit that changes source",
-    authors: [dependencyBot],
     changes: [modifiedFile(sourceFile)],
   },
   {
+    actor: dependencyBot,
     name: "no changeset on a dependency bot's template update",
-    authors: [dependencyBot],
-    changes: [modifiedFile("templates/nestjs/package.json")],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    name: "no changeset on a template update by another account",
+    actor: "someone",
+    changes: [modifiedFile(templateManifest)],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
@@ -313,8 +363,8 @@ const selfTestCases: SelfTestCase[] = [
   {
     addedChangesets: majorChangeset,
     changes: templateOnlyChanges,
+    expectedMessagePart: contractMessagePart,
     name: "major with only template content changes",
-    expectedMessagePart: "only for a removed or renamed CLI argument",
   },
   ...[
     ["two spaces", `"${packageName}":  major`],
@@ -322,41 +372,40 @@ const selfTestCases: SelfTestCase[] = [
     ["no quotes", `${packageName}: major`],
   ].map(([spelling = "", declaration = ""]) => ({
     changes: templateOnlyChanges,
-    expectedMessagePart: "only for a removed or renamed CLI argument",
+    expectedMessagePart: contractMessagePart,
     addedChangesets: majorChangesetOf(declaration),
     name: `major written with ${spelling} and only template content changes`,
   })),
   {
     addedChangesets: majorChangeset,
-    name: "major with src/stacks.ts changed",
+    name: "major with lines removed from src/stacks.ts",
+    changes: [addedFile(majorChangesetPath), modifiedFile(stacksFile, 1)],
+  },
+  {
+    addedChangesets: majorChangeset,
+    expectedMessagePart: contractMessagePart,
+    name: "major with only lines added to src/stacks.ts",
     changes: [addedFile(majorChangesetPath), modifiedFile(stacksFile)],
+  },
+  {
+    addedChangesets: minorChangesetWithMajorBody,
+    name: "a major declaration in the body of a minor changeset",
+    changes: [addedFile(minorChangesetPath), modifiedFile(sourceFile)],
   },
   {
     addedChangesets: majorChangeset,
     name: "major with a stack directory removed",
-    changes: [
-      addedFile(majorChangesetPath),
-      {
-        status: "D",
-        paths: ["templates/nestjs/package.json"],
-      },
-    ],
+    changes: [addedFile(majorChangesetPath), changeOf("D", templateManifest)],
   },
 ];
 
 const selfTestFailures = selfTestCases
   .filter(
-    ({
-      changes,
-      expectedMessagePart,
-      authors = [],
-      changedManifestFields = [],
-      addedChangesets = {},
-    }) => {
+    ({actor, changes, expectedMessagePart, changedManifestFields = [], addedChangesets = {}}) => {
       const problems = findChangesetProblems(
         changes,
         addedChangesets,
-        authors,
+        actor,
         changedManifestFields,
       );
 
@@ -379,7 +428,10 @@ if (selfTestFailures.length > 0) {
     process.stderr.write(`Cannot find ${defaultBranch}; run "git fetch origin main" first.\n`);
     process.exitCode = 1;
   } else {
-    const changes = parseNameStatus(runGit(["diff", "--name-status", `${mergeBase}...HEAD`]));
+    const changes = parseNameStatus(
+      runGit(["diff", "--no-renames", "--name-status", `${mergeBase}...HEAD`]),
+      parseRemovedLines(runGit(["diff", "--no-renames", "--numstat", `${mergeBase}...HEAD`])),
+    );
 
     const addedChangesets = Object.fromEntries(
       changes
@@ -388,14 +440,10 @@ if (selfTestFailures.length > 0) {
         .map(changedPath => [changedPath, readFileSync(changedPath, "utf8")]),
     );
 
-    const authors = runGit(["log", "--no-merges", "--format=%an", `${mergeBase}..HEAD`])
-      .split("\n")
-      .filter(author => author !== "");
-
     const problems = findChangesetProblems(
       changes,
       addedChangesets,
-      authors,
+      process.env.GITHUB_ACTOR,
       findChangedManifestFields(mergeBase),
     );
 

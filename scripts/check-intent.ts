@@ -1,4 +1,5 @@
-import {existsSync, readFileSync} from "node:fs";
+import {existsSync, readdirSync, readFileSync} from "node:fs";
+import path from "node:path";
 
 type Problem = {
   line: number;
@@ -359,15 +360,31 @@ const selfTestFailures = selfTestCases
   })
   .map(({name}) => name);
 
-const intentPaths = process.argv.slice(2);
+const intentDirectory = "intent";
+
+/**
+ * List the `intent.md` of every change directory under `intent/`.
+ * @returns The paths, or none when `intent/` does not exist.
+ */
+function findCommittedIntentPaths(): string[] {
+  return existsSync(intentDirectory)
+    ? readdirSync(intentDirectory, {
+        withFileTypes: true,
+      })
+        .filter(entry => entry.isDirectory())
+        .map(({name}) => path.join(intentDirectory, name, "intent.md"))
+        .toSorted((left, right) => left.localeCompare(right))
+    : [];
+}
+
+const passedPaths = process.argv.slice(2);
+const intentPaths = passedPaths.length > 0 ? passedPaths : findCommittedIntentPaths();
 
 if (selfTestFailures.length > 0) {
   const failureLines = selfTestFailures.map(name => `- ${name}`);
 
   process.stderr.write(`Intent self-tests failed:\n${failureLines.join("\n")}\n`);
   process.exitCode = 1;
-} else if (intentPaths.length === 0) {
-  process.stdout.write(`Ran ${selfTestCases.length} intent self-tests.\n`);
 } else {
   const missingLines = intentPaths
     .filter(intentPath => !existsSync(intentPath))

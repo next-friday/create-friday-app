@@ -42,6 +42,10 @@ describe("parseCliArguments", () => {
     });
   });
 
+  it.each(["--help", "--version"])("reads %s despite other bad arguments", flag => {
+    expect(parseCliArguments([flag, "--stack", "rails", "first", "second"]).stack).toBeUndefined();
+  });
+
   it("rejects an unknown stack", () => {
     expect(() => parseCliArguments(["--stack", "rails"])).toThrow(
       'Unknown stack "rails". Use one of: nodejs, nestjs, nextjs, payload, turborepo.',

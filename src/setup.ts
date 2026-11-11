@@ -49,7 +49,7 @@ export function initGit(directory: string): GitResult {
   const init = spawnSync("git", ["init", "--initial-branch=main"], {
     cwd: directory,
     env: environment,
-    stdio: "ignore",
+    stdio: ["ignore", "ignore", "inherit"],
   });
 
   return init.status === 0 ? "initialized" : "failed";

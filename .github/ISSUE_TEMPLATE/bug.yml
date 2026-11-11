@@ -24,18 +24,18 @@ body:
     id: version
     attributes:
       label: "@next-friday/create-app version"
-      placeholder: 0.0.0
+      description: The version that `--version` prints, or the commit when you run from `main`.
     validations:
       required: true
   - type: textarea
     id: environment
     attributes:
       label: Environment
-      description: List Node.js, operating system, and package manager versions.
+      description: List the output of `node --version` and `pnpm --version`, and your operating system.
       placeholder: |
-        Node.js: 24.20.0
-        OS: Ubuntu 24.04 / macOS
-        Package manager: pnpm 12.6.0
+        Node.js:
+        OS:
+        Package manager:
     validations:
       required: true
   - type: textarea

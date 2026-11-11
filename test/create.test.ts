@@ -1,6 +1,16 @@
 import {afterAll, afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {cancel, CANCEL_SYMBOL, intro, isCancel, log, outro, select, text} from "@clack/prompts";
-import {existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync} from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import {tmpdir} from "node:os";
 
@@ -8,6 +18,15 @@ import {create} from "../src/create.ts";
 import {didInstallDependencies, initGit} from "../src/setup.ts";
 import {renameProject} from "../src/rename.ts";
 import {usage} from "../src/arguments.ts";
+
+vi.mock("node:fs", async importOriginal => {
+  const actual = await importOriginal<typeof import("node:fs")>();
+
+  return {
+    ...actual,
+    existsSync: vi.fn(actual.existsSync),
+  };
+});
 
 vi.mock("../src/rename.ts", async importOriginal => {
   const actual = await importOriginal<typeof import("../src/rename.ts")>();
@@ -46,6 +65,8 @@ vi.mock("@clack/prompts", () => ({
 const nestModule = "src/app.module.ts";
 const packageManifest = "package.json";
 const renameError = "EACCES: permission denied";
+const dotStack = ["nodejs"];
+const gitDirectory = ".git";
 const cancelled = "Cancelled.";
 const cwd = mkdtempSync(path.join(tmpdir(), "create-app-test-"));
 
@@ -79,7 +100,44 @@ function captureOutput(): string[] {
   return output;
 }
 
+/**
+ * Record what is written to standard error instead of printing it.
+ * @returns The written chunks.
+ */
+function captureErrors(): string[] {
+  const output: string[] = [];
+
+  vi.spyOn(process.stderr, "write").mockImplementation(chunk => {
+    output.push(String(chunk));
+
+    return true;
+  });
+
+  return output;
+}
+
+/**
+ * Make `directory` the working directory, holding an empty repository.
+ * @param name - Directory name under the test root.
+ * @returns The directory path.
+ */
+function enterClone(name: string): string {
+  const current = path.join(cwd, name);
+
+  mkdirSync(path.join(current, gitDirectory), {
+    recursive: true,
+  });
+
+  vi.spyOn(process, "cwd").mockReturnValue(current);
+
+  return current;
+}
+
 beforeEach(() => {
+  vi.mocked(isCancel).mockReset();
+  vi.mocked(text).mockReset();
+  vi.mocked(select).mockReset();
+  vi.mocked(existsSync).mockReset();
   vi.spyOn(process, "cwd").mockReturnValue(cwd);
   setTerminal(true);
   process.exitCode = 0;
@@ -113,6 +171,7 @@ describe("create", () => {
     expect(existsSync(path.join(directory, nestModule))).toBe(true);
     expect(existsSync(path.join(directory, ".gitignore"))).toBe(true);
     expect(existsSync(path.join(directory, "_gitignore"))).toBe(false);
+    expect(existsSync(path.join(directory, ".env"))).toBe(true);
     expect(vi.mocked(initGit)).toHaveBeenCalledWith(directory);
     expect(vi.mocked(didInstallDependencies)).toHaveBeenCalledWith(directory);
 
@@ -133,6 +192,7 @@ describe("create", () => {
     );
 
     expect(existsSync(path.join(directory, "src", "server.ts"))).toBe(true);
+    expect(existsSync(path.join(directory, ".env"))).toBe(true);
     expect(existsSync(path.join(directory, nestModule))).toBe(false);
     expect(process.exitCode).toBe(0);
   });
@@ -142,6 +202,7 @@ describe("create", () => {
     vi.mocked(select).mockResolvedValue("nextjs");
     await create([]);
     expect(existsSync(path.join(cwd, "my-web", "app", "page.tsx"))).toBe(true);
+    expect(existsSync(path.join(cwd, "my-web", ".env"))).toBe(true);
     expect(existsSync(path.join(cwd, "my-web", nestModule))).toBe(false);
     expect(process.exitCode).toBe(0);
   });
@@ -164,8 +225,11 @@ describe("create", () => {
   });
 
   it("exits with 1 for an invalid project name", async () => {
+    const errors = captureErrors();
+
     await create(["My-App", "--stack", "nestjs"]);
-    expect(vi.mocked(cancel)).toHaveBeenCalledWith(expect.stringMatching(/^Use lowercase letters/));
+    expect(errors).toStrictEqual([expect.stringMatching(/^Use lowercase letters/u)]);
+    expect(vi.mocked(intro)).not.toHaveBeenCalled();
     expect(existsSync(path.join(cwd, "My-App"))).toBe(false);
     expect(process.exitCode).toBe(1);
   });
@@ -181,10 +245,13 @@ describe("create", () => {
   });
 
   it("removes the project and exits with 1 when the rename fails", async () => {
+    const errors = captureErrors();
+
     vi.mocked(renameProject).mockRejectedValueOnce(new Error(renameError));
     await create(["locked-api", "--stack", "nestjs"]);
     expect(existsSync(path.join(cwd, "locked-api"))).toBe(false);
-    expect(vi.mocked(cancel)).toHaveBeenCalledWith(renameError);
+    expect(errors).toStrictEqual([`${renameError}\n`]);
+    expect(vi.mocked(cancel)).not.toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
   });
 
@@ -194,20 +261,99 @@ describe("create", () => {
     await create(["empty-api", "--stack", "nestjs"]);
     expect(readdirSync(path.join(cwd, "empty-api"))).toStrictEqual([]);
   });
+});
 
-  it("removes the partial project and exits with 130 on Ctrl+C during the copy", async () => {
-    vi.mocked(renameProject).mockImplementationOnce(async () => {
-      process.emit("SIGINT");
+describe("create interruptions and edge cases", () => {
+  it.each(["SIGINT", "SIGTERM", "SIGHUP"] as const)(
+    "removes the partial project and exits with 130 on %s during the copy",
+    async signal => {
+      vi.mocked(renameProject).mockImplementationOnce(async () => {
+        process.emit(signal);
+      });
 
-      return [];
+      await create(["interrupted-api", "--stack", "nestjs"]);
+      expect(existsSync(path.join(cwd, "interrupted-api"))).toBe(false);
+      expect(vi.mocked(cancel)).toHaveBeenCalledWith(cancelled);
+      expect(vi.mocked(initGit)).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(130);
+      expect(process.listenerCount(signal)).toBe(0);
+    },
+  );
+
+  it("reports a thrown value that is not an Error", async () => {
+    const errors = captureErrors();
+
+    vi.mocked(renameProject).mockRejectedValueOnce("plain text");
+    await create(["thrown-api", "--stack", "nestjs"]);
+    expect(errors).toStrictEqual(["plain text\n"]);
+    expect(process.exitCode).toBe(1);
+  });
+
+  it("names the missing template instead of a raw ENOENT", async () => {
+    const errors = captureErrors();
+    const {existsSync: actualExists} = await vi.importActual<typeof import("node:fs")>("node:fs");
+
+    vi.mocked(existsSync).mockImplementation(
+      file => actualExists(file) && !String(file).endsWith(`${path.sep}nestjs`),
+    );
+
+    await create(["no-template", "--stack", "nestjs"]);
+    expect(errors).toStrictEqual([expect.stringMatching(/^The nestjs template is missing from/u)]);
+    expect(actualExists(path.join(cwd, "no-template"))).toBe(false);
+    expect(process.exitCode).toBe(1);
+  });
+
+  it("rejects a name whose directory appears while the stack prompt waits", async () => {
+    const errors = captureErrors();
+    const taken = path.join(cwd, "raced-api");
+
+    vi.mocked(select).mockImplementation(async () => {
+      mkdirSync(taken);
+      writeFileSync(path.join(taken, "mine.txt"), "kept");
+
+      return "nestjs";
     });
 
-    await create(["interrupted-api", "--stack", "nestjs"]);
-    expect(existsSync(path.join(cwd, "interrupted-api"))).toBe(false);
-    expect(vi.mocked(cancel)).toHaveBeenCalledWith(cancelled);
-    expect(vi.mocked(initGit)).not.toHaveBeenCalled();
-    expect(process.exitCode).toBe(130);
-    expect(process.listenerCount("SIGINT")).toBe(0);
+    await create(["raced-api"]);
+    expect(errors).toStrictEqual([expect.stringMatching(/already exists and is not empty/u)]);
+    expect(readdirSync(taken)).toStrictEqual(["mine.txt"]);
+    expect(process.exitCode).toBe(1);
+  });
+
+  it("rejects . when the current directory holds files", async () => {
+    const errors = captureErrors();
+    const current = enterClone("dot-full");
+
+    writeFileSync(path.join(current, "mine.txt"), "kept");
+    await create([".", "--stack", ...dotStack]);
+    expect(errors).toStrictEqual([expect.stringMatching(/already exists and is not empty/u)]);
+
+    expect(
+      readdirSync(current).toSorted((first, second) => first.localeCompare(second)),
+    ).toStrictEqual([gitDirectory, "mine.txt"]);
+  });
+
+  it("creates the project in a symbolic link to an empty directory", async () => {
+    const real = path.join(cwd, "real-directory");
+    const link = path.join(cwd, "linked-api");
+
+    mkdirSync(real);
+    symlinkSync(real, link);
+    await create(["linked-api", "--stack", "nodejs"]);
+    expect(existsSync(path.join(real, packageManifest))).toBe(true);
+    expect(process.exitCode).toBe(0);
+  });
+
+  it("leaves a script in an existing .git without the executable bit", async () => {
+    const current = enterClone("dot-hooks");
+    const sample = path.join(current, gitDirectory, "pre-commit.sample");
+
+    writeFileSync(sample, "#!/bin/sh\n", {
+      mode: 0o644,
+    });
+
+    await create([".", "--stack", "nodejs"]);
+    expect(statSync(sample).mode % 0o1000).toBe(0o644);
   });
 
   it("validates the name typed into the prompt", async () => {
@@ -238,26 +384,20 @@ describe("create", () => {
   });
 
   it("exits with 1 instead of prompting when not running in a terminal", async () => {
+    const errors = captureErrors();
+
     setTerminal(false);
     await create(["no-terminal"]);
     expect(vi.mocked(text)).not.toHaveBeenCalled();
-
-    expect(vi.mocked(cancel)).toHaveBeenCalledWith(
-      expect.stringMatching(/^Pass the project name and --stack/),
-    );
-
+    expect(errors).toStrictEqual([expect.stringMatching(/^Pass the project name and --stack/u)]);
+    expect(vi.mocked(intro)).not.toHaveBeenCalled();
     expect(existsSync(path.join(cwd, "no-terminal"))).toBe(false);
     expect(process.exitCode).toBe(1);
   });
 
   it("creates the project in the current directory for .", async () => {
-    const current = path.join(cwd, "dot-app");
+    const current = enterClone("dot-app");
 
-    mkdirSync(path.join(current, ".git"), {
-      recursive: true,
-    });
-
-    vi.spyOn(process, "cwd").mockReturnValue(current);
     await create([".", "--stack", "nodejs"]);
 
     expect(readFileSync(path.join(current, packageManifest), "utf8")).toContain(
@@ -268,13 +408,8 @@ describe("create", () => {
   });
 
   it("keeps .git when the create fails in the current directory", async () => {
-    const current = path.join(cwd, "dot-failed");
+    const current = enterClone("dot-failed");
 
-    mkdirSync(path.join(current, ".git"), {
-      recursive: true,
-    });
-
-    vi.spyOn(process, "cwd").mockReturnValue(current);
     vi.mocked(renameProject).mockRejectedValueOnce(new Error(renameError));
     await create([".", "--stack", "nodejs"]);
     expect(readdirSync(current)).toStrictEqual([".git"]);
@@ -317,13 +452,23 @@ describe("create", () => {
     );
   });
 
+  it("lists no git init for --skip-git in a directory that holds .git", async () => {
+    enterClone("dot-skip-git");
+    await create([".", "--stack", "nodejs", "--skip-git", "--skip-install"]);
+    expect(vi.mocked(initGit)).not.toHaveBeenCalled();
+
+    expect(vi.mocked(outro)).toHaveBeenCalledWith(
+      `Next steps:\n  pnpm install\n${nextStepsTail} README.md.`,
+    );
+  });
+
   it("keeps the project and exits with 1 when pnpm install fails", async () => {
     vi.mocked(didInstallDependencies).mockReturnValueOnce(false);
     await create(["offline-api", "--stack", "nestjs"]);
     expect(existsSync(path.join(cwd, "offline-api", packageManifest))).toBe(true);
 
     expect(vi.mocked(log.error)).toHaveBeenCalledWith(
-      expect.stringMatching(/^pnpm install failed/),
+      expect.stringMatching(/^pnpm install failed.*package\.json#engines\.$/u),
     );
 
     expect(vi.mocked(outro)).toHaveBeenCalledWith(
@@ -346,7 +491,10 @@ describe("create", () => {
   it("asks the user to run git init when it fails", async () => {
     vi.mocked(initGit).mockReturnValueOnce("failed");
     await create(["no-git-api", "--stack", "nestjs"]);
-    expect(vi.mocked(log.warn)).toHaveBeenCalledWith(expect.stringMatching(/^git init failed/));
+
+    expect(vi.mocked(log.warn)).toHaveBeenCalledWith(
+      expect.stringMatching(/^git init failed\. Check that Git 2\.28/u),
+    );
 
     expect(vi.mocked(outro)).toHaveBeenCalledWith(
       `Next steps:\n  cd no-git-api\n  git init --initial-branch=main\n  pnpm install\n${nextStepsTail} no-git-api/README.md.`,

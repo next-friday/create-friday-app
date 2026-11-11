@@ -29,7 +29,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 ## What every project includes
 
 - **Code quality:** TypeScript, ESLint and Prettier with the Next Friday configs, Vitest with coverage, fast-check, Knip, dependency-cruiser, editorconfig-checker, and sort-package-json.
-- **Git hooks:** Husky runs gitleaks and lint-staged before each commit, commitlint on each message, and `pnpm check` before each push. Commits and pushes to `main` are blocked after the first one.
+- **Git hooks:** Husky runs gitleaks, `pnpm rules:check`, and lint-staged before each commit, commitlint on each message, and `pnpm check` before each push. After the first commit, commits to `main` are blocked, and local merges into `main` always are; pushes to `main` are blocked once it exists on the remote.
 - **CI:** GitHub Actions run the static checks, tests with patch coverage, the build, end-to-end tests for Next.js and Payload, a container build and vulnerability scan, Semgrep, OSV-Scanner, CodeQL, dependency review, OpenSSF Scorecard, gitleaks, TruffleHog, zizmor, and pull request title validation. Dependabot keeps dependencies current.
 - **Deployment:** a `Dockerfile` that runs as the `node` user, and a Railway workflow that promotes one commit through `dev`, `uat`, and `prod`.
 - **Agent rules:** `CLAUDE.md` imports `AGENTS.md`. Shared rules live in `.agents/rules`, with hooks that enforce them in Claude Code and Cursor, and a Cursor Bugbot configuration.
@@ -37,7 +37,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 ## Requirements
 
 - Node.js 24.22.1, the version in the generated `.nvmrc`. The CLI itself runs on the range in [`package.json#engines`](package.json).
-- pnpm: `npm install --global pnpm`. The generated project pins its pnpm version in `package.json#packageManager`.
+- pnpm, through Corepack: `corepack enable`. The generated project pins its pnpm version in `package.json#packageManager`.
 - Git 2.28 or later.
 - gitleaks 8.19 or later and jq, which the generated project's Git hooks need for the first commit.
 
@@ -60,6 +60,7 @@ The name must:
 
 - use lowercase letters, digits, `.`, `_`, or `-`, and start with a letter or digit;
 - not end in `.`, and not be `node_modules`, `favicon.ico`, or a name that Windows reserves, such as `con`;
+- be at most 214 characters long;
 - point to a directory that does not exist or is empty, apart from `.git`.
 
 ## What the CLI does

@@ -46,6 +46,9 @@ const waitingWordList = [
   "confirmation",
   "permission",
   "sign off",
+  "sign-off",
+  "authorize",
+  "authorizes",
 ];
 
 const waitingWords = new RegExp(String.raw`\b(?:${waitingWordList.join("|")})\b`, "i");
@@ -78,7 +81,7 @@ function maskFencedBlocks(text: string): string {
  * @returns The steps with the line each starts on.
  */
 function splitSteps(text: string): Step[] {
-  return Array.from(text.matchAll(/^\d+\. .*(?:\n[\t ]+\S.*)*/gm), match => ({
+  return Array.from(text.matchAll(/^(?:\d+\.|[-*+]) .*(?:\n[\t ]+\S.*)*/gm), match => ({
     line: text.slice(0, match.index).split("\n").length,
     text: match[0],
   }));
@@ -216,7 +219,7 @@ function checkPlaybook(text: string): Problem[] {
  * @returns The missing roles.
  */
 function findMissingRoles(ruleText: string): string[] {
-  return humanGateRoles.filter(role => !ruleText.toLowerCase().includes(role));
+  return humanGateRoles.filter(role => !new RegExp(String.raw`\b${role}s?\b`, "i").test(ruleText));
 }
 
 const validNext = "**Next:** none; the person; when they write.";
@@ -245,6 +248,15 @@ const selfTestCases: SelfTestCase[] = [
     name: `waiting word "${word}" names no role`,
     text: `1. Ask, then ${word} for the answer.\n\n${validNext}`,
   })),
+  {
+    expectedRule: "B",
+    name: "waiting bullet names no role",
+    text: `- Wait for the answer.\n\n${validNext}`,
+  },
+  {
+    name: "waiting bullet names a role",
+    text: `- Wait for the engineer.\n\n${validNext}`,
+  },
   {
     name: "plural role",
     text: `1. Wait for the engineers and the code owners.\n\n${validNext}`,
@@ -334,12 +346,12 @@ const selfTestFailures = selfTestCases
   })
   .map(({name}) => name);
 
-if (findMissingRoles(humanGateRoles.join(" ")).length > 0) {
-  selfTestFailures.push("a rule naming every role has no missing role");
+if (!findMissingRoles("the engineering team").includes("engineer")) {
+  selfTestFailures.push("a longer word that starts with a role names that role");
 }
 
-if (findMissingRoles("no role").length !== humanGateRoles.length) {
-  selfTestFailures.push("a rule naming no role is missing every role");
+if (findMissingRoles(humanGateRoles.map(role => `${role}s`).join(" ")).length > 0) {
+  selfTestFailures.push("a rule naming every role in the plural has a missing role");
 }
 
 if (existsSync(playbookDirectory) && existsSync(agentOwnedWorkRule)) {

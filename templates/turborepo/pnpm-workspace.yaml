@@ -17,7 +17,6 @@ overrides:
   "minimatch@<11.0.1": ^11.0.1
 minimumReleaseAgeExclude:
   - "@next-friday/commitlint-config-friday@4.0.0"
-  - "@next-friday/eslint-config-friday@5.0.0"
   - "@next-friday/eslint-config-friday@5.1.0"
   - "@next-friday/prettier-config-friday@4.0.0"
   - "@next-friday/eslint-plugin-friday@1.1.3"

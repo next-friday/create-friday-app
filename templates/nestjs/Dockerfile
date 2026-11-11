@@ -1,4 +1,4 @@
-# Runs on any OCI platform (Railway, Vercel Container Runtime, Fly.io, Cloud Run). The platform sets `PORT`.
+# Runs on any OCI platform (Railway, Fly.io, Cloud Run). The platform sets `PORT`.
 FROM \
   node@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 \
   AS base
@@ -33,5 +33,5 @@ COPY package.json ./
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 USER 1000
-HEALTHCHECK --interval=30s --timeout=5s CMD ["node", "-e", "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/health').then(response => process.exit(response.ok ? 0 : 1), () => process.exit(1))"]
+HEALTHCHECK --interval=30s --timeout=5s CMD ["node", "-e", "fetch('http://127.0.0.1:' + process.env.PORT + '/health').then(response => process.exit(response.ok ? 0 : 1), () => process.exit(1))"]
 CMD ["node", "dist/main.js"]

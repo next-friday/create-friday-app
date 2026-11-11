@@ -7,7 +7,6 @@ updates:
       interval: weekly
       day: monday
       time: "09:00"
-      timezone: Asia/Bangkok
     cooldown:
       default-days: 7
     open-pull-requests-limit: 10
@@ -15,10 +14,6 @@ updates:
       prefix: chore
       prefix-development: chore
       include: scope
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - version-update:semver-major
     groups:
       minor-patch:
         applies-to: version-updates
@@ -29,13 +24,11 @@ updates:
           - patch
 
   - package-ecosystem: github-actions
-    directories:
-      - /
+    directory: /
     schedule:
       interval: weekly
       day: monday
       time: "09:30"
-      timezone: Asia/Bangkok
     cooldown:
       default-days: 7
     commit-message:
@@ -52,7 +45,6 @@ updates:
       interval: weekly
       day: monday
       time: "10:00"
-      timezone: Asia/Bangkok
     cooldown:
       default-days: 7
     commit-message:
@@ -69,7 +61,6 @@ updates:
       interval: weekly
       day: monday
       time: "10:30"
-      timezone: Asia/Bangkok
     cooldown:
       default-days: 7
     commit-message:

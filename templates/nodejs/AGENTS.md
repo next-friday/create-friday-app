@@ -7,6 +7,7 @@ TypeScript HTTP service on `node:http`, without a framework, on pnpm and Node.js
 | Task                        | Command                                             |
 | :-------------------------- | :-------------------------------------------------- |
 | Start with reload           | `pnpm start:dev`                                    |
+| Run the build               | `pnpm build`, then `pnpm start`                     |
 | One test                    | `pnpm vitest run src/port.test.ts -t "<test name>"` |
 | Unit tests                  | `pnpm test`, or `pnpm test:coverage`                |
 | What `pre-push` runs        | `pnpm check`                                        |
@@ -17,7 +18,7 @@ TypeScript HTTP service on `node:http`, without a framework, on pnpm and Node.js
 
 - Build: `pnpm build` (prints nothing after `$ tsc -p tsconfig.build.json`)
 - Test: `pnpm test:coverage` (all green, then the coverage summary; never skip or delete a failing test)
-- Lint: `pnpm verify:static` (ESLint allows zero warnings; prints `✔ no dependency violations found`)
+- Static checks: `pnpm verify:static` (ESLint allows zero warnings; every check must pass)
 
 Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
 

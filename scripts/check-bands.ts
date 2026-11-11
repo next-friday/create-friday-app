@@ -631,12 +631,33 @@ function run(valuesPath: string): void {
   }
 }
 
+/**
+ * Validate `bands.yaml` and report the self-tests that ran.
+ */
+function checkCommittedBands(): void {
+  if (!existsSync(bandsPath)) {
+    fail(`${bandsPath}: the file does not exist; run this from the project root`);
+
+    return;
+  }
+
+  const bands = readBands(readFileSync(bandsPath, "utf8"));
+
+  if ("problem" in bands) {
+    fail(`${bandsPath}: ${bands.problem}`);
+  } else {
+    process.stdout.write(
+      `Ran ${selfTestCases.length} bands self-tests and checked ${bandsPath}.\n`,
+    );
+  }
+}
+
 if (selfTestFailures.length > 0) {
   const failureLines = selfTestFailures.map(name => `- ${name}`);
 
   fail(`Bands self-tests failed:\n${failureLines.join("\n")}`);
 } else if (argumentsList.length === 0) {
-  process.stdout.write(`Ran ${selfTestCases.length} bands self-tests.\n`);
+  checkCommittedBands();
 } else if (argumentsList.length > 1) {
   fail("pass one argument: the path of the JSON file with the baseline and recent values");
 } else {

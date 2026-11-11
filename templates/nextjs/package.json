@@ -2,7 +2,7 @@
   "name": "next-friday-template-nextjs",
   "version": "0.1.0",
   "private": true,
-  "description": "Next Friday Next.js template.",
+  "description": "Next.js application.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/next-friday/next-friday-template-nextjs.git"
@@ -65,7 +65,6 @@
     "dependency-cruiser": "18.7.1",
     "editorconfig-checker": "7.0.0",
     "eslint": "10.14.0",
-    "fast-check": "4.10.2",
     "husky": "9.1.7",
     "jiti": "2.7.0",
     "knip": "6.44.1",

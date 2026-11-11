@@ -10,11 +10,12 @@ Do these steps in order.
 
 1. **Match the request** to the first row that fits, and read that row's file before you act.
 
-   | The request                                                                      | What to do                                                                                                                                                                                                                                           |
-   | :------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | A question, or a request to explain or check without changing things             | Follow [`playbooks/question.md`](playbooks/question.md).                                                                                                                                                                                             |
-   | An idea, a problem, a ticket, or an incident, whether asked for or only reported | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                                                                                                                                                     |
-   | A later step: a spec, a build, a review, a deploy, or an incident fix            | Say "This step has no playbook in `/sdlc` yet" and name the step. Name the skill that covers it when one exists: `write-spec` for a spec, `babysit-pr` for a pull request you opened. Answer what you can as `playbooks/question.md` says, and stop. |
+   | The request                                                                      | What to do                                                                                                                                                                        |
+   | :------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | A question, or a request to explain or check without changing things             | Follow [`playbooks/question.md`](playbooks/question.md).                                                                                                                          |
+   | An idea, a problem, a ticket, or an incident, whether asked for or only reported | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                                                                                  |
+   | A spec for an intent                                                             | Follow [`playbooks/design.md`](playbooks/design.md).                                                                                                                              |
+   | A later step: a build, a review, a deploy, or an incident fix                    | Say "This step has no playbook in `/sdlc` yet" and name the step. Name `babysit-pr` for a pull request you opened. Answer what you can as `playbooks/question.md` says, and stop. |
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line.
 

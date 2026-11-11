@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: spec-for-unmerged-intent-stops
+expected_outcome: |
+  The intent intent/dark-mode/intent.md exists only on the branch docs/dark-mode-intent. The agent says in a few lines that the intent is not merged yet, names that branch, and stops. It writes no spec and makes no commit.

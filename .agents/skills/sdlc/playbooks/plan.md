@@ -12,7 +12,7 @@ This playbook writes the intent. The build plan, `intent/<change>/plan.md`, come
 6. Commit `intent.md` on a new branch, push it, and open a pull request ready for review, as `AGENTS.md` says for branches and pull requests.
 7. **Gate: the product owner accepts or rejects the intent.** The product owner accepts by setting `Status: accepted.` and merging the pull request, or rejects by closing it; you do neither. Report the pull request's URL, keep it green as `AGENTS.md` says, and wait.
 
-**Next:** `.agents/skills/write-spec/SKILL.md`; an agent; when the product owner has merged the intent's pull request and a person or a trigger asks for the spec.
+**Next:** `.agents/skills/sdlc/playbooks/design.md`; an agent; when the product owner has merged the intent's pull request and a person or a job asks for the spec.
 
 ## Template
 

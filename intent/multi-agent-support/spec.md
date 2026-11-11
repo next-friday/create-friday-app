@@ -71,7 +71,7 @@ CI and code owner review remain the boundary for both agents (intent).
 
 ### What `AGENTS.md` says about Cursor
 
-A short **Cursor** section in the root and in `templates/base/AGENTS.md`, next to convention 8's plan-mode line:
+A short **Cursor** section in the root and in `templates/base/AGENTS.md`, next to the plan convention's plan-mode line:
 
 - Cursor does not read Claude Code's `permissions`; the file-path gate and the shell gate's Cursor check stand in for them.
 - Keep **Include Third-Party Plugins, Skills, and Other Configs** on: Cursor runs the hooks in `.claude/settings.json` only while it is on, and the project's skills are in `.claude/skills/`.

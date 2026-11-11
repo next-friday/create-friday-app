@@ -127,7 +127,7 @@ The edit-time hook goes: its entries leave `.claude/settings.json` (lines 51–5
 
 ### Test-edit gate
 
-`.agents/hooks/agent-test-edit-gate.sh`, its entries in `.claude/settings.json` (lines 57–62) and `.cursor/hooks.json` (lines 17–22), and convention 9's marker sentences are removed, in the root and `templates/`. `REVIEW.md`'s Compliance pass gains: "A pull request that fixes a bug changes no existing test, unless it names the test that asserted the bug and says why; flag any other test change as Important." Claude Code Review "never approves or blocks the pull request" ([Claude Code: Code Review](https://code.claude.com/docs/en/code-review)), so the code owner rejects it, as page 32, step 7 has it ("reject any change that touches a test").
+`.agents/hooks/agent-test-edit-gate.sh`, its entries in `.claude/settings.json` (lines 57–62) and `.cursor/hooks.json` (lines 17–22), and the **Start a bug fix with a failing test** convention's marker sentences are removed, in the root and `templates/`. `REVIEW.md`'s Compliance pass gains: "A pull request that fixes a bug changes no existing test, unless it names the test that asserted the bug and says why; flag any other test change as Important." Claude Code Review "never approves or blocks the pull request" ([Claude Code: Code Review](https://code.claude.com/docs/en/code-review)), so the code owner rejects it, as page 32, step 7 has it ("reject any change that touches a test").
 
 ### Agent settings
 

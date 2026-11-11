@@ -1,7 +1,5 @@
 # Deploy phase: take a merged change to the production gate
 
-The agent may act up to the production gate and cannot pass it.
-
 1. Find the commit: the full SHA on the default branch that the request names, or the latest commit there. Read its CI run. When a check failed or is still running, say which one in two lines and stop. When you cannot read the CI run from this session, say so and carry on with the commit marked as not verified.
 2. Read how this project deploys: the deploy section of `README.md` and `.github/workflows/deploy.yml`. When the project has no deploy workflow, or deploying is switched off, say so in two lines and stop. When you cannot tell whether deploying is switched on, say so and carry on.
 3. Report where the commit is. For each environment, in the order the project promotes them, say whether this commit is deployed there, and give the deployment's link or the output that shows it. Read production only from the deploy workflow's run history, never with a command that names the production environment. Where you cannot read an environment, write "not read" and why.

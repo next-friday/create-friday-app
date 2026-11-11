@@ -1,6 +1,6 @@
 # Changesets
 
-A release is public and permanent, so the fewest releases that carry the work are the right number. Add a changeset only for a change that a person would notice when they run the CLI or run a command in the project it generated.
+Add a changeset only for a change that a person would notice when they run the CLI or run a command in the project it generated.
 
 ## Changes that need no changeset
 
@@ -8,8 +8,6 @@ A release is public and permanent, so the fewest releases that carry the work ar
 - Scripts and checks that exist to check agent instructions or agent gates, such as `pnpm human-gates:check`.
 - Comments, documentation, and the templates for issues and pull requests.
 - CI and tooling of this repository.
-
-Such a change stays on `main` and reaches generated projects with the next release that another change causes. That is expected.
 
 ## Add a changeset
 
@@ -25,8 +23,6 @@ Check pending `.changeset/*.md` files first. When one already covers the same pi
 
 - Use `patch` for a fix to a defect a person meets when they run the CLI or the generated project.
 - Use `minor` for something a person can use for their own application that was not there before, such as a CLI option, a stack, or a command in the generated project that builds, tests, or deploys their code. Any other change to a template file that is not listed above is `minor` at most.
-
-When you cannot name what a person who never reads the agent files would notice, the change needs no changeset.
 
 - Use `major` only when a CLI argument, a prompt, or a stack is removed or renamed, so that a command that ran before no longer runs. A change to what a template contains is never `major`.
 

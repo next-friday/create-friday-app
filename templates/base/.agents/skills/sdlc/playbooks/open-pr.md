@@ -1,7 +1,5 @@
 # Open the pull request
 
-The `build` playbook ends here. Nothing in it stops for a person.
-
 1. Clean the diff against the default branch. Remove debug output, commented-out code, changes the plan does not name, and comments that `.agents/rules/code-comments.md` does not allow.
 2. Do what `AGENTS.md` and `CONTRIBUTING.md` require for this kind of change. Add a release note only when they say this change needs one; most changes need none.
 3. When step 1 or 2 changed a file, run the checks under **Verifying your work** in `AGENTS.md` again. When one fails, fix the code and run it again. Commit only when they pass.
@@ -10,7 +8,7 @@ The `build` playbook ends here. Nothing in it stops for a person.
    - `Closes #<issue>` for each issue the change closes, or the word the template asks for when there is none;
    - each check you ran, with its result copied from the output.
 
-   When you cannot open a pull request from this session, say so and give the pushed branch's name. When you cannot push either, say so; the review then reads the local branch's diff.
+   When you cannot open a pull request from this session, say so and give the pushed branch's name. When you cannot push either, say so. The review then reads the local branch's diff.
 
 5. Go on in the same turn, without asking: follow `.agents/skills/sdlc/playbooks/review.md`.
 

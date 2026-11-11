@@ -44,3 +44,7 @@ The CI in this repository and in the templates does not follow Turborepo's offic
 ## Constraints
 
 - Related intents: `intent/playbook-plays/intent.md` covers every playbook play, including the ones that run in CI, and `intent/monorepo-apps/intent.md` covers the app layout at `apps/<group>/<app>`, what an app's own files tell CI, the remote cache, and deploying and promoting images by digest; this intent owns how CI builds them.
+
+## Open questions
+
+Not recorded when this intent was written.

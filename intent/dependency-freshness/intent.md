@@ -32,3 +32,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 - Dependabot's seven-day cooldown stays, as supply-chain protection. Whether pnpm also enforces a release age, and for how long, is decided in the spec.
 - A generated project passes its own `pnpm verify` after each update.
+
+## Open questions
+
+Not recorded when this intent was written.

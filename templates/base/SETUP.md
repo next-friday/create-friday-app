@@ -10,7 +10,7 @@ This project runs an AI-native software development loop in Claude Code and Curs
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
 5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
 6. **Deploy:** send `/sdlc deploy` to see where a commit is deployed and what the release manager must do. Once `DEPLOY_ENABLED` is `true`, each push to `main` that passes CI deploys to `dev`, and the Deploy workflow promotes a commit to `uat` and then `prod`. `agent-production-gate.sh` blocks an agent's shell commands that deploy to `prod`, run a Railway command with `prod` as its environment, or push a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set.
-7. **Maintain:** a job or a person sends a finding with `/sdlc`, which diagnoses it and writes `intent.md`. The service owner triages it.
+7. **Maintain:** a person, or a job you build, sends a finding with `/sdlc`, which diagnoses it and writes `intent.md`. The service owner triages it.
 
 ## 1. First commit and push
 
@@ -100,6 +100,6 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 
 ## 7. Later, as the guardrails mature
 
-- Send the intent's path with `/sdlc` by hand first, then as an organization-level slash command, then as a job that commits `spec.md` as a pull request when an `intent.md` merges.
+- Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges; this project ships no such job. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git log:*)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
 - Replace `bands.yaml` with this project's metric, add a unit-tested detection script that reads it, and add the trigger that runs it.

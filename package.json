@@ -35,6 +35,7 @@
     "build": "tsdown",
     "changeset": "changeset",
     "changeset:status": "changeset status --since main",
+    "changesets:check": "node scripts/check-changesets.ts",
     "check:publint": "publint",
     "clean": "rm -rf dist coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "dev": "tsdown --watch",
@@ -57,7 +58,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "verify": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
+    "verify": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm changesets:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
   },
   "dependencies": {
     "@clack/prompts": "1.8.1"

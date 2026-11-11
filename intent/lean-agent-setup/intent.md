@@ -83,3 +83,7 @@ The agent setup in this repository and in the templates is heavier than the AI-n
 
 - The agent still cannot weaken the checks on its own work (page 32); CI and code owner review stay the boundary.
 - A change to hooks, rules, or agent settings goes through a pull request that code owners approve.
+
+## Open questions
+
+Not recorded when this intent was written.

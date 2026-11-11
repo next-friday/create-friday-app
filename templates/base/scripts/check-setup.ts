@@ -21,7 +21,7 @@ const codeownersPath = ".github/CODEOWNERS";
 const securityPath = "SECURITY.md";
 const zizmorPath = ".github/zizmor.yml";
 const securityPlaceholder = "example.com";
-const zizmorPlaceholder = "@your-org/your-team";
+const ownerPlaceholder = "@your-org/your-team";
 const ownersStep = "step 2 (Owners) of SETUP.md";
 
 /**
@@ -33,7 +33,7 @@ function findCodeownersProblems(codeowners: string): Problem[] {
   const hasRule = codeowners.split("\n").some(line => {
     const trimmed = line.trim();
 
-    return trimmed !== "" && !trimmed.startsWith("#");
+    return trimmed !== "" && !trimmed.startsWith("#") && !trimmed.includes(ownerPlaceholder);
   });
 
   return hasRule
@@ -73,7 +73,7 @@ function checkSetup(files: SetupFiles): Problem[] {
   return [
     ...findCodeownersProblems(files.codeowners),
     ...findPlaceholderProblems(securityPath, files.security, securityPlaceholder),
-    ...findPlaceholderProblems(zizmorPath, files.zizmor, zizmorPlaceholder),
+    ...findPlaceholderProblems(zizmorPath, files.zizmor, ownerPlaceholder),
   ];
 }
 

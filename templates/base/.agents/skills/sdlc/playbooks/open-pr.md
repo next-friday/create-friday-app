@@ -3,7 +3,7 @@
 1. Clean the diff against the default branch. Remove debug output, commented-out code, changes the plan does not name, and comments that `.agents/rules/code-comments.md` does not allow.
 2. Do what `AGENTS.md` and `CONTRIBUTING.md` require for this kind of change. Add a release note only when they say this change needs one; most changes need none.
 3. When step 1 or 2 changed a file, run the checks under **Verifying your work** in `AGENTS.md` again. When one fails, fix the code and run it again. Commit only when they pass.
-   - When `package.json` has a `setup:check` script, run it and tell the person what it reports in your reply. It does not block the pull request.
+   - Whether or not a file changed, when `package.json` has a `setup:check` script, run it and tell the person what it reports in your reply. It does not block the pull request.
 4. Push the branch and open the pull request ready for review, as `AGENTS.md` says for branches and pull requests. When the branch already has a pull request, update that one. Fill the body from `.github/pull_request_template.md`:
    - what changed and why, with the paths of `intent/<change>/spec.md` and `plan.md` when they exist;
    - `Closes #<issue>` for each issue that already exists and that the change closes. When there is none, write what the template's own section asks for, and leave it out when the template has no such section. Never open an issue to get a number;

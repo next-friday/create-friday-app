@@ -1,5 +1,15 @@
 # @next-friday/create-app
 
+## 9.1.0
+
+### Minor Changes
+
+- 3064b0b: Generated projects gain the rest of the `/sdlc` loop. `/sdlc` now routes to a `maintain` playbook, which writes an `intent.md` from a finding, and a `deploy` playbook, which stops at the production gate. `pnpm intent:check` checks an `intent.md` and runs in `pnpm verify` and CI. A plan records who accepted it and a spec records the request that started it. New files: `SECURITY.md`, `lessons/README.md`, and a documentation issue form.
+
+### Patch Changes
+
+- 3064b0b: Generated projects load fewer repeated agent instructions. `AGENTS.md`, the `/sdlc` skill, its playbooks, `SETUP.md`, and `intent/README.md` no longer restate a rule that a rule file, a hook, or another playbook already holds. No rule changes.
+
 ## 9.0.0
 
 ### Major Changes

@@ -1,6 +1,6 @@
 # Setup
 
-This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook) in Claude Code and Cursor. Do the steps below in order. Each step says who does it and how to check that it is done.
+This project runs an AI-native software development loop in Claude Code and Cursor: intent, spec, plan, build, review, deploy, and maintain. Do the steps below in order. Each step says who does it and how to check that it is done.
 
 ## How a change flows
 
@@ -9,7 +9,7 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 3. **Build:** the engineer sends `/sdlc build` with the spec's path, starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
 5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
-6. **Deploy:** once `DEPLOY_ENABLED` is `true`, each push to `main` that passes CI deploys to `dev`, and the Deploy workflow promotes a commit to `uat` and then `prod`. `agent-production-gate.sh` blocks an agent's shell commands that deploy to `prod`, run a Railway command with `prod` as its environment, or push a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set.
+6. **Deploy:** send `/sdlc deploy` to see where a commit is deployed and what the release manager must do. Once `DEPLOY_ENABLED` is `true`, each push to `main` that passes CI deploys to `dev`, and the Deploy workflow promotes a commit to `uat` and then `prod`. `agent-production-gate.sh` blocks an agent's shell commands that deploy to `prod`, run a Railway command with `prod` as its environment, or push a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set.
 7. **Maintain:** a job or a person sends a finding with `/sdlc`, which diagnoses it and writes `intent.md`. The service owner triages it.
 
 ## 1. First commit and push
@@ -73,8 +73,8 @@ Also replace the owner placeholder in `.github/zizmor.yml`.
 **Who:** an Owner of the Claude organization, with an owner of the GitHub organization.
 
 - **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow.
-- **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the playbook's worked example in `.claude/managed-settings.example.json`. Engineers cannot override them.
-- **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage) that the playbook's indicators read.
+- **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the example in `.claude/managed-settings.example.json`. Engineers cannot override them.
+- **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage).
 
 **Check:** the test pull request gets a **Claude Code Review** check run within a few minutes.
 

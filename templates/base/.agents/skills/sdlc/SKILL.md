@@ -10,15 +10,16 @@ Do these steps in order.
 
 1. **Match the request** to the first row that fits, and read that row's file before you act.
 
-   | The request                                                                                             | What to do                                                                                                                       |
-   | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
-   | A question, or a request to explain or check without changing things                                    | Follow [`playbooks/question.md`](playbooks/question.md).                                                                         |
-   | An idea, a problem, a ticket, or an incident, whether asked for or only reported                        | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                                 |
-   | A finding from a job or a monitor, with no person to interview: an alert, a failing run, or an incident | Follow [`playbooks/maintain.md`](playbooks/maintain.md).                                                                         |
-   | A spec for an intent, or a path to an `intent.md`                                                       | Follow [`playbooks/design.md`](playbooks/design.md).                                                                             |
-   | A build for a spec, a path to a `spec.md`, or a plan the engineer accepted                              | Follow [`playbooks/build.md`](playbooks/build.md).                                                                               |
-   | A review of a pull request, or a pull request to drive to green                                         | Follow [`playbooks/review.md`](playbooks/review.md).                                                                             |
-   | A later step: a deploy                                                                                  | Say "This step has no playbook in `/sdlc` yet" and name the step. Answer what you can as `playbooks/question.md` says, and stop. |
+   | The request                                                                                             | What to do                                                                                                                     |
+   | :------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
+   | A question, or a request to explain or check without changing things                                    | Follow [`playbooks/question.md`](playbooks/question.md).                                                                       |
+   | A finding from a job or a monitor, with no person to interview: an alert, a failing run, or an incident | Follow [`playbooks/maintain.md`](playbooks/maintain.md).                                                                       |
+   | An idea, a problem, a ticket, or an incident, whether asked for or only reported                        | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                               |
+   | A spec for an intent, or a path to an `intent.md`                                                       | Follow [`playbooks/design.md`](playbooks/design.md).                                                                           |
+   | A build for a spec, a path to a `spec.md`, or a plan the engineer accepted                              | Follow [`playbooks/build.md`](playbooks/build.md).                                                                             |
+   | A review of a pull request, or a pull request to drive to green                                         | Follow [`playbooks/review.md`](playbooks/review.md).                                                                           |
+   | A deploy, or a question about what is deployed where                                                    | Follow [`playbooks/deploy.md`](playbooks/deploy.md).                                                                           |
+   | Anything else                                                                                           | Say which of the rows above is closest and why it does not fit, answer what you can as `playbooks/question.md` says, and stop. |
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line.
 
@@ -27,7 +28,7 @@ Do these steps in order.
 
 ## Reply shape
 
-Write every part in the language of the person's message; keep paths, commands, copied step text, and a draft file's own text as they are. For `question` and for a later step, leave out **Steps** and put the answer in its place.
+Write every part in the language of the person's message; keep paths, commands, copied step text, and a draft file's own text as they are. For `question` and for a request no row fits, leave out **Steps** and put the answer in its place.
 
 ```markdown
 **Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>

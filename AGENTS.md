@@ -60,6 +60,6 @@ When Claude makes a mistake twice, add the correction here.
 - **Issues**: open an issue only to hand work to another person, never to give a pull request a number to close. A pull request closes an issue that already exists with `Closes #<issue>`.
 - **Testing a skill**: test a skill with Claude Code itself, in a generated project: `claude -p "/sdlc <request>" --model <small model> --strict-mcp-config`.
 - **Accepted is not built**: a spec with `Status: accepted.` is not built. Check each requirement against the tree before you call a change done.
-- **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, session note, or list of what was left undone into a file, a commit message, or a pull request.
+- **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
 - **CI-only jobs**: Template, Consumer Smoke, and Compatibility run only in CI. Do not report them as local results.
 - **Playbook claims**: add a requirement to an intent, spec, or plan only when the user decided it or a source says it: the playbook page, an official document, or a named community repository. This includes a requirement a review bot suggests. Quote the passage with its page number from the PDF's page breaks. When the user did not decide it and no source says it, leave it out and answer the thread with that.

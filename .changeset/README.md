@@ -15,7 +15,7 @@ The files under `templates/` are what the CLI produces. `src/create.ts` copies t
 
 - A pull request adds a changeset when it changes a file under `src/` or `templates/`, or one of these `package.json` fields: `bin`, `dependencies`, `engines`, `exports`, `files`, `name`, `optionalDependencies`, `peerDependencies`, `type`.
 - A pull request that changes none of those adds none. This repository's own agent instructions, scripts, tests, and CI are not in the package. `README.md` and `LICENSE` are, and a change to them goes out with the next version.
-- A pull request that Dependabot opens adds none, whatever it changes. A maintainer who wants it released on its own adds a `patch` changeset to that pull request; otherwise it goes out with the next version.
+- A pull request that Dependabot opens adds none when it changes only dependency files: `package.json`, `pnpm-workspace.yaml`, a `Dockerfile`, `.nvmrc`, or a workflow. A maintainer who wants it released on its own adds a `patch` changeset to that pull request; otherwise it goes out with the next version.
 - This repository does not use empty changesets (`changeset --empty`): a pull request that publishes nothing adds no file.
 
 `pnpm changesets:check` fails a branch that changes something published without a changeset, adds a changeset without changing something published, or declares `major` without a change to the public API. It runs in `pnpm verify`, which the pre-push hook and the release job run. It does not judge `patch` against `minor`; the reviewer does.

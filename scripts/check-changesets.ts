@@ -47,6 +47,9 @@ const publishedManifestFields = [
 const breakingManifestFields = new Set(["bin", "engines", "name"]);
 const dependencyBot = "dependabot[bot]";
 
+const dependencyFile =
+  /(?:(?:^|\/)(?:package\.json|pnpm-workspace\.yaml|Dockerfile|\.nvmrc)(?: \(.*)?|\/\.github\/workflows\/[^/]+\.ya?ml)$/;
+
 /**
  * Tell whether a changed path is part of what the package publishes: the CLI source or a template.
  * @param changedPath Path from the project root.
@@ -97,7 +100,9 @@ function findChangesetProblems(
 
   if (addedPaths.length === 0) {
     const isDependencyUpdate =
-      authors.length > 0 && authors.every(author => author === dependencyBot);
+      authors.length > 0 &&
+      authors.every(author => author === dependencyBot) &&
+      publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
 
     return isDependencyUpdate || publishedPaths.length === 0
       ? []
@@ -207,6 +212,7 @@ const minorChangesetPath = ".changeset/quiet-owls-sing.md";
 const majorChangesetPath = ".changeset/loud-owls-sing.md";
 const patchChangesetPath = ".changeset/calm-owls-sing.md";
 const missingChangesetMessagePart = "adds no changeset";
+const sourceFile = "src/setup.ts";
 
 const patchChangeset = {
   [patchChangesetPath]: '---\n"@next-friday/create-app": patch\n---\n\nNote.\n',
@@ -247,7 +253,13 @@ const selfTestCases: SelfTestCase[] = [
   {
     expectedMessagePart: missingChangesetMessagePart,
     name: "no changeset with a src change",
-    changes: [modifiedFile("src/setup.ts")],
+    changes: [modifiedFile(sourceFile)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    name: "no changeset on a dependency bot's commit that changes source",
+    authors: [dependencyBot],
+    changes: [modifiedFile(sourceFile)],
   },
   {
     name: "no changeset on a dependency bot's template update",
@@ -273,7 +285,7 @@ const selfTestCases: SelfTestCase[] = [
   {
     addedChangesets: minorChangeset,
     name: "one changeset with a src change",
-    changes: [addedFile(minorChangesetPath), modifiedFile("src/setup.ts")],
+    changes: [addedFile(minorChangesetPath), modifiedFile(sourceFile)],
   },
   {
     name: "two changesets with a template change",

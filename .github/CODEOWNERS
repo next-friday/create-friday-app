@@ -1,3 +1,13 @@
 # Global code owners
 
 * @joetakara @next-friday-engineer
+
+# Product owner: the intent home
+/intent/ @joetakara
+
+# Policy owner: policy skills and the loop's own skill
+/.agents/skills/brand-policy/ @joetakara
+/.agents/skills/security-policy/ @joetakara
+/.agents/skills/compliance-policy/ @joetakara
+/.agents/skills/ux-policy/ @joetakara
+/.agents/skills/sdlc/ @joetakara

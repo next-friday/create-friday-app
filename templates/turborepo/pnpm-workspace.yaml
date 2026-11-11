@@ -4,6 +4,7 @@ packages:
 engineStrict: true
 savePrefix: ""
 allowBuilds:
+  "@swc/core": false
   esbuild: true
   unrs-resolver: true
 overrides:

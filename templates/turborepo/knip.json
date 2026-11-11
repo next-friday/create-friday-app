@@ -3,7 +3,10 @@
   "ignoreDependencies": ["fast-check"],
   "workspaces": {
     "apps/app": {
-      "ignoreDependencies": ["fast-check"]
+      "ignoreDependencies": ["@swc/core", "fast-check"]
+    },
+    "apps/backoffice": {
+      "ignoreDependencies": ["@swc/core"]
     }
   }
 }

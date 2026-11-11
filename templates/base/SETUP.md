@@ -45,6 +45,8 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 
 **Check:** on GitHub, open `.github/CODEOWNERS`; GitHub shows no errors in the file. `grep example.com SECURITY.md` prints nothing.
 
+Run `pnpm setup:check`. It names each file that still holds a template placeholder, and passes when none does.
+
 ## 3. GitHub repository settings
 
 **Who:** a repository admin.
@@ -91,11 +93,11 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 - **Higher risk (engineering lead):** decide which changes count as higher risk. A tech lead or architect approves their specs and plans.
 - **Policies (each policy owner, with an engineer):** each `.agents/skills/<area>-policy/SKILL.md` ships a default (security: OWASP ASVS 5.0.0 Level 1; UX: WCAG 2.2 Level AA; compliance: the OECD privacy principles; brand: one declared source for every brand value). Review it, replace or add the organization's own rules, then run `pnpm rules:sync`. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time. The policy owner approves every later change as its code owner.
 - **Production gate (engineering leadership, with change management and compliance):** name the release managers and add them as required reviewers on the `prod` environment, as the README's deploy section describes. `.agents/hooks/agent-production-gate.sh` blocks an agent's shell commands that dispatch a `prod` deploy, run a Railway command with `prod` as its environment, or push a release tag. It does not read MCP tools. A release manager whose own agent session must do one of these starts the agent with `RELEASE_APPROVAL` set to the approval record, for example `RELEASE_APPROVAL=CHG-123 claude`.
-- **Review (tech lead):** replace `src/gen/` in `.agents/review.md` with this project's generated paths, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
+- **Review (tech lead):** check that the generated files named in `.agents/review.md` match this project's generated paths, and change the list where they differ, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
 - **People without Git experience:** connect GitHub to Claude (claude.ai or Cowork), so Claude commits `intent.md` for them.
 
 ## 7. Later, as the guardrails mature
 
-- Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges; this project ships no such job. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git log:*)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
+- Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git log:*)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
 - Replace `bands.yaml` with this project's metric, add a unit-tested detection script that reads it, and add the trigger that runs it.

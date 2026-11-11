@@ -18,6 +18,7 @@ Do these steps in order.
    | A review of a pull request or a branch, a failing check on a pull request, or a pull request to drive to green | Follow [`playbooks/review.md`](playbooks/review.md).                                                                           |
    | A deploy, a promotion to an environment, or a release to production                                            | Follow [`playbooks/deploy.md`](playbooks/deploy.md).                                                                           |
    | A finding sent by a job, a monitor, or a trigger, or one the message says no person can answer questions about | Follow [`playbooks/maintain.md`](playbooks/maintain.md).                                                                       |
+   | A defect in behaviour that already exists, to fix                                                              | Follow [`playbooks/fix.md`](playbooks/fix.md).                                                                                 |
    | An idea, a problem, a ticket, or an incident that a person describes, whether asked for or only reported       | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                               |
    | Anything else                                                                                                  | Say which of the rows above is closest and why it does not fit, answer what you can as `playbooks/question.md` says, and stop. |
 

@@ -88,7 +88,7 @@ Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the
 
 ## Mobile app
 
-The template does not ship an Expo app. Add one under `apps/mobile` when you need it:
+To add an Expo app, create it under `apps/mobile`:
 
 1. Create the app from the workspace root with `pnpm create expo-app@latest apps/mobile`, then add `packages/*` workspace packages as you share code. Keep `eas.json` and `credentials.json` inside `apps/mobile` and run the EAS CLI from that directory ([Expo: Build with monorepos](https://docs.expo.dev/build-reference/build-with-monorepos/)).
 2. Use `@expo/fingerprint` with `expo-github-action/fingerprint` so a pull request requests a native build only when the native layer changed ([Expo fingerprint](https://docs.expo.dev/versions/latest/sdk/fingerprint/)).

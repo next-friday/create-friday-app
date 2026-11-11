@@ -16,6 +16,7 @@ disable-model-invocation: true
 ## Map
 
 - **How the workflow runs, and starting work:** `intent/README.md` and the table in `.agents/skills/sdlc/SKILL.md`.
+- **Fixing a defect in behaviour that already exists:** `.agents/skills/sdlc/playbooks/fix.md` is the short path with no intent, spec, or plan. Every other change runs intent, spec, plan, then build.
 - **Who decides:** `.agents/rules/agent-owned-work.md` and `.github/CODEOWNERS`.
 - **A mistake the agent repeats:** **Things Claude gets wrong** in `AGENTS.md`.
 - **Company policy:** the policy skills in `.agents/skills/`, and `.github/CODEOWNERS` for each one's owner.

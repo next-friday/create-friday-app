@@ -6,6 +6,9 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
    - The request names no change, or the folder has no `spec.md` on any branch: list each `intent/*/` on the default branch that has a `spec.md` and no `plan.md`, or say that there is none.
    - The spec exists only on another branch: say that the spec is not merged yet, and name that branch.
    - `intent/<change>/plan.md` is already on the default branch: say that the change is built, and name the file.
+
+   When the request is a bug fix with no spec, none of these cases applies: follow `.agents/skills/sdlc/playbooks/fix.md` instead.
+
 2. When `intent/<change>/plan.md` exists on a branch that is not merged, check out that branch. When the request says the plan is accepted, go to step 7. Otherwise show that plan and go to step 5.
 3. Read `intent.md`, `spec.md`, and the code the change touches.
 4. Write the plan from the template below, in the language of the files already in `intent/`. Use exactly the template's headings. The date in the title is the date of the last commit to `intent/<change>/intent.md`: `git log -1 --format=%cs -- intent/<change>/intent.md`. An engineer who has never seen this conversation must be able to implement the change from the plan alone.

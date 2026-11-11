@@ -18,4 +18,4 @@ Report at most five nits per review; summarize the rest as a count.
 
 ## Do not report
 
-Generated files under src/gen/ and anything CI already enforces.
+Generated files, such as `src/payload-types.ts` and `src/migrations/` where the project has them, and anything CI already enforces.

@@ -17,6 +17,7 @@
     }
   ],
   "options": {
+    "parser": "swc",
     "skipAnalysisNotInRules": true,
     "tsPreCompilationDeps": true,
     "enhancedResolveOptions": {

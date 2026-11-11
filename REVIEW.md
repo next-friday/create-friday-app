@@ -18,4 +18,4 @@ Report at most five nits per review; summarize the rest as a count.
 
 ## Do not report
 
-Generated files under src/gen/ and anything CI already enforces.
+Generated files and anything CI already enforces: `templates/payload/src/app/(payload)/**`, `templates/payload/src/migrations/**`, `templates/payload/src/payload-types.ts`, `templates/turborepo/apps/backoffice/src/app/(payload)/**`, `templates/turborepo/apps/backoffice/src/migrations/**`, and `templates/turborepo/apps/backoffice/src/payload-types.ts`.

@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 8.0.1
+
+### Patch Changes
+
+- c54ec9f: The pull request template in each generated project now says to link an issue with `Closes #123` only when one already exists, and not to open an issue for the pull request.
+
 ## 8.0.0
 
 ### Major Changes

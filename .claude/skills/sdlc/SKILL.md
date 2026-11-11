@@ -23,7 +23,7 @@ Do these steps in order.
 
 ## Reply shape
 
-For `question` and for a later step, leave out **Steps** and put the answer in its place.
+Write every part in the language of the person's message; keep paths, commands, and copied step text as they are. For `question` and for a later step, leave out **Steps** and put the answer in its place.
 
 ```markdown
 **Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>
@@ -40,6 +40,6 @@ For `question` and for a later step, leave out **Steps** and put the answer in i
 
 A step you have not reached yet is `open`. Use `skip` only for a step you decide never to do.
 
-When the evidence rules out the change the person asked for, show the evidence under **Request** and stop.
+When the evidence shows that the change cannot be made in this project, say so under **Request** and keep to the playbook: its first round asks the one question that settles where the change belongs.
 
 "new task" starts again at step 1. "don't change anything" keeps the session on `question`.

@@ -17,7 +17,14 @@ const defaultBranch = "origin/main";
 const argumentsFile = "src/arguments.ts";
 const promptsFile = "src/create.ts";
 const stacksFile = "src/stacks.ts";
-const majorDeclaration = /^"@next-friday\/create-app": major\s*$/m;
+const {name: packageName} = JSON.parse(readFileSync("package.json", "utf8")) as {name: string};
+const escapedPackageName = packageName.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
+
+const majorDeclaration = new RegExp(
+  String.raw`^\s*(["']?)` + escapedPackageName + String.raw`\1\s*:\s*(["']?)major\2\s*$`,
+  "m",
+);
+
 const changesetFile = /^\.changeset\/(?!README\.md$)[^/]+\.md$/;
 const stackManifest = /^templates\/(?!base\/)[^/]+\/package\.json$/;
 
@@ -35,7 +42,7 @@ const noChangesetPatterns = [
   /\.md$/,
   /^templates\/.*\/\.(?:agents|claude|cursor)\//,
   /^templates\/.*\/\.github\/ISSUE_TEMPLATE\//,
-  /^templates\/.*\/scripts\/check-[^/]*\.ts$/,
+  /^templates\/.*\/scripts\/check-(?:agent-gates|human-gates|intent)\.ts$/,
 ];
 
 /**
@@ -174,9 +181,23 @@ const minorChangeset = {
   [minorChangesetPath]: '---\n"@next-friday/create-app": minor\n---\n\nNote.\n',
 };
 
-const majorChangeset = {
-  [majorChangesetPath]: '---\n"@next-friday/create-app": major\n---\n\nNote.\n',
-};
+/**
+ * Build the text of a self-test changeset around one front matter line.
+ * @param declaration The front matter line.
+ * @returns The changeset text by its path.
+ */
+function majorChangesetOf(declaration: string): Record<string, string> {
+  return {
+    [majorChangesetPath]: `---\n${declaration}\n---\n\nNote.\n`,
+  };
+}
+
+const majorChangeset = majorChangesetOf(`"${packageName}": major`);
+
+const templateOnlyChanges = [
+  addedFile(majorChangesetPath),
+  modifiedFile("templates/nestjs/src/main.ts"),
+];
 
 const selfTestCases: SelfTestCase[] = [
   {
@@ -215,9 +236,36 @@ const selfTestCases: SelfTestCase[] = [
   },
   {
     addedChangesets: majorChangeset,
+    changes: templateOnlyChanges,
     name: "major with only template content changes",
     expectedMessagePart: "only for a removed or renamed CLI argument",
-    changes: [addedFile(majorChangesetPath), modifiedFile("templates/nestjs/src/main.ts")],
+  },
+  ...[
+    ["two spaces", `"${packageName}":  major`],
+    ["single quotes", `'${packageName}': 'major'`],
+    ["no quotes", `${packageName}: major`],
+  ].map(([spelling = "", declaration = ""]) => ({
+    changes: templateOnlyChanges,
+    expectedMessagePart: "only for a removed or renamed CLI argument",
+    addedChangesets: majorChangesetOf(declaration),
+    name: `major written with ${spelling} and only template content changes`,
+  })),
+  {
+    addedChangesets: minorChangeset,
+    name: "changeset with a template script that is not an agent check",
+    changes: [
+      addedFile(minorChangesetPath),
+      modifiedFile("templates/nestjs/scripts/check-health.ts"),
+    ],
+  },
+  {
+    addedChangesets: minorChangeset,
+    name: "changeset with only a template agent check script",
+    expectedMessagePart: "needs none",
+    changes: [
+      addedFile(minorChangesetPath),
+      modifiedFile("templates/base/scripts/check-intent.ts"),
+    ],
   },
   {
     addedChangesets: majorChangeset,

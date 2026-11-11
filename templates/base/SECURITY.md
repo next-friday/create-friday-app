@@ -6,7 +6,7 @@ Only the latest commit on the `main` branch receives security fixes.
 
 ## Reporting a vulnerability
 
-Report vulnerabilities privately through **Security → Report a vulnerability** in this repository. Describe the issue, the affected files or versions, and steps to reproduce it.
+Report vulnerabilities privately by email to `security@example.com`. Describe the issue, the affected files or versions, and steps to reproduce it.
 
 Do not open a public issue, pull request, or discussion for a vulnerability.
 

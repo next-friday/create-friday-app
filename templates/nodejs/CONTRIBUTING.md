@@ -49,6 +49,7 @@ We use trunk-based development. `main` is the only long-lived branch, and every 
 - Branch from `main` and merge back within a day or two. Do not create `develop` or release branches.
 - Merge unfinished work behind a feature flag or keep it unreachable instead of holding a long-lived branch.
 - Pull requests are squash-merged, so the pull request title becomes the commit on `main`.
+- After a pull request that only reformats code merges, the next pull request lists its commit on `main` in `.git-blame-ignore-revs` at the repository root, creating the file the first time, with a `#` comment that names the change, as [GitHub Docs](https://docs.github.com/en/repositories/working-with-files/using-files/viewing-and-understanding-files) shows. GitHub then hides that commit in the blame view.
 - Write commit messages in the format that `@next-friday/commitlint-config-friday` defines. Pull request titles use `<type>(<scope>): <subject>`, which `.github/workflows/validate-pr-title.yml` checks.
 - Keep each pull request focused on one cohesive change.
 - Describe observable endpoint, request or response, or configuration effects.

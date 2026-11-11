@@ -8,6 +8,7 @@ This playbook turns a merged intent into the requirements and design spec. A per
    - `spec.md` already exists: say so and name the file.
 2. Read the four policies, every time, before you write: `.agents/skills/brand-policy/SKILL.md`, `.agents/skills/security-policy/SKILL.md`, `.agents/skills/compliance-policy/SKILL.md`, and `.agents/skills/ux-policy/SKILL.md`. Then read the code and the docs the change touches.
 3. Write `intent/<change>/spec.md` from the template below, in the language of the files already in `intent/`. Use exactly the template's headings.
+   - **Provenance:** under the status line, name the default branch's commit you wrote the spec at (`git rev-parse --short origin/<default branch>`), and quote the words of the request that started this spec.
    - **Requirements:** numbered; each one states a result a test or a reader can check.
    - **Design:** how the change fits the existing code: the files that change, and what each one does afterwards.
    - **Policies:** one line for each of the four policies: the rules of that policy the change must meet, each as a requirement number, or "Does not apply" and why.
@@ -24,6 +25,8 @@ This playbook turns a merged intent into the requirements and design spec. A per
 # Spec: <title>
 
 From `intent/<change>/intent.md`. Status: draft.
+
+Written at `<commit on the default branch>`. Request: "<the words of the request that started this spec>".
 
 ## Requirements
 

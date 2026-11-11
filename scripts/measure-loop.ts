@@ -96,7 +96,7 @@ function summarizeLoop(dates: CommitDates): LoopFigures {
  * @returns Commit dates in ISO 8601, newest first; empty when git has no commit for the file.
  */
 function readCommitDates(filePath: string): string[] {
-  return execFileSync("git", ["log", "--follow", "--format=%cI", "--", filePath], {
+  return execFileSync("git", ["log", "--format=%cI", "--", filePath], {
     encoding: "utf8",
   })
     .split("\n")

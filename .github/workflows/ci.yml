@@ -86,6 +86,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          fetch-depth: 0
           persist-credentials: false
       - name: Set up pnpm
         uses: ./.github/actions/setup-pnpm
@@ -97,6 +98,8 @@ jobs:
         run: pnpm gates:check
       - name: Check human gates
         run: pnpm human-gates:check
+      - name: Check changesets
+        run: pnpm changesets:check
 
   format:
     name: Format & Manifests

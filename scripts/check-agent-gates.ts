@@ -1,4 +1,7 @@
-import {spawnSync} from "node:child_process";
+import {execFileSync, spawnSync} from "node:child_process";
+import {mkdtempSync, rmSync, writeFileSync} from "node:fs";
+import path from "node:path";
+import {tmpdir} from "node:os";
 
 type GateCase = {
   expectedExit: 0 | 2;
@@ -6,6 +9,7 @@ type GateCase = {
   gate: string;
   input: Record<string, unknown>;
   name: string;
+  projectDirectory?: string;
 };
 
 const shellGate = ".agents/hooks/agent-shell-gate.sh";
@@ -13,6 +17,7 @@ const suppressionGate = ".agents/hooks/agent-suppression-gate.sh";
 const constitutionGate = ".cursor/hooks/agent-constitution-gate.sh";
 const mcpGate = ".agents/hooks/agent-mcp-gate.sh";
 const productionGate = ".agents/hooks/agent-production-gate.sh";
+const testEditGate = ".agents/hooks/agent-test-edit-gate.sh";
 const sourceFile = "src/example.ts";
 
 const blockedCommands = [
@@ -252,6 +257,57 @@ const protectedPaths = [
   "src/../.husky/pre-commit",
 ];
 
+/**
+ * Create a repository on a branch, with one commit per file after an empty commit on `main`.
+ * @param branch - The branch to check out.
+ * @param committedFiles - Files to commit on the branch, one commit each.
+ * @returns The repository directory.
+ */
+function createRepository(branch: string, committedFiles: string[]): string {
+  const directory = mkdtempSync(path.join(tmpdir(), "agent-gates-"));
+
+  const runGit = (...gitArguments: string[]): void => {
+    execFileSync(
+      "git",
+      [
+        "-C",
+        directory,
+        "-c",
+        "user.name=Gate Check",
+        "-c",
+        "user.email=gate-check@example.com",
+        "-c",
+        "commit.gpgsign=false",
+        ...gitArguments,
+      ],
+      {
+        stdio: "ignore",
+      },
+    );
+  };
+
+  runGit("init", "--initial-branch=main");
+  runGit("commit", "--allow-empty", "--message", "initial");
+  runGit("checkout", "-b", branch);
+
+  for (const file of committedFiles) {
+    writeFileSync(path.join(directory, path.basename(file)), "");
+    runGit("add", "--all");
+    runGit("commit", "--message", `add ${file}`);
+  }
+
+  return directory;
+}
+
+const fixBranchWithTest = createRepository("fix/login-error", ["login.test.ts"]);
+const fixBranchWithoutTest = createRepository("fix/login-error", ["login.ts"]);
+const featureBranchWithTest = createRepository("feat/login", ["login.test.ts"]);
+const markerRepository = createRepository("feat/login", []);
+
+writeFileSync(path.join(markerRepository, ".git", "bug-fix-in-progress"), "");
+
+const testFile = "src/login.test.ts";
+
 const cases: GateCase[] = [
   ...blockedCommands.flatMap(command => [
     {
@@ -430,6 +486,38 @@ const cases: GateCase[] = [
       },
     },
   },
+  ...[
+    {
+      projectDirectory: fixBranchWithTest,
+      name: "fix branch with a committed test",
+      expectedExit: 2,
+    },
+    {
+      projectDirectory: fixBranchWithoutTest,
+      name: "fix branch without a committed test",
+      expectedExit: 0,
+    },
+    {
+      projectDirectory: featureBranchWithTest,
+      name: "other branch with a committed test",
+      expectedExit: 0,
+    },
+    {
+      projectDirectory: markerRepository,
+      name: "bug-fix-in-progress marker",
+      expectedExit: 2,
+    },
+  ].map(({expectedExit, name, projectDirectory}) => ({
+    gate: testEditGate,
+    projectDirectory,
+    input: {
+      tool_input: {
+        file_path: testFile,
+      },
+    },
+    expectedExit: expectedExit as 0 | 2,
+    name: `test edit: ${name}`,
+  })),
 ];
 
 /**
@@ -458,8 +546,8 @@ const failures = cases.filter(gateCase => {
   const result = spawnSync(gateCase.gate, {
     env: {
       ...process.env,
-      CLAUDE_PROJECT_DIR: process.cwd(),
-      CURSOR_PROJECT_DIR: process.cwd(),
+      CLAUDE_PROJECT_DIR: gateCase.projectDirectory ?? process.cwd(),
+      CURSOR_PROJECT_DIR: gateCase.projectDirectory ?? process.cwd(),
     },
     input: JSON.stringify(gateCase.input),
   });
@@ -470,6 +558,18 @@ const failures = cases.filter(gateCase => {
 
   return result.status !== gateCase.expectedExit || isPermissionWrong;
 });
+
+for (const directory of [
+  fixBranchWithTest,
+  fixBranchWithoutTest,
+  featureBranchWithTest,
+  markerRepository,
+]) {
+  rmSync(directory, {
+    recursive: true,
+    force: true,
+  });
+}
 
 if (failures.length > 0) {
   const failureLines = failures.map(gateCase => {

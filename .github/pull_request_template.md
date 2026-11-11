@@ -1,4 +1,4 @@
-<!-- Use `<type>(<scope>): <subject>` for the pull request title. `.github/workflows/validate-pr-title.yml` lists the allowed types. For a breaking change as defined in `.changeset/README.md`, record a major release in the changeset. -->
+<!-- Use `<type>(<scope>): <subject>` for the pull request title. `.github/workflows/validate-pr-title.yml` lists the allowed types. `.changeset/README.md` says whether the change needs a changeset; a major one needs the product owner's agreement first. -->
 
 ## Description
 
@@ -11,7 +11,7 @@
 ## Contributor checklist
 
 - [ ] The change follows `CONTRIBUTING.md`.
-- [ ] CLI arguments, prompts, and the generated project layout are unchanged, or the changeset declares the change breaking.
+- [ ] CLI arguments, prompts, and stack names are unchanged, or the changeset declares the change breaking.
 - [ ] Tests cover any changed observable contract.
 
 ## Verification
@@ -22,6 +22,6 @@
 
 <!-- Select one option. -->
 
-- [ ] A package release is required, and a pending or new `.changeset/*.md` entry covers it.
-- [ ] The package change has no release impact, so no changeset is required.
-- [ ] Only documentation, CI, or repository tooling changed, so no changeset is required.
+- [ ] This pull request completes a piece of work that needs a release, and a pending or new `.changeset/*.md` entry covers the whole.
+- [ ] No changeset: a later pull request of the same piece of work carries it.
+- [ ] No changeset: only agent instructions, comments, documentation, CI, or repository tooling changed.

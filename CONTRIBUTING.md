@@ -34,7 +34,7 @@ pnpm install
 ## Quality standards
 
 - Fix lint, type, test, documentation, and packaging failures at their root cause.
-- Preserve the CLI arguments, prompts, and generated project layout unless the change explicitly declares a breaking contract.
+- Preserve the CLI arguments, prompts, and stack names unless the change explicitly declares a breaking contract.
 - Edit source under `src/`, tests under `test/`, and templates under `templates/`.
 - Treat `dist/` as generated output.
 

@@ -1,5 +1,15 @@
 # @next-friday/create-app
 
+## 7.1.0
+
+### Minor Changes
+
+- 2ccd3d7: Generated projects run `pnpm human-gates:check` in `pnpm verify` (`verify:static` in each stack) and in CI. The check reads `.agents/skills/sdlc/playbooks/*.md` and fails when a gate or a waiting step names no human role, or when a playbook lacks a `**Next:**` line that names what runs next, who runs it, and what starts it. The `plan` and `question` playbooks now carry that line, and the `plan` playbook says that in plan mode the originator approving the plan is the yes to the draft. A rejected intent is a closed pull request, no longer `Status: rejected.`; the product owner still accepts by setting `Status: accepted.` and merging.
+
+### Patch Changes
+
+- 260485f: Generated projects' `constitution-changes` rule (`.agents/rules/constitution-changes.md`, `.agents/rules.json`, and the rendered `.claude/rules` and `.cursor/rules` copies) now says the constitution changes in a pull request like any other change, and a code owner approves it in review. It no longer requires a dedicated issue. When a task needs a constitution change, the agent writes the exact new text and the files it goes in on the pull request, and a person commits it to that branch.
+
 ## 7.0.0
 
 ### Major Changes

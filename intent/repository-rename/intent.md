@@ -1,10 +1,12 @@
-# Intent: Follow the repository rename to create-next-friday-app
+# Intent: Follow the repository rename to next-friday-create-app
 
 Author: Joe Takara (Developer Productivity). Status: accepted.
 
+Updated after the repository became `next-friday/next-friday-create-app` and pull request #95 renamed the CLI command to match (2026-11-11). The first acceptance covered only the repository links.
+
 ## Problem
 
-The repository was renamed from `next-friday/create-friday-app` to `next-friday/create-next-friday-app`, but files and settings still name the old repository. GitHub redirects web links, so most of them still open, but the npm release depends on the exact name.
+The repository was renamed from `next-friday/create-friday-app` to `next-friday/next-friday-create-app`, but files and settings still name the old repository. GitHub redirects web links, so most of them still open, but the npm release depends on the exact name.
 
 | Still names the old repository                                           | Where                                              | Risk                                                                                                                                                                                                                                                                                                                 |
 | :----------------------------------------------------------------------- | :------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,8 +17,8 @@ The repository was renamed from `next-friday/create-friday-app` to `next-friday/
 
 ## Proposed outcome
 
-- The next release publishes to npm with provenance, from the renamed repository, once `repository.url` names it. npm does not let a trusted publisher connection change: "Existing trusted publisher connections cannot be changed… delete the connection and create a new one", and a new connection expires unless its first publish succeeds within 2 days (npm docs: Trusted publishing for npm packages). The connection names workflow `release.yml` and environment `Release`, which the release job uses (`.github/workflows/release.yml`, line 98). The npm owner replaced the connection with `next-friday/create-next-friday-app` on 2026-11-09, so it expires unless a release publishes by 2026-11-11; after that, the owner deletes it and creates it again just before the next release. Release 5.0.0 was the last one built under the old name: its provenance names `https://github.com/next-friday/create-friday-app`.
-- No file in this repository names the old repository by its URL or slug, except release history. The CLI's command name `create-friday-app` (`package.json`, line 27), which `knip.json` and the CI smoke tests also use, is not the repository name and stays, because changing it would break the CLI for its users (`AGENTS.md`, convention 3).
+- The next release publishes to npm with provenance, from the renamed repository, once `repository.url` names it. npm does not let a trusted publisher connection change: "Existing trusted publisher connections cannot be changed… delete the connection and create a new one", and a new connection expires unless its first publish succeeds within 2 days (npm docs: Trusted publishing for npm packages). The connection names workflow `release.yml` and environment `Release`, which the release job uses (`.github/workflows/release.yml`, line 98). The npm owner replaces the connection with `next-friday/next-friday-create-app`. A connection that expires before a release publishes is deleted and created again just before the next release. Release 5.0.0 was the last one built under the old name: its provenance names `https://github.com/next-friday/create-friday-app`. 6.0.0 is the first release whose `repository.url` names `next-friday/next-friday-create-app`.
+- No file in this repository names the old repository by its URL or slug, except release history. The CLI's command changes from `create-friday-app` to `next-friday-create-app` with a `major` changeset, because users who installed the package globally or call the command by name in a script must run the new name (`CHANGELOG.md`, 6.0.0).
 
 ## Affected users and systems
 

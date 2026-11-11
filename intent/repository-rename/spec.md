@@ -1,12 +1,14 @@
-# Spec: Follow the repository rename to create-next-friday-app
+# Spec: Follow the repository rename to next-friday-create-app
 
 From `intent/repository-rename/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: accepted.
+
+Updated after the repository became `next-friday/next-friday-create-app` and pull request #95 renamed the CLI command to match (2026-11-11). The first acceptance covered only the repository links.
 
 ## Requirements
 
 1. The package metadata names the renamed repository, so the next release can publish with provenance. npm requires that "your package's `repository.url` field in `package.json` must exactly match your GitHub repository" (npm docs: Trusted publishing for npm packages).
 2. Every link and instruction in the repository that points at the old repository points at the new one.
-3. The CLI's command name `create-friday-app` does not change, because it is not the repository name and renaming it would break the CLI for its users (`AGENTS.md`, convention 3).
+3. The CLI's command changes from `create-friday-app` to `next-friday-create-app` with a `major` changeset, because users who installed the package globally or call the command by name in a script must run the new name (`CHANGELOG.md`, 6.0.0).
 4. Release history stays as written: `CHANGELOG.md` and earlier release notes are not edited.
 
 ## Design
@@ -15,18 +17,18 @@ From `intent/repository-rename/intent.md` (accepted 2026-11-09 by the merge of p
 
 | File                                | Line    | Today                                                                                         | After                                                                              |
 | :---------------------------------- | :------ | :-------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
-| `package.json`                      | 11      | `"homepage": "https://github.com/next-friday/create-friday-app#readme"`                       | `"homepage": "https://github.com/next-friday/create-next-friday-app#readme"`       |
-| `package.json`                      | 13      | `"url": "https://github.com/next-friday/create-friday-app/issues"`                            | `"url": "https://github.com/next-friday/create-next-friday-app/issues"`            |
-| `package.json`                      | 17      | `"url": "git+https://github.com/next-friday/create-friday-app.git"`                           | `"url": "git+https://github.com/next-friday/create-next-friday-app.git"`           |
-| `SECURITY.md`                       | 13      | `https://github.com/next-friday/create-friday-app/security/advisories/new`                    | `https://github.com/next-friday/create-next-friday-app/security/advisories/new`    |
-| `.github/ISSUE_TEMPLATE/config.yml` | 4       | `https://github.com/next-friday/create-friday-app/discussions/categories/q-a`                 | `https://github.com/next-friday/create-next-friday-app/discussions/categories/q-a` |
-| `.github/ISSUE_TEMPLATE/config.yml` | 7       | `.../create-friday-app/discussions/categories/ideas`                                          | `.../create-next-friday-app/discussions/categories/ideas`                          |
-| `CONTRIBUTING.md`                   | 27 – 28 | `git clone https://github.com/next-friday/create-friday-app.git`, then `cd create-friday-app` | the same with `create-next-friday-app` in both lines                               |
-| `CONTRIBUTING.md`                   | 91      | `add next-friday/create-friday-app with workflow release.yml and environment Release`         | `add next-friday/create-next-friday-app` with the same workflow and environment    |
+| `package.json`                      | 11      | `"homepage": "https://github.com/next-friday/create-friday-app#readme"`                       | `"homepage": "https://github.com/next-friday/next-friday-create-app#readme"`       |
+| `package.json`                      | 13      | `"url": "https://github.com/next-friday/create-friday-app/issues"`                            | `"url": "https://github.com/next-friday/next-friday-create-app/issues"`            |
+| `package.json`                      | 17      | `"url": "git+https://github.com/next-friday/create-friday-app.git"`                           | `"url": "git+https://github.com/next-friday/next-friday-create-app.git"`           |
+| `SECURITY.md`                       | 13      | `https://github.com/next-friday/create-friday-app/security/advisories/new`                    | `https://github.com/next-friday/next-friday-create-app/security/advisories/new`    |
+| `.github/ISSUE_TEMPLATE/config.yml` | 4       | `https://github.com/next-friday/create-friday-app/discussions/categories/q-a`                 | `https://github.com/next-friday/next-friday-create-app/discussions/categories/q-a` |
+| `.github/ISSUE_TEMPLATE/config.yml` | 7       | `.../create-friday-app/discussions/categories/ideas`                                          | `.../next-friday-create-app/discussions/categories/ideas`                          |
+| `CONTRIBUTING.md`                   | 27 – 28 | `git clone https://github.com/next-friday/create-friday-app.git`, then `cd create-friday-app` | the same with `next-friday-create-app` in both lines                               |
+| `CONTRIBUTING.md`                   | 91      | `add next-friday/create-friday-app with workflow release.yml and environment Release`         | `add next-friday/next-friday-create-app` with the same workflow and environment    |
 
-### Files that keep the old name, and why
+### The CLI command and test folders
 
-`git grep -n create-friday-app` on `main` at `c576e0c` also finds these. They name the CLI command or a temporary folder, not the repository, so they stay:
+`git grep -n create-friday-app` on `main` at `c576e0c` also finds these. They name the CLI command or a temporary folder, and they change too: the command to `next-friday-create-app`, and the folder prefix to `create-app-test-`:
 
 | File                                                                                                       | What it names                              |
 | :--------------------------------------------------------------------------------------------------------- | :----------------------------------------- |
@@ -37,27 +39,22 @@ From `intent/repository-rename/intent.md` (accepted 2026-11-09 by the merge of p
 
 ### Release and the npm trusted publisher
 
-- The npm owner replaced the trusted publisher connection with `next-friday/create-next-friday-app`, workflow `release.yml`, and environment `Release` on 2026-11-09. A new connection expires unless its first publish succeeds within 2 days (npm docs: Trusted publishing for npm packages), so by 2026-11-11.
-- This change adds no changeset of its own: `.changeset/README.md` says changes to documentation, CI, or repository tooling need none, and the metadata change does not change CLI behavior. The next release that carries a user-facing changeset publishes with the corrected metadata.
-- If no release publishes by 2026-11-11, the npm owner deletes the expired connection and creates it again just before the next release, as the intent says.
+- The npm owner replaces the trusted publisher connection with `next-friday/next-friday-create-app`, workflow `release.yml`, and environment `Release`. A new connection expires unless its first publish succeeds within 2 days (npm docs: Trusted publishing for npm packages).
+- The command rename carries a `major` changeset (released as 6.0.0, `CHANGELOG.md`), so the release that follows publishes with the corrected metadata.
+- If no release publishes within those 2 days, the npm owner deletes the expired connection and creates it again just before the next release, as the intent says.
 
 ### Order of work
 
-1. Change the files in the first table.
-2. Run `git grep -n -I "create-friday-app" -- . ':!pnpm-lock.yaml' ':!intent/'` and confirm that only the lines in the second table remain.
+1. Change the files in both tables, and add a `major` changeset for the command rename.
+2. Run `git grep -n -I "create-friday-app" -- . ':!pnpm-lock.yaml' ':!intent/' ':!CHANGELOG.md' ':!.changeset/'` and confirm that it finds nothing.
 3. Run `pnpm verify`.
 
 ## Proof
 
-- The `git grep` in step 2 lists only the lines in the second table.
+- The `git grep` in step 2 finds nothing.
 - `pnpm verify` passes, including `pnpm check:publint`, which reads `package.json`.
-- After the next release, the npm package page links to `create-next-friday-app`, and the release job's provenance step succeeds.
+- After the next release, the npm package page links to `next-friday-create-app`, and the release job's provenance step succeeds.
 
 ## Areas of concern
 
 - **Policy skills:** the brand, security, compliance, and UX policy skills in `.agents/skills/` say "This policy is not written yet. Report that as an area of concern." No policy could be applied. The change touches the security reporting link in `SECURITY.md`; the security policy owner, once named, should confirm the new link.
-- **Lean-agent-setup overlap:** `intent/lean-agent-setup/intent.md` removes the first-publish token steps at `CONTRIBUTING.md` lines 88, 90, and 92 and keeps line 91. This spec changes only line 91, so the two changes do not conflict.
-
-## Open questions
-
-- Should a release publish before 2026-11-11, so the new trusted publisher connection does not expire? That needs a user-facing change with a changeset, or a decision by the product owner to release this metadata change on its own. Carried forward from the intent's expiry note.

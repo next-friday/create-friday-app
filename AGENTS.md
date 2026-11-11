@@ -42,7 +42,7 @@ If a test fails, fix the code, not the test.
 
 1. **Follow `.agents/rules/`.** `.agents/rules.json` gives each rule's scope; Claude Code and Cursor load them. Rules, hooks, and agent settings change as `constitution-changes.md` describes.
 2. **Edit `src/`, `test/`, and `templates/`; treat `dist/` as generated.** The build overwrites `dist/`.
-3. **Preserve CLI arguments, prompts, and stack names** unless a major changeset declares the break. `.changeset/README.md` decides whether a change needs a changeset at all, and of which type; most changes need none. CI and agents run the CLI without prompts.
+3. **Preserve CLI arguments, prompts, and stack names** unless a major changeset declares the break. `.changeset/README.md` decides whether a change needs a changeset, and of which type. CI and agents run the CLI without prompts.
 4. **A stack replaces a `base` file only when that stack needs different content.** The CLI copies the stack after `base`, so the stack's file wins. Today these replace `base`: `knip.json` in `nextjs` and `turborepo`, and `pnpm-workspace.yaml`, `.github/dependabot.yml`, and `.github/workflows/deploy.yml` in `turborepo`. When you change one of those `base` files, make the same change in each replacement.
 5. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 6. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.** npm drops `.gitignore` from the package and `pnpm pack` drops nested lockfiles.

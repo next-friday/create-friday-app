@@ -10,16 +10,18 @@ Do these steps in order.
 
 1. **Match the request** to the first row that fits, and read that row's file before you act.
 
-   | The request                                                                      | What to do                                                                                                                                                                        |
-   | :------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | A question, or a request to explain or check without changing things             | Follow [`playbooks/question.md`](playbooks/question.md).                                                                                                                          |
-   | An idea, a problem, a ticket, or an incident, whether asked for or only reported | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                                                                                  |
-   | A spec for an intent                                                             | Follow [`playbooks/design.md`](playbooks/design.md).                                                                                                                              |
-   | A later step: a build, a review, a deploy, or an incident fix                    | Say "This step has no playbook in `/sdlc` yet" and name the step. Name `babysit-pr` for a pull request you opened. Answer what you can as `playbooks/question.md` says, and stop. |
+   | The request                                                                      | What to do                                                                                                                       |
+   | :------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+   | A question, or a request to explain or check without changing things             | Follow [`playbooks/question.md`](playbooks/question.md).                                                                         |
+   | An idea, a problem, a ticket, or an incident, whether asked for or only reported | Follow [`playbooks/plan.md`](playbooks/plan.md).                                                                                 |
+   | A spec for an intent, or a path to an `intent.md`                                | Follow [`playbooks/design.md`](playbooks/design.md).                                                                             |
+   | A build for a spec, a path to a `spec.md`, or a plan the engineer accepted       | Follow [`playbooks/build.md`](playbooks/build.md).                                                                               |
+   | A review of a pull request, or a pull request to drive to green                  | Follow [`playbooks/review.md`](playbooks/review.md).                                                                             |
+   | A later step: a deploy or an incident fix                                        | Say "This step has no playbook in `/sdlc` yet" and name the step. Answer what you can as `playbooks/question.md` says, and stop. |
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line.
 
-2. **Do the playbook's steps yourself.** Find facts in files and commands instead of asking. Stop only where the playbook says to stop; at a step marked **Gate**, which waits for the person it names and is never skipped; before an irreversible action; or for a decision no file settles. `.agents/rules/agent-owned-work.md` lists the gates and the irreversible actions.
+2. **Do the playbook's steps yourself.** Find facts in files and commands instead of asking. Stop only where the playbook says to stop; at a step marked **Gate**, which waits for the person it names and is never skipped; before an irreversible action; or for a decision no file settles. `.agents/rules/agent-owned-work.md` lists the gates and the irreversible actions. When a playbook's **Next** line says an agent runs the next file in the same turn, read that file and continue without asking.
 3. **Write the reply in the shape below,** following the **Write replies a person can check** convention in `AGENTS.md`.
 
 ## Reply shape
@@ -39,7 +41,7 @@ Write every part in the language of the person's message; keep paths, commands, 
 **Status:** <what is done, what comes next, and which gate it waits on and for whom.>
 ```
 
-A step that is not finished is `open`, including one that waits at its Gate. Use `skip` only for a step you decide never to do.
+A step that is not finished is `open`, including one that waits at its Gate. When one turn runs more than one playbook, list the steps of each under the playbook's file name. Use `skip` only for a step you decide never to do.
 
 When the evidence shows that the change cannot be made in this project, say so under **Request**. In the `plan` playbook, the first round then asks the one question that settles where the change belongs.
 

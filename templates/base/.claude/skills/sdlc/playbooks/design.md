@@ -16,7 +16,7 @@ This playbook turns a merged intent into the requirements and design spec. A per
 4. Commit `spec.md` on a new branch, push it, and open a pull request ready for review, as `AGENTS.md` says for branches and pull requests. Put the areas of concern first in the pull request's description, under the template's first heading. When you cannot open a pull request from this session, say so and give the pushed branch's name.
 5. **Gate: the product owner reviews the spec.** The product owner resolves each area of concern with its policy owner, accepts the spec by setting `Status: accepted.` and merging the pull request, or rejects it by closing it; you do neither. Report the pull request's URL, keep it green as `AGENTS.md` says, and wait.
 
-**Next:** `AGENTS.md`; an engineer; when the product owner has merged the spec's pull request, the engineer starts the build in plan mode with `intent.md` and `spec.md`.
+**Next:** `.agents/skills/sdlc/playbooks/build.md`; an engineer with an agent; when the product owner has merged the spec's pull request and the engineer sends `/sdlc build` with the spec's path.
 
 ## Template
 

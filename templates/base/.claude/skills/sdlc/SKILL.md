@@ -43,7 +43,7 @@ Write every part in the language of the person's message; keep paths, commands, 
 **Status:** <what is done, what comes next, and which gate it waits on and for whom.>
 ```
 
-A step that is not finished is `open`, including one that waits at its Gate. When one turn runs more than one playbook, list the steps of each under the playbook's file name. Use `skip` only for a step you decide never to do.
+A step that is not finished is `open`, including one that waits at its Gate. When one turn runs more than one playbook, list the steps of each under the playbook's file name. A reply that ends before a **Gate** step must say which step stopped it and why; "waiting for an instruction" is not a reason. Use `skip` only for a step you decide never to do.
 
 When the evidence shows that the change cannot be made in this project, say so under **Request**. In the `plan` playbook, the first round then asks the one question that settles where the change belongs.
 

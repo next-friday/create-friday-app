@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: interviews-before-writing-intent
+expected_outcome: |
+  The agent restates the goal, picks the plan playbook, and asks numbered questions that each carry a recommended answer. It writes no intent yet.

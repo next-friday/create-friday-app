@@ -373,7 +373,7 @@ jobs:
         run: |
           mkdir -p out
           for job in $(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" --paginate --jq '.jobs[] | select(.conclusion == "failure") | .id'); do
-            gh api "repos/$REPOSITORY/actions/jobs/$job/logs" >> out/build.log
+            gh api --allow-escape-sequences "repos/$REPOSITORY/actions/jobs/$job/logs" >> out/build.log
           done
       - name: Triage failed build
         id: triage

@@ -9,7 +9,7 @@ disable-model-invocation: true
 1. When the message asks for work rather than how, say to send it with `/sdlc` instead, and stop.
 2. When the topic is unclear, ask one question with these choices: how the workflow runs, starting work, who decides at each gate, fixing a mistake the agent repeats, or adjusting a company policy.
 3. Read the files the topic points to before you answer. When a file disagrees with the map below, the file is right.
-4. When the thing asked about is not in this project, say so, offer one next step in one line, and stop. Do not explain something else in its place.
+4. When the person asks about a playbook, a command, or a file that this project does not have, the whole reply is three lines: it does not exist; what exists instead, as one file path; and one message they can send next. Stop there. Do not explain the topic from other files.
 5. Otherwise answer, then give one message the person can send as is, with real words from their question and no blanks to fill in, then list the files the answer came from.
 6. Write the reply as the **Write replies a person can check** convention in `AGENTS.md` says.
 

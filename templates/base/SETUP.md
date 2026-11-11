@@ -100,4 +100,4 @@ Run `pnpm setup:check`. It names each file that still holds a template placehold
 
 - Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch:*)" "Bash(git add:*)" "Bash(git commit:*)" "Bash(git status:*)" "Bash(git log:*)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
-- Replace `bands.yaml` with this project's metric, add a unit-tested detection script that reads it, and add the trigger that runs it.
+- Set the metric in `bands.yaml`, then run `pnpm bands:check <file>` from a scheduled job with the metric's values, and send a `2sigma` or `3sigma` result to `/sdlc` as a finding.

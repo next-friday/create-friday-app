@@ -11,6 +11,7 @@
   "author": "Next Friday",
   "type": "module",
   "scripts": {
+    "bands:check": "node scripts/check-bands.ts",
     "build": "tsc -p tsconfig.build.json",
     "check": "pnpm verify:static && pnpm test:changed && pnpm build",
     "clean": "rm -rf dist coverage *.tsbuildinfo .eslintcache node_modules/.cache",
@@ -46,7 +47,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
-    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
+    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm bands:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "dependencies": {
     "@nestjs/common": "12.3.2",
@@ -78,7 +79,8 @@
     "sort-package-json": "4.1.0",
     "supertest": "7.3.1",
     "typescript": "7.0.2",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "yaml": "2.9.1"
   },
   "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec",
   "engines": {

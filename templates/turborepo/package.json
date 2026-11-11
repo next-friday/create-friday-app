@@ -11,6 +11,7 @@
   "author": "Next Friday",
   "type": "module",
   "scripts": {
+    "bands:check": "node scripts/check-bands.ts",
     "build": "turbo run build ${TURBO_FILTER:-\"--filter=./apps/*\"}",
     "check": "pnpm verify:static && pnpm test:changed && pnpm build",
     "clean": "rm -rf apps/app/.next apps/app/coverage apps/backoffice/.next apps/backoffice/coverage .turbo coverage *.tsbuildinfo .eslintcache node_modules/.cache",
@@ -44,7 +45,7 @@
     "test:watch": "turbo run test:watch --filter=./apps/*",
     "typecheck": "tsc --noEmit -p tsconfig.json && turbo run typecheck ${TURBO_FILTER:-\"--filter=./apps/*\"}",
     "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
-    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
+    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm bands:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
@@ -64,7 +65,8 @@
     "prettier-plugin-tailwindcss": "0.8.1",
     "sort-package-json": "4.1.0",
     "turbo": "2.11.10",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "yaml": "2.9.1"
   },
   "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec",
   "engines": {

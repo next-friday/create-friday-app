@@ -1,5 +1,5 @@
-# Example. Replace it with this project's metric, and add a version-controlled, unit-tested detection script that
-# reads this file. Detection stays deterministic, with no model involved.
+# Detection settings for one metric: the tiers' actions, tools, and routes. `pnpm bands:check <file>` reads this file.
+# The metric is this project's to set. Tiers are sample standard deviations from the baseline's mean.
 metric: ci_test_failure_rate
 baseline: rolling_30d
 rules: western_electric

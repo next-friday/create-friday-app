@@ -5,6 +5,7 @@ A release is public and permanent, so the fewest releases that carry the work ar
 ## Changes that need no changeset
 
 - Agent instructions, whether added, removed, or reworded: skills, playbooks, rules, and `AGENTS.md`.
+- Scripts and checks that exist to check agent instructions or agent gates, such as `pnpm human-gates:check`.
 - Comments, documentation, and the templates for issues and pull requests.
 - CI and tooling of this repository.
 
@@ -23,7 +24,10 @@ Check pending `.changeset/*.md` files first. When one already covers the same pi
 ## Choose a release type
 
 - Use `patch` for a fix to a defect a person meets when they run the CLI or the generated project.
-- Use `minor` for something a person can run that was not there before, such as a CLI option, a stack, or a script in the generated project. Any other change to a template file that is not listed above is `minor` at most.
+- Use `minor` for something a person can use for their own application that was not there before, such as a CLI option, a stack, or a command in the generated project that builds, tests, or deploys their code. Any other change to a template file that is not listed above is `minor` at most.
+
+When you cannot name what a person who never reads the agent files would notice, the change needs no changeset.
+
 - Use `major` only when a CLI argument, a prompt, or a stack is removed or renamed, so that a command that ran before no longer runs. A change to what a template contains is never `major`.
 
 Before you add a `major` changeset, stop and tell the product owner the version it produces and why: ask in the session, or in the pull request's description when no one is in the session. Add it only after they agree.

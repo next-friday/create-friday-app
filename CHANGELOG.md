@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 9.1.1
+
+### Patch Changes
+
+- 79c45d9: In generated projects, a spec that `/sdlc` writes now records the commit of the skills in force, beside the request that started it: `Request: "…". Skills at <commit>.`
+
 ## 9.1.0
 
 ### Minor Changes

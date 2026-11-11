@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: work-request-is-sent-to-sdlc
-expected_outcome: |
-  The message asks for work. The agent says to send it with /sdlc and changes nothing.

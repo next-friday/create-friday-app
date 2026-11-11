@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-The reply does not describe steps of a deploy playbook
+After saying so, the reply stops or offers one next step; it does not go on to give deploy instructions

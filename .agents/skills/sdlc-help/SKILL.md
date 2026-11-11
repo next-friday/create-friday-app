@@ -11,7 +11,7 @@ disable-model-invocation: true
 3. Read the files the topic points to before you answer. When a file disagrees with the map below, the file is right.
 4. When the thing asked about is not in this project, say so, offer one next step in one line, and stop. Do not explain something else in its place.
 5. Otherwise answer, then give one message the person can send as is, with real words from their question and no blanks to fill in, then list the files the answer came from.
-6. Write the reply as **Replies** in `.agents/skills/sdlc/SKILL.md` says.
+6. Write the reply as the **Write replies a person can check** convention in `AGENTS.md` says.
 
 ## Map
 

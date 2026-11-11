@@ -1,0 +1,1 @@
+`intent/app-version/intent.md` and `intent/app-version/spec.md` are committed on the default branch. The branch `feat/app-version` holds `intent/app-version/plan.md` as its only commit, is pushed, and is not merged; the default branch has no `intent/app-version/plan.md`. `origin` is a repository the session can push to, but it has no pull request host.

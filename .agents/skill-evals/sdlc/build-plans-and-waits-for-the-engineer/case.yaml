@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: build-plans-and-waits-for-the-engineer
+expected_outcome: |
+  The spec intent/app-version/spec.md is merged and has no plan. The agent follows the build playbook: it reads the intent, the spec, and the code, shows the plan with the template's four headings, changes no code and makes no commit, and waits at the gate for the engineer to accept the plan.

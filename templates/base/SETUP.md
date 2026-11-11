@@ -6,7 +6,7 @@ This project follows Anthropic's [AI-native SDLC Playbook](https://claude.com/re
 
 1. **Plan:** the originator of an idea, a ticket, or an incident sends it with `/sdlc`, which interviews them and writes `intent/<change>/intent.md`. The product owner accepts it by merging it with `Status: accepted.`, or rejects it by closing its pull request.
 2. **Design:** `spec.md` is written from the accepted intent with the policy skills loaded (send the intent's path with `/sdlc`). The product owner resolves concerns with the policy owners.
-3. **Build:** the engineer starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
+3. **Build:** the engineer sends `/sdlc build` with the spec's path, starts in plan mode, approves the plan, and commits it as `plan.md`. A tech lead approves higher-risk plans.
 4. **Test:** the session runs **Verifying your work** in `AGENTS.md`.
 5. **Review:** Claude Code Review and Bugbot review by `REVIEW.md`. A code owner approves; the agent never does.
 6. **Deploy:** once `DEPLOY_ENABLED` is `true`, each push to `main` that passes CI deploys to `dev`, and the Deploy workflow promotes a commit to `uat` and then `prod`. `agent-production-gate.sh` blocks an agent's shell commands that deploy to `prod`, run a Railway command with `prod` as its environment, or push a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set.

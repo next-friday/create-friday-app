@@ -1,5 +1,12 @@
 # @next-friday/create-app
 
+## 7.0.0
+
+### Major Changes
+
+- 478ee72: Generated projects no longer include the `git-workflow` and `script-driven-changes` agent skills, in `.agents/skills/`, `.claude/skills/`, or `.cursor/skills/`, or the links to them in `.cursor/BUGBOT.md`. Each stack's `AGENTS.md` has a new convention with the rules from `git-workflow` that no Git hook enforces: branch from the latest `origin/main` as `<type>/<short-description>`, open the pull request ready for review, drive it until it waits only on code owner approval, rebase and force-push with lease only your own branches, and leave the merge to a person. If a script or habit in your project calls either skill, use the `AGENTS.md` convention instead.
+- 40b0775: Generated projects start work through one command, `/sdlc`, and no longer include the `write-intent` skill. `/sdlc` matches a request to a playbook in `.agents/skills/sdlc/playbooks/`: `question` answers without changing anything, and `plan` interviews the originator, drafts `intent/<change>/intent.md`, and waits for their yes before it commits or opens a pull request. A request for a later step, such as a spec or a deploy, is told that the step has no playbook yet. `/sdlc-help` explains the workflow and starts no work. Each stack's `AGENTS.md` gains a convention for replies a person can check, and tells the agent to answer a problem report with the `/sdlc` message that would start the work. If you ran `/write-intent`, send the same request with `/sdlc`.
+
 ## 6.0.2
 
 ### Patch Changes

@@ -43,7 +43,7 @@ The intent's open question: how is a permission question counted, so this play's
 
 Both are proxies, not a count of permission questions: a question asked in chat, or work that stalls before a pull request opens, leaves no record in git or on GitHub, so neither indicator sees it. The cloud-session check in **Proof** and the eval case cover that gap.
 
-The loop guide page that `intent/playbook-plays/intent.md` adds lists these with the other plays' indicators.
+The loop guide page that `intent/playbook-plays/intent.md` adds names the command that reads the indicators git history holds. These two read GitHub, which that command does not.
 
 ### Order of work
 

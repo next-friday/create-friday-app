@@ -47,6 +47,7 @@
     "knip": "knip",
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
+    "loop:measure": "node scripts/measure-loop.ts",
     "prepack": "pnpm build",
     "prepare": "husky",
     "rules:check": "node scripts/sync-agent-rules.ts --check",

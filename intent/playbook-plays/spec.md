@@ -22,7 +22,7 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 10. **CI/CD.** The templates get the triage job. Every CI job that calls Claude runs with an exact allowlist and no production credentials. Deploy, status, and rollback are reachable through MCP. `prod` deploys only from a protected tag that the release team pushes. Promotion and rollback gate on the deployment platform's history for each environment, not on GitHub deployment records. Rollback is one command per environment, and in the root it moves the npm `latest` tag.
 11. **Closing the loop.** A stage that no person started passes an independent gate before the next starts. The CI test failure rate is watched with the playbook's `bands.yaml` tiers.
 12. **Lessons.** Every project has `lessons/`.
-13. **Measure.** The loop guide names each play's indicators and where each is read.
+13. **Measure.** The loop guide names the command that reads the indicators git history holds.
 14. **Entering the loop.** Every generated project has the loop guide page in `apps/docs`, a status skill, a session-start reminder for Claude Code and Cursor, and a setup skill.
 
 ## Design
@@ -48,7 +48,7 @@ The root ships the CLI and releases one npm package; it deploys no app (`.github
 | CI/CD step 6, rollback (45)                | Applies  | As the npm `latest` tag, in **Rollback in the root**. `bands.yaml` already routes to `runbook:rollback-deploy`.                                                                           |
 | Closing the loop (48–51)                   | Applies  | The root has CI and `bands.yaml` with `metric: ci_test_failure_rate`.                                                                                                                     |
 | Claude Tag and the lessons file (52)       | Applies  | Incidents in the root (a bad release) need a post-mortem.                                                                                                                                 |
-| How to measure it (8)                      | Applies  | In `CONTRIBUTING.md` **The loop**.                                                                                                                                                        |
+| How to measure it (8)                      | Applies  | In `CONTRIBUTING.md` **The loop**, which names `pnpm loop:measure`.                                                                                                                       |
 | Entering the loop: guide, status, reminder | Applies  | Guide in `CONTRIBUTING.md`; the status skill and reminder read `intent/`, which the root has.                                                                                             |
 | Entering the loop: setup skill             | Does not | The root has no `SETUP.md`; its one-time setup is done.                                                                                                                                   |
 
@@ -213,7 +213,7 @@ A failed gate opens no pull request, comments on the source pull request or run,
 
 ### How to measure it
 
-The loop guide (`apps/docs`; `CONTRIBUTING.md` in the root) has one row per play the project has: the play, its leading and lagging indicators as the playbook names them, and where each is read (git history, pull request metadata, the CI API, the OpenTelemetry export). The first named row is the time spent waiting at each gate, read from hook decisions in the OpenTelemetry export (page 44). The other indicators are not in this spec because the playbook PDF was not available; the plan copies them from the playbook with page numbers. `SETUP.md` step 4's OpenTelemetry line names the indicators it feeds. `intent/loop-autonomy/spec.md`'s two indicators join the table.
+The loop guide (`apps/docs`; `CONTRIBUTING.md` in the root) names the command that reads the indicators git history holds: in the root, `pnpm loop:measure`, which prints the days from the `intent.md` commit to the `spec.md` commit, the `intent.md` commits after the `spec.md` commit, and the `spec.md` commits after the `plan.md` commit for each change. The guide does not tabulate the other plays' indicators, and they are not collected in this repository. `SETUP.md` step 4's OpenTelemetry line names the gate-wait indicator it feeds (page 44).
 
 ### Entering the loop
 

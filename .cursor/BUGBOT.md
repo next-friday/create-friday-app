@@ -1,7 +1,7 @@
 # Review rules
 
 - Require root-cause fixes. Flag new suppression directives, skipped tests, `as any`, and lint rules turned off in `eslint.config.ts`.
-- Preserve CLI arguments, prompts, stack ids, and the generated project layout. Flag a breaking change, as defined in `.changeset/README.md`, that has no major changeset.
+- Preserve CLI arguments, prompts, and stack ids. Flag a breaking change, as defined in `.changeset/README.md`, that has no major changeset, and a major changeset for a change that is not breaking by that definition.
 - Require tests in `test/` to exercise observable CLI behavior. Flag tests that assert implementation shape alone.
 - Keep runtime dependencies to what the shipped CLI needs; repository tooling belongs in `devDependencies`.
 - Each stack is `templates/base` plus `templates/<stack>`. Keep a file in `base` only when every stack uses it with the same content. A stack may replace that file when its content must differ. Current replacements are `templates/nextjs/knip.json`, `templates/turborepo/knip.json`, `templates/turborepo/pnpm-workspace.yaml`, `templates/turborepo/.github/dependabot.yml`, `templates/turborepo/.github/labeler.yml`, and `templates/turborepo/.github/workflows/deploy.yml`. Flag a `.gitignore` not stored as `_gitignore` and a committed `pnpm-lock.yaml` under `templates/`.

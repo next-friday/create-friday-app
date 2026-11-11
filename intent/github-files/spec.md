@@ -1,6 +1,6 @@
 # Spec: GitHub files that fit private client projects
 
-From `intent/github-files/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: accepted.
+From `intent/github-files/intent.md`. Status: accepted.
 
 Written at `main` `dfac1fc` with the `write-spec` skill as committed there, as the next step of the loop. The product owner asked for it through another session and added no constraint to the skill's prompt.
 

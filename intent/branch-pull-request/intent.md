@@ -4,7 +4,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 
-On 2026-11-10 the product owner had to delete the branch `claude/spec-github-files` by hand. Pull request #69 merged from it at 05:42:32Z, and the repository deleted the branch, because `delete_branch_on_merge` is `true` in the repository's REST API response. The session that opened #69 committed `cb59b3a` at 05:43:25Z and pushed it to the same branch name, which created the branch again with no pull request. Its one sentence never reached `main`, and nothing on GitHub showed that the branch held unreviewed work.
+The product owner had to delete the branch `claude/spec-github-files` by hand. Pull request #69 merged from it at 05:42:32Z, and the repository deleted the branch, because `delete_branch_on_merge` is `true` in the repository's REST API response. The session that opened #69 committed `cb59b3a` at 05:43:25Z and pushed it to the same branch name, which created the branch again with no pull request. Its one sentence never reached `main`, and nothing on GitHub showed that the branch held unreviewed work.
 
 The product owner names manual branch deletion a serious departure from the workflow: neither a person nor an agent should ever have to do it. The playbook has every change arrive as a pull request: "Anything the agent writes arrives as a PR through branch protection" (page 45), and "Branch protection turns anything the agent writes into a PR, with no direct path to main" (page 46). A branch with no pull request is work outside that path.
 
@@ -26,8 +26,8 @@ Nothing prevents it today: `.husky/pre-push` and `templates/base/.husky/pre-push
 
 ## Constraints
 
-- The product owner decided on 2026-11-10: the system opens a pull request for a branch that has none, rather than deleting it, so no work is lost; and the rule applies in this repository and in every generated project.
-- The product owner decided on 2026-11-10: when the workflow runs correctly, no pull request is closed by hand; every pull request goes through the merge.
+- The product owner decided: the system opens a pull request for a branch that has none, rather than deleting it, so no work is lost; and the rule applies in this repository and in every generated project.
+- The product owner decided: when the workflow runs correctly, no pull request is closed by hand; every pull request goes through the merge.
 - The normal flow pushes a branch and opens its pull request a few seconds later. The system must not open a second pull request for a branch whose author is about to open one.
 - A changed hook, a new workflow, or a changed ruleset goes through `constitution-changes.md` and the workflow rule in `intent/ci/spec.md`.
 - The agent still never approves or merges (page 39).

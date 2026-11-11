@@ -2,8 +2,6 @@
 
 Author: Joe Takara (Developer Productivity). Status: accepted.
 
-Updated after the repository became `next-friday/next-friday-create-app` and pull request #95 renamed the CLI command to match (2026-11-11). The first acceptance covered only the repository links.
-
 ## Problem
 
 The repository was renamed from `next-friday/create-friday-app` to `next-friday/next-friday-create-app`, but files and settings still name the old repository. GitHub redirects web links, so most of them still open, but the npm release depends on the exact name.

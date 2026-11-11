@@ -1,6 +1,6 @@
 # Spec: A lean agent setup that matches the playbook
 
-From `intent/lean-agent-setup/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: draft.
+From `intent/lean-agent-setup/intent.md`. Status: draft.
 
 Written at `main` `7aac1c3` with the `write-spec` skill as committed there. The agent wrote it as the next step of the loop, under `AGENTS.md`'s "Asking the product owner"; the product owner asked for it through another session, and no product owner prompt added a constraint to the skill's prompt.
 
@@ -123,7 +123,7 @@ The edit-time hook goes: its entries leave `.claude/settings.json` (lines 51–5
 
 - **Proposal:** the script moves from `.agents/hooks/agent-suppression-gate.sh --repo` to `scripts/check-suppressions.sh`, because it is no longer a hook, and `suppressions:check` points there. Agent settings deny it, as they deny `.agents/hooks/**` today, so an agent cannot shorten the list on its own work (page 32).
 - **The list.** Today 20 directives (line 4). Out, because a configured rule already rejects them or no tool here reads them: ESLint's disable and enable comments, inert under `--no-inline-config` (`package.json`, line 46); SonarQube's comment, rejected by `sonarjs/no-sonar-comments` (`node_modules/@next-friday/eslint-config-friday/dist/index.mjs`, line 1977); TypeScript's ignore and no-check comments, which `@typescript-eslint/ban-ts-comment` (line 2372) reports with its default options; and Python linters' comment, which belongs to tools no project runs. In the root also out: the comments of Semgrep, hadolint, and Trivy, whose tools only the templates run (`intent/ci/spec.md`, **Scanners**). The rest stays, including TypeScript's expect-error comment, which `ban-ts-comment` allows with a description and `tsc` still honours (intent).
-- **Seen while writing this spec.** On 2026-11-10 the edit hook blocked the first write of this file, because the spec named some directives in prose. `pnpm suppressions:check` reads the files the same way, so this spec names directives by tool, as the intent does.
+- **Seen while writing this spec.** The edit hook blocked the first write of this file, because the spec named some directives in prose. `pnpm suppressions:check` reads the files the same way, so this spec names directives by tool, as the intent does.
 
 ### Test-edit gate
 

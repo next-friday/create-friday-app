@@ -1,8 +1,6 @@
 # Spec: Follow the repository rename to next-friday-create-app
 
-From `intent/repository-rename/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: accepted.
-
-Updated after the repository became `next-friday/next-friday-create-app` and pull request #95 renamed the CLI command to match (2026-11-11). The first acceptance covered only the repository links.
+From `intent/repository-rename/intent.md`. Status: accepted.
 
 ## Requirements
 

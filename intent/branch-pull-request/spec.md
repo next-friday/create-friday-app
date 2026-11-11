@@ -1,8 +1,8 @@
 # Spec: Every branch has an open pull request, and every pull request ends in a merge
 
-From `intent/branch-pull-request/intent.md` (accepted 2026-11-10 by the merge of pull request #72). Status: accepted.
+From `intent/branch-pull-request/intent.md`. Status: accepted.
 
-Written at `b76ed2c` with the `write-spec` skill. GitHub Docs claims are read from the `github/docs` repository at `f309096` (2026-11-09), because `docs.github.com` is not reachable from this session; each cites the file under `content/` or `data/`.
+GitHub Docs claims are read from the `github/docs` repository at `f309096`, because `docs.github.com` is not reachable from this session; each cites the file under `content/` or `data/`.
 
 ## Requirements
 
@@ -11,7 +11,7 @@ Written at `b76ed2c` with the `write-spec` skill. GitHub Docs claims are read fr
 3. When a branch other than `main` exists with no open pull request, the system opens one for it.
 4. When a pull request closes without merging, the system reopens it.
 
-Requirements 3 and 4 are not built: the product owner removed their workflow on 2026-11-10, as `plan.md` records under **Departure: the workflow is removed**. They wait for the agent's own identity. 5. A rejected intent or spec is recorded by merging its pull request with `Status: rejected.`, and every file that says closing rejects says this instead. 6. Requirements 1 to 5 hold in this repository and in every generated project. No person and no agent deletes a branch or closes a pull request by hand.
+Requirements 3 and 4 are not built: their workflow was removed, as `plan.md` records under **Departure: the workflow is removed**. They wait for the agent's own identity. 5. A rejected intent or spec is recorded by merging its pull request with `Status: rejected.`, and every file that says closing rejects says this instead. 6. Requirements 1 to 5 hold in this repository and in every generated project. No person and no agent deletes a branch or closes a pull request by hand.
 
 ## Design
 
@@ -27,7 +27,7 @@ GitHub's setting: "You can have head branches automatically deleted after pull r
 
 A new workflow, `.github/workflows/branch-pull-request.yml`, in the root and in `templates/base/`. Its job **`open-pull-request`** runs on `push` to any branch except `main`, on `schedule`, and on `workflow_dispatch`.
 
-**On a push**, it acts only when the branch had a pull request that merged and has no open one, which is the 2026-11-10 case: `gh pr list --head "$BRANCH" --state merged` returns a pull request and `--state open` returns none. It then opens a pull request at once. A new branch with no pull request history is left alone, because its author usually opens the pull request moments later. Pull request #72 opened about a minute after its branch was first pushed.
+**On a push**, it acts only when the branch had a pull request that merged and has no open one, which is the case in the intent: `gh pr list --head "$BRANCH" --state merged` returns a pull request and `--state open` returns none. It then opens a pull request at once. A new branch with no pull request history is left alone, because its author usually opens the pull request moments later. Pull request #72 opened about a minute after its branch was first pushed.
 
 **On the schedule**, once a day, or a manual dispatch, it lists the remote branches other than `main`. For each one with no open pull request and a last commit older than one hour, it opens a pull request. Proposal for the product owner to accept or correct in review: once a day, and one hour. The schedule runs at most once a day, and the hour leaves the author room to open the pull request first.
 

@@ -6,7 +6,7 @@
 
 ## Related issue
 
-<!-- Link a related issue (for example, `Closes #123`) or write `None`. -->
+<!-- Write `Closes #123` only for an issue that already exists; otherwise write `None`. Do not open an issue only to get a number. -->
 
 ## Contributor checklist
 

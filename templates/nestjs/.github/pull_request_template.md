@@ -2,7 +2,7 @@
 
 ## Why
 
-<!-- The problem and the approach in 1-3 short sentences. No SHAs or rebase history. Link a related issue with `Closes #123`. -->
+<!-- The problem and the approach in 1-3 short sentences. No SHAs or rebase history. When an issue already exists, link it with `Closes #123`; do not open an issue only to get a number. -->
 
 ## What changed
 

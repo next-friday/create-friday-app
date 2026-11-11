@@ -6,3 +6,18 @@ This folder is the intent home. Every change starts here as an `intent.md`, and 
 - **Plan.** An idea, a ticket, or an incident becomes `intent.md`, written with the `write-intent` skill. The product owner reviews and corrects it before it is committed. Merging its pull request records the decision: `Status: accepted.` accepts it, and `Status: rejected.` rejects it.
 - **Design.** The `write-spec` skill turns the accepted `intent.md` into `spec.md`, committed alongside it. The product owner reviews the spec against the idea and resolves each area of concern with its policy owner. Accepting the spec starts the build.
 - **Build.** The engineer starts in plan mode with `intent.md` and `spec.md`, and commits the approved plan as `plan.md`. When implementation departs from the plan, `plan.md` changes in the same commit.
+
+## Which file holds what
+
+The bullets above say who writes and who decides each file. What each file answers:
+
+| File        | Answers                                                                                                    |
+| :---------- | :--------------------------------------------------------------------------------------------------------- |
+| `intent.md` | The problem, the outcome wanted, the users and systems it affects, its constraints, and its open questions |
+| `spec.md`   | What to build and how it is designed: requirements, design, and areas of concern                           |
+| `plan.md`   | How to make the change: the files that change, the order of the work, and the tests that prove it          |
+
+## Where a technology choice goes
+
+- **A choice already made**, such as a required framework or service, goes into the intent's **Constraints**. The spec designs within it.
+- **A choice to weigh**, such as two libraries or two approaches, goes into the intent's **Proposed outcome** as a proposal or into its **Open questions**. The spec compares the options in its design, with sources, and the product owner accepts or corrects the choice in review.

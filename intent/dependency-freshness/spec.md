@@ -30,12 +30,12 @@ The latest releases on 2026-11-09, from `npm view <package> time` and nodejs.org
 
 - pnpm 12.18.0 (2026-11-05) is four days old on 2026-11-09, so it waits for Renovate's next run after 2026-11-12.
 - Node.js 24 entered maintenance on 2026-10-20, and 26 became LTS on 2026-10-28 (`nodejs/Release` `schedule.json`). The packages the templates install accept Node.js 26: `payload` `"^22.23.4||>=24.22.1"`, `vitest` `"^22.12.0||^24.0.0||>=26.0.0"`, `eslint` `"^20.19.0||^22.13.0||>=24"`, `next` `">=20.9.0"`, `@nestjs/core` `">=20"`, and each `@next-friday/*` config at 5.2.1 `">=24.15.0"` (`npm view <package> engines`). So the templates move to Node.js 26 and no hold is recorded.
-- The root's `engines.node` stays `">=24.15.0"`: it is the CLI's public contract (`AGENTS.md`, convention 3), and it already allows Node.js 26. Only the root's development and release version in `.nvmrc` moves.
+- The root's `engines.node` stays `">=24.15.0"`: it is the CLI's public contract (`AGENTS.md`, the **Preserve CLI arguments, prompts, and stack names** convention), and it already allows Node.js 26. Only the root's development and release version in `.nvmrc` moves.
 - The plan updates every other dependency that `pnpm outdated` reports in the root and in a project generated from each stack, under requirement 1. On 2026-11-09 that includes `next` 16.4.3 in `templates/nextjs/package.json`, line 43, and `templates/turborepo/apps/app/package.json`, line 21, whose 16.4.4 turns seven days old that day.
 
 ### Dependabot
 
-`.github/dependabot.yml`, `templates/base/.github/dependabot.yml`, and `templates/turborepo/.github/dependabot.yml`, which replaces the base file (`AGENTS.md`, convention 4):
+`.github/dependabot.yml`, `templates/base/.github/dependabot.yml`, and `templates/turborepo/.github/dependabot.yml`, which replaces the base file (`AGENTS.md`, the **A stack replaces a `base` file** convention):
 
 - Every `cooldown` block gains `exclude: ["@next-friday/*"]`. GitHub documents `exclude` as the "List of dependencies **excluded from cooldown** (up to **150 items**). Supports wildcards (`*`)", and "The `exclude` list always take precedence over the `include` list" (`github/docs` `content/code-security/reference/supply-chain-security/dependabot-options-reference.md`, lines 226 and 292).
 - `default-days: 7` stays, as the intent's constraint requires.
@@ -84,7 +84,7 @@ minimumReleaseAgeExcludePrune: true
 
 - 10080 minutes is seven days; the setting counts minutes ("The built-in 1440-minute default", pnpm 12.18.0 `CHANGELOG.md`, line 2925).
 - An explicit value turns strict mode on: "`minimumReleaseAgeStrict` now defaults to `true` when `minimumReleaseAge` is explicitly configured … The built-in 1440-minute default stays non-strict" (same line). A version younger than seven days then stops the install instead of being added to the exclude list.
-- The reason to enforce it: a template ships no `pnpm-lock.yaml` (`AGENTS.md`, convention 6), so a generated project resolves every transitive dependency fresh on its first `pnpm install`. Dependabot's `cooldown` delays only the pull requests it opens; pnpm's release age is the only wait that applies to those transitive versions.
+- The reason to enforce it: a template ships no `pnpm-lock.yaml` (`AGENTS.md`, the **Store `.gitignore` as `_gitignore`** convention), so a generated project resolves every transitive dependency fresh on its first `pnpm install`. Dependabot's `cooldown` delays only the pull requests it opens; pnpm's release age is the only wait that applies to those transitive versions.
 - The name pattern replaces every `@next-friday/...@<version>` entry, including the stale `@next-friday/eslint-config-friday@5.0.0` (`templates/base/pnpm-workspace.yaml`, line 16; `templates/turborepo/pnpm-workspace.yaml`, line 19; root `pnpm-workspace.yaml`, line 10). `@next-friday/eslint-plugin-friday@1.1.3` is covered by the pattern too.
 - `minimumReleaseAgeExcludePrune` drops entries "the freshly written lockfile no longer resolves", and "Name patterns (`@scope/*`) are always kept" (pnpm 12.18.0 `CHANGELOG.md`, line 3715). A one-off `name@version` entry, such as a security fix younger than seven days that `dependency-security.md` asks to apply as an override, is then removed once the lockfile moves past it.
 
@@ -94,7 +94,6 @@ minimumReleaseAgeExcludePrune: true
 
 ### Documentation
 
-- `AGENTS.md`: the `.nvmrc` version in the first section, and the "Node.js for payload and turborepo" note, which names `>=24.22.1`.
 - `templates/<stack>/CONTRIBUTING.md`, line 8: "Dependabot updates only the `Dockerfile`" becomes "Renovate updates `.nvmrc`; Dependabot updates the `Dockerfile`'s digest."
 
 ### Files that change

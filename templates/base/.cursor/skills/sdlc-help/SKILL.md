@@ -15,8 +15,7 @@ disable-model-invocation: true
 
 ## Map
 
-- **The loop:** intent, then spec, then plan, then build, review, deploy, and maintain. Each change keeps its files in `intent/<change>/`: `intent.md`, `spec.md`, and `plan.md` (`intent/README.md`).
-- **Starting work:** `/sdlc` matches the request to a playbook in `.agents/skills/sdlc/playbooks/`. The table in `.agents/skills/sdlc/SKILL.md` lists the playbooks this project has. The `plan` playbook writes `intent.md`; `intent/<change>/plan.md` is the later build plan.
-- **Who decides:** `.agents/rules/agent-owned-work.md` lists the human gates. `.github/CODEOWNERS` names who approves each path.
-- **A mistake the agent repeats:** add the correction to **Things Claude gets wrong** in `AGENTS.md`.
-- **Company policy:** the policy skills in `.agents/skills/`; `.github/CODEOWNERS` names each one's owner.
+- **How the workflow runs, and starting work:** `intent/README.md` and the table in `.agents/skills/sdlc/SKILL.md`.
+- **Who decides:** `.agents/rules/agent-owned-work.md` and `.github/CODEOWNERS`.
+- **A mistake the agent repeats:** **Things Claude gets wrong** in `AGENTS.md`.
+- **Company policy:** the policy skills in `.agents/skills/`, and `.github/CODEOWNERS` for each one's owner.

@@ -37,7 +37,7 @@ The root `SECURITY.md` keeps line 13, the private vulnerability reporting link (
 
 ### The documentation report form
 
-One file in `templates/base/`, because every stack would carry the same content and `AGENTS.md` convention 4 lets a stack replace a `base` file only when it needs different content. This also matches `intent/monorepo-apps/spec.md`, which moves each stack's `.github/` into `templates/base/` once.
+One file in `templates/base/`, because every stack would carry the same content and `AGENTS.md` the **A stack replaces a `base` file** convention lets a stack replace a `base` file only when it needs different content. This also matches `intent/monorepo-apps/spec.md`, which moves each stack's `.github/` into `templates/base/` once.
 
 The fields follow [vercel/next.js `.github/ISSUE_TEMPLATE/4.docs_report.yml`](https://github.com/vercel/next.js/blob/canary/.github/ISSUE_TEMPLATE/4.docs_report.yml), fetched on 2026-11-09 (lines 14–31):
 

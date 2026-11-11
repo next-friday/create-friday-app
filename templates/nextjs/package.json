@@ -19,6 +19,7 @@
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",
+    "human-gates:check": "node scripts/check-human-gates.ts",
     "knip": "knip",
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
@@ -37,7 +38,7 @@
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.json",
     "verify": "pnpm verify:static && pnpm test:coverage && pnpm build",
-    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
+    "verify:static": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm peers:check && pnpm typecheck && pnpm knip && pnpm depcruise"
   },
   "dependencies": {
     "next": "16.4.3",

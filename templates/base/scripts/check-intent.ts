@@ -29,7 +29,7 @@ const requiredHeadings = [
 ];
 
 const titlePattern = /^# Intent: \S/;
-const statusPattern = /Status: (?:draft|accepted|rejected)\.$/;
+const statusPattern = /Status: (?:draft|accepted|rejected|done)\.$/;
 
 /**
  * Blank every line of a fenced code block, keeping line numbers.
@@ -98,7 +98,7 @@ function findAuthorProblems(lines: string[]): Problem[] {
     : [
         {
           message:
-            'an author line must start with "Author: " and end with "Status: draft.", "Status: accepted." or "Status: rejected."; write "Author: <name> (<team>). Status: draft."',
+            'an author line must start with "Author: " and end with "Status: draft.", "Status: accepted.", "Status: rejected." or "Status: done."; write "Author: <name> (<team>). Status: draft."',
           line: authorLine?.line ?? 1,
         },
       ];
@@ -257,6 +257,10 @@ const selfTestCases: SelfTestCase[] = [
   {
     text: validIntent,
     name: "a complete intent",
+  },
+  {
+    name: "status is done",
+    text: validIntent.replace(statusDraft, "Status: done."),
   },
   {
     name: "CRLF line endings",

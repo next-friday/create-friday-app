@@ -6,6 +6,7 @@ This folder is the intent home. Every change starts here as an `intent.md`, and 
 - **Plan.** An idea, a ticket, or an incident becomes `intent.md`, written by sending the idea with `/sdlc`, which interviews the originator. The originator corrects the draft before it is committed, and the product owner reviews it in its pull request. Merging its pull request with `Status: accepted.` accepts it; closing the pull request rejects it.
 - **Design.** Sending the intent's path with `/sdlc` turns the accepted `intent.md` into `spec.md`, committed alongside it. The product owner reviews the spec against the idea and resolves each area of concern with its policy owner. Accepting the spec starts the build.
 - **Build.** The engineer sends `/sdlc build` with the spec's path, starts in plan mode with `intent.md` and `spec.md`, and commits the approved plan as `plan.md`. When implementation departs from the plan, `plan.md` changes in the same commit.
+- **Done.** A change is `done` when the tree meets every numbered requirement of its `spec.md`. The agent sets `Status: done.` in `intent.md` and `spec.md` in the pull request that meets the last requirement, and the code owner's approval of that pull request accepts it.
 
 ## Which file holds what
 

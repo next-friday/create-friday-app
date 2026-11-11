@@ -11,3 +11,5 @@ Every generated project gets `pnpm setup:check`. It names each file that still h
 The review instructions in `.agents/review.md` and `REVIEW.md` name the generated files to skip, such as `src/payload-types.ts` and `src/migrations/`. For a change classed as higher risk, the product owner consults a tech lead before accepting the spec. Each stack's `AGENTS.md` carries the rules on issues, on what belongs in the repository, and on sourced requirements.
 
 Every generated project gets `pnpm bands:check <file>`. It reads `bands.yaml` and a JSON file `{"baseline": [...], "recent": [...]}`, applies the Western Electric rules to the metric, and prints one JSON line with the tier, its action, tools, and routes. A `2sigma` or `3sigma` result goes to `/sdlc` as a finding. With no argument it runs its self-tests, and `pnpm verify` runs them. Each stack gains the `yaml` dev dependency.
+
+`pnpm intent:check` also accepts `Status: done.`, which an agent sets in `intent.md` once the tree meets every requirement of the spec; `intent/README.md` says when and who.

@@ -1,6 +1,6 @@
 # Intent: Every branch has an open pull request, and every pull request ends in a merge
 
-Author: Joe Takara (Developer Productivity). Status: accepted.
+Author: Joe Takara (Developer Productivity). Status: done.
 
 ## Problem
 

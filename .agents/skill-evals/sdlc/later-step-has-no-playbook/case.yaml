@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: later-step-has-no-playbook
+expected_outcome: |
+  The agent says that writing a spec has no playbook in /sdlc yet, and writes no spec.

@@ -95,6 +95,8 @@ jobs:
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
+      - name: Check human gates
+        run: pnpm human-gates:check
 
   format:
     name: Format & Manifests

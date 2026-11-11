@@ -8,7 +8,7 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
    - `intent/<change>/plan.md` is already on the default branch: say that the change is built, and name the file.
 2. When `intent/<change>/plan.md` exists on a branch that is not merged, check out that branch. When the request says the plan is accepted, go to step 7. Otherwise show that plan and go to step 5.
 3. Read `intent.md`, `spec.md`, and the code the change touches.
-4. Write the plan from the template below, in the language of the files already in `intent/`. Use exactly the template's headings. An engineer who has never seen this conversation must be able to implement the change from the plan alone.
+4. Write the plan from the template below, in the language of the files already in `intent/`. Use exactly the template's headings. The date in the title is the date of the last commit to `intent/<change>/intent.md`: `git log -1 --format=%cs -- intent/<change>/intent.md`. An engineer who has never seen this conversation must be able to implement the change from the plan alone.
    - **Files that change:** every file, marked new, changed, or deleted, with one line on what it does afterwards.
    - **Order of work:** numbered steps; each ends with the check that proves it.
    - **Risks:** what the change could break, which step is the riskiest, and each option you chose not to take and why.
@@ -27,11 +27,9 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
 ## Template
 
 ```markdown
-# Plan: <title>
+# Plan: <title> (from intent.md <YYYY-MM-DD>)
 
 Accepted by: @<engineer>.
-
-From `intent/<change>/spec.md`.
 
 ## Files that change
 

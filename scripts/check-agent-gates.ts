@@ -12,6 +12,7 @@ const shellGate = ".agents/hooks/agent-shell-gate.sh";
 const suppressionGate = ".agents/hooks/agent-suppression-gate.sh";
 const constitutionGate = ".cursor/hooks/agent-constitution-gate.sh";
 const mcpGate = ".agents/hooks/agent-mcp-gate.sh";
+const productionGate = ".agents/hooks/agent-production-gate.sh";
 const sourceFile = "src/example.ts";
 
 const blockedCommands = [
@@ -189,6 +190,37 @@ const allowedCommands = [
   'gh api repos/next-friday/example/issues/1/comments -f body="APPROVED by QA"',
 ];
 
+const publishCommands = [
+  "npm publish",
+  "npm publish;echo",
+  "pnpm publish --access public",
+  "pnpm -r publish",
+  "pnpm --filter x publish",
+  "npm pub",
+  "npm stage publish next-friday-create-app-6.0.0.tgz",
+  "npm stage approve 123",
+  "pnpm changeset publish",
+  "pnpm exec changeset publish",
+  "npx changeset publish",
+  "pnpm dlx @changesets/cli@3.0.3 publish",
+  "bash -c 'npm publish'",
+  "npm \\\n  publish",
+];
+
+const nonPublishCommands = [
+  "pnpm changeset",
+  "pnpm changeset version",
+  "pnpm pack",
+  "pnpm approve-builds",
+  "npm stage list",
+  "npm help publish",
+  "npm view @next-friday/create-app versions",
+  'pnpm vitest run test/stacks.test.ts -t "does not publish"',
+  'git commit -m "docs: npm packages publish only from CI"',
+  'git commit -m "deploy to production"',
+  'git commit -m "gate npm publishing in the root hook"',
+];
+
 const mcpTools = {
   blocked: [
     "mcp__github__merge_pull_request",
@@ -272,6 +304,35 @@ const cases: GateCase[] = [
     expectedExit: 0 as const,
     expectedPermission: "allow" as const,
     name: `shell: ${command}`,
+  })),
+  ...publishCommands.flatMap(command => [
+    {
+      gate: productionGate,
+      input: {
+        command,
+      },
+      expectedExit: 2 as const,
+      name: `Cursor publish: ${command}`,
+    },
+    {
+      gate: productionGate,
+      input: {
+        tool_input: {
+          command,
+        },
+      },
+      expectedExit: 2 as const,
+      name: `Claude publish: ${command}`,
+    },
+  ]),
+  ...nonPublishCommands.map(command => ({
+    gate: productionGate,
+    input: {
+      command,
+    },
+    expectedExit: 0 as const,
+    expectedPermission: "allow" as const,
+    name: `publish gate: ${command}`,
   })),
   ...mcpTools.blocked.map(tool => ({
     gate: mcpGate,

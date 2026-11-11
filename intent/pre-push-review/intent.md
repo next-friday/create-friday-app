@@ -35,8 +35,8 @@ The playbook puts an independent check before the work reaches a person. A verif
 
 ## Constraints
 
-- The product owner decided on 2026-11-10: the reviewer replaces Bugbot and CodeRabbit, Claude Code Review stays in generated projects and stays off in this repository, a hook enforces the review because agents forget steps, and the change applies in this repository and in every generated project.
-- The product owner stopped using Bugbot and CodeRabbit on 2026-11-10, before this change is built. Until the reviewer and its hook exist, agents do not wait for either bot, and they run a reviewer subagent by hand before each push.
+- The product owner decided: the reviewer replaces Bugbot and CodeRabbit, Claude Code Review stays in generated projects and stays off in this repository, a hook enforces the review because agents forget steps, and the change applies in this repository and in every generated project.
+- The product owner stopped using Bugbot and CodeRabbit before this change is built. Until the reviewer and its hook exist, agents do not wait for either bot, and they run a reviewer subagent by hand before each push.
 - Approval comes from a person: "Approval comes from a human through branch protection" (page 39). The reviewer never approves.
 - A file in the constitution changes through `constitution-changes.md`.
 

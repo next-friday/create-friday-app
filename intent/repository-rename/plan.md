@@ -2,7 +2,7 @@
 
 From `intent/repository-rename/intent.md` and `intent/repository-rename/spec.md` (both accepted).
 
-Updated after the repository became `next-friday/next-friday-create-app` and pull request #95 renamed the CLI command to match (2026-11-11). The first acceptance covered only the repository links. Engineer: Joe Takara, who accepts this plan in a plan-mode session on 2026-11-09 (playbook page 19, steps 1–6; page 20, "the plan is logged … along with who accepted it").
+Engineer: Joe Takara, who accepts this plan in a plan-mode session (playbook page 19, steps 1–6; page 20, "the plan is logged … along with who accepted it").
 
 ## Context
 

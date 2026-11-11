@@ -1,6 +1,6 @@
 # Spec: Support Claude Code and Cursor from one source
 
-From `intent/multi-agent-support/intent.md` (accepted 2026-11-09 by the merge of pull request #57). Status: draft.
+From `intent/multi-agent-support/intent.md`. Status: draft.
 
 Written at `main` `7aac1c3` with the `write-spec` skill as committed there. The agent wrote it as the next step of the loop, under `AGENTS.md`'s "Asking the product owner"; the product owner asked for it through another session, and no product owner prompt added a constraint to the skill's prompt.
 

@@ -4,7 +4,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 
-This repository runs the AI-native SDLC Playbook on itself before it ships the loop to every generated project. On 2026-11-09, while doing that, the agent asked the product owner in chat whether to open the pull request for `intent/monorepo-apps/spec.md` (pull request #65), and asked which fix to apply to the stale `Status:` lines, although `intent/playbook-plays/intent.md` already says who writes them. The product owner had to answer before the work moved, so a person blocked a step the playbook never gives to a person.
+This repository runs the AI-native SDLC Playbook on itself before it ships the loop to every generated project. While doing that, the agent asked the product owner in chat whether to open the pull request for `intent/monorepo-apps/spec.md` (pull request #65), and asked which fix to apply to the stale `Status:` lines, although `intent/playbook-plays/intent.md` already says who writes them. The product owner had to answer before the work moved, so a person blocked a step the playbook never gives to a person.
 
 The playbook does not ask the agent to seek permission for these steps:
 
@@ -38,7 +38,7 @@ The automated handover in `intent/playbook-plays/intent.md` runs the spec pass a
 
 ## Constraints
 
-- The product owner put this intent ahead of the other accepted intents on 2026-11-09.
+- The product owner put this intent ahead of the other accepted intents.
 - The agent still never approves or merges (page 39), never passes the production gate (page 46), and asks the intent questions the playbook lists (page 12, step 2).
 - This repository cannot change a session's default instructions or another repository's skills; the outcome works through this repository's own files.
 

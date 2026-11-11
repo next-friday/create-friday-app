@@ -111,3 +111,39 @@ A repository admin sets these once in the GitHub repository settings. Git does n
 - Describe observable CLI effects.
 - Report only checks that actually ran and include their results.
 - Add or update tests only when they protect a distinct observable contract.
+- After a pull request that only reformats code merges, the next pull request lists its commit on `main` in `.git-blame-ignore-revs` at the repository root, creating the file the first time, with a `#` comment that names the change, as [GitHub Docs](https://docs.github.com/en/repositories/working-with-files/using-files/viewing-and-understanding-files) shows. GitHub then hides that commit in the blame view.
+
+## The loop
+
+A change moves through the stages of the AI-native SDLC Playbook: Plan, Design, Build, Test, Deploy, and Maintain. [`.agents/skills/sdlc/SKILL.md`](.agents/skills/sdlc/SKILL.md) starts each stage, and each stage's playbook in `.agents/skills/sdlc/playbooks/` names the gate that follows it.
+
+This repository is the source of truth for intents, specs, plans, and lessons (the playbook asks for one named source of truth per artifact, page 22). This repository's own choice is that GitHub pull requests are the source of truth for reviews and approvals. No other tracker is used.
+
+### Plays this repository has
+
+| Play (playbook page)                     | Where it lives                                                                                |
+| :--------------------------------------- | :-------------------------------------------------------------------------------------------- |
+| Intent home (12–13)                      | [`intent/`](intent/README.md)                                                                 |
+| Interviews in Plan and Build (12, 19–20) | `.agents/skills/sdlc/playbooks/plan.md` and `build.md`                                        |
+| Requirements and design (15–17)          | `.agents/skills/sdlc/playbooks/design.md` and the four policy skills in `.agents/skills/`     |
+| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, and `.claude/agents/verifier.md`                      |
+| PR review loop, step 4 (38)              | `REVIEW.md` (rendered from `.agents/review.md`) and `.agents/skills/sdlc/playbooks/review.md` |
+| CI/CD step 1, triage (45)                | The **Triage failed build** job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)     |
+| Closing the loop (48–51)                 | [`bands.yaml`](bands.yaml)                                                                    |
+| Claude Tag and the lessons file (52)     | [`lessons/`](lessons/README.md)                                                               |
+
+### How the loop is measured
+
+Indicators are the playbook's own words, shortened by cutting words, with the page they come from. The last row is this repository's own, from `intent/loop-autonomy/spec.md`.
+
+| Play (page of the indicators)     | Leading indicator                                                                                                           | Lagging indicator                                                                                                               | Where it is read                                                                                                                |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| Intent home (13)                  | Time from first conversation to a committed `intent.md`.                                                                    | The share of `intent.md` files that the product owner accepts into Design rather than closes.                                   | Git history of `intent/`, and the merge or the closed pull request. The first conversation is not collected in this repository. |
+| Interviews in Plan and Build (21) | Share of changes that merge from the first implementation pass, and time from plan approval to merged PR.                   | Rework cycles per change, and how often the merged diff still matches the committed `plan.md`.                                  | Pull request metadata.                                                                                                          |
+| Requirements and design (17)      | Elapsed time between the `intent.md` commit and the `spec.md` commit for the same change.                                   | Requirements rework after build starts: count `spec.md` commits dated after the first `plan.md` commit for the same change.     | `git log`.                                                                                                                      |
+| Feedback loop (33)                | First-pass CI success rate for agent-written changes.                                                                       | Review time per PR, and the change failure rate from an incident tracker.                                                       | The CI system and pull request metadata. The incident tracker is not collected in this repository.                              |
+| PR review loop, step 4 (39)       | Time to first review, and the share of review comments resolved without a human touching the branch.                        | Defects and vulnerabilities caught before merge set against those escaping to production.                                       | The pull request history. Escapes to production are not collected in this repository.                                           |
+| CI/CD step 1, triage (46)         | The share of pipeline failures triaged without paging a human.                                                              | DevOps Research and Assessment (DORA) measures.                                                                                 | The CI/CD pipeline logs. DORA measures are not collected in this repository.                                                    |
+| Closing the loop (51)             | Time from band breach to an `intent.md` in the triage queue.                                                                | The share of findings that become merged fixes, and repeat incidents of the same class.                                         | Not collected in this repository: it has `bands.yaml` but no detection script.                                                  |
+| Hooks as approval gates (44)      | Time spent waiting on each approval gate.                                                                                   | Gate violations reaching production before and after hooks.                                                                     | Hook decisions in the OpenTelemetry export. Violations reaching production are not collected in this repository.                |
+| Carry each step without asking    | Time from the head commit when the pull request opened to its `created_at`. A pull request with no such CI run is left out. | The share of the agent's pull requests that reach green with no push or comment from a person other than reviews and approvals. | The first CI run's `head_sha`, that commit's timestamp, and the pull request's `created_at`; the pull request timeline.         |

@@ -8,7 +8,7 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
    - `intent/<change>/plan.md` is already on the default branch: say that the change is built, and name the file.
 2. When `intent/<change>/plan.md` exists on a branch that is not merged, check out that branch. When the request says the plan is accepted, go to step 7. Otherwise show that plan and go to step 5.
 3. Read `intent.md`, `spec.md`, and the code the change touches.
-4. Write the plan from the template below, in the language of the files already in `intent/`. Use exactly the template's headings. An engineer who has never seen this conversation must be able to implement the change from the plan alone.
+4. Write the plan from the template below, in the language of the files already in `intent/`. Use exactly the template's headings. The date in the title is the date of the last commit to `intent/<change>/intent.md`: `git log -1 --format=%cs -- intent/<change>/intent.md`. An engineer who has never seen this conversation must be able to implement the change from the plan alone.
    - **Files that change:** every file, marked new, changed, or deleted, with one line on what it does afterwards.
    - **Order of work:** numbered steps; each ends with the check that proves it.
    - **Risks:** what the change could break, which step is the riskiest, and each option you chose not to take and why.
@@ -17,7 +17,7 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
    Show the whole plan and name the file only as `intent/<change>/plan.md`. In plan mode you cannot write the file: show the plan as the plan.
 
 5. **Gate: the engineer accepts the plan.** Ask whether an engineer could build from it, and revise until they say yes. Change no code and commit nothing before that yes. In plan mode, the engineer approving the plan is that yes. When the spec or `AGENTS.md` classes the change as higher risk, say that a tech lead or an architect accepts the plan with the engineer.
-6. Create the branch as `AGENTS.md` says, and commit `intent/<change>/plan.md` as its first commit.
+6. Create the branch as `AGENTS.md` says. Set the plan's `Accepted by:` line, under its title, to the engineer who said yes in step 5, and commit `intent/<change>/plan.md` as its first commit.
 7. Implement the plan in its order. After each step, run the check that proves it and fix what fails. For a bug fix, first write the test that reproduces the bug, run it, check that it fails for the reason you expect, and commit it. Then create `.git/bug-fix-in-progress`, make the test pass without editing it, and delete `.git/bug-fix-in-progress`. When the work departs from the plan, change `plan.md` in the same commit.
 8. Run every check under **Verifying your work** in `AGENTS.md` and keep the output. Every check must pass: fix the code, and never skip, delete, or weaken a test. Then look for `.claude/agents/verifier.md`: when it exists, run the `verifier` subagent and fix what it reports; when you cannot start a subagent, do what that file says yourself. When a check cannot run in this session, say which one and why, and never report it as passed.
 9. Go on in the same turn, without asking: follow `.agents/skills/sdlc/playbooks/open-pr.md`, and then `.agents/skills/sdlc/playbooks/review.md`. Pushing the branch and opening the pull request are part of this task. The next stop is the code owner's gate in `review.md`.
@@ -27,9 +27,9 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
 ## Template
 
 ```markdown
-# Plan: <title>
+# Plan: <title> (from intent.md <YYYY-MM-DD>)
 
-From `intent/<change>/spec.md`.
+Accepted by: @<engineer>.
 
 ## Files that change
 

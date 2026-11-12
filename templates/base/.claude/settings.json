@@ -32,6 +32,9 @@
       "Edit(./.git/config.worktree)",
       "Edit(./.lintstagedrc.json)",
       "Edit(./.gitleaks.toml)",
+      "Bash(gh repo delete *)",
+      "Bash(gh issue delete *)",
+      "Bash(gh release delete *)",
       "Bash(gh pr merge*)"
     ]
   },

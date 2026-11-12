@@ -8,7 +8,6 @@ type Change = {
 };
 
 type SelfTestCase = {
-  actor?: string;
   addedChangesets?: Record<string, string>;
   authors?: string[];
   changedManifestFields?: string[];
@@ -88,14 +87,14 @@ function hasCliContractChange(changes: Change[], changedManifestFields: string[]
  * Find the problems a branch's changes have with the changesets it adds.
  * @param changes Changed paths with their git status.
  * @param addedChangesets Text of each changeset the branch adds, by path.
- * @param actor The GitHub account that triggered the run, or undefined outside GitHub Actions.
+ * @param authors The author of each commit on the branch that is not a merge.
  * @param changedManifestFields Published `package.json` fields the branch changes.
  * @returns One message per problem.
  */
 function findChangesetProblems(
   changes: Change[],
   addedChangesets: Record<string, string>,
-  actor: string | undefined,
+  authors: string[],
   changedManifestFields: string[],
 ): string[] {
   const addedPaths = Object.keys(addedChangesets);
@@ -107,7 +106,8 @@ function findChangesetProblems(
 
   if (addedPaths.length === 0) {
     const isDependencyUpdate =
-      actor === dependencyBot &&
+      authors.length > 0 &&
+      authors.every(author => author === dependencyBot) &&
       publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
 
     return isDependencyUpdate || publishedPaths.length === 0
@@ -302,25 +302,30 @@ const selfTestCases: SelfTestCase[] = [
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
-    actor: dependencyBot,
     name: "no changeset on a dependency bot's commit that changes source",
+    authors: [dependencyBot],
     changes: [modifiedFile(sourceFile)],
   },
   {
-    actor: dependencyBot,
     name: "no changeset on a dependency bot's template update",
+    authors: [dependencyBot],
     changes: [modifiedFile(templateManifest)],
   },
   {
-    actor: "someone",
     name: "no changeset on a dependency bot's branch that a person updated",
-    authors: [dependencyBot],
+    authors: [dependencyBot, dependencyBot],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    name: "no changeset on a dependency bot's branch with a person's commit",
+    authors: [dependencyBot, "someone"],
     changes: [modifiedFile(templateManifest)],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
     name: "no changeset on a template update by another account",
-    actor: "someone",
+    authors: ["someone"],
     changes: [modifiedFile(templateManifest)],
   },
   {
@@ -408,11 +413,17 @@ const selfTestCases: SelfTestCase[] = [
 
 const selfTestFailures = selfTestCases
   .filter(
-    ({actor, changes, expectedMessagePart, changedManifestFields = [], addedChangesets = {}}) => {
+    ({
+      changes,
+      expectedMessagePart,
+      authors = [],
+      changedManifestFields = [],
+      addedChangesets = {},
+    }) => {
       const problems = findChangesetProblems(
         changes,
         addedChangesets,
-        actor,
+        authors,
         changedManifestFields,
       );
 
@@ -450,7 +461,9 @@ if (selfTestFailures.length > 0) {
     const problems = findChangesetProblems(
       changes,
       addedChangesets,
-      process.env.GITHUB_ACTOR,
+      runGit(["log", "--no-merges", "--format=%an", `${mergeBase}..HEAD`])
+        .split("\n")
+        .filter(author => author !== ""),
       findChangedManifestFields(mergeBase),
     );
 

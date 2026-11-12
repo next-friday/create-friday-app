@@ -1,0 +1,6 @@
+{
+  "claude-code": {
+    "event": "Stop",
+    "script": "check-reply-shape.sh"
+  }
+}

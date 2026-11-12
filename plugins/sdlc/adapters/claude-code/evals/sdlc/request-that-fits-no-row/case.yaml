@@ -1,0 +1,31 @@
+schema_version: "1.1"
+name: request-that-fits-no-row
+expected_outcome: |
+  The request matches no row of the /sdlc:sdlc table. The agent says which row is closest and why it does not fit, answers in a few lines, and stops. It writes no file and commits nothing.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu

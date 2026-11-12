@@ -1,4 +1,4 @@
-# Intent: Ship the SDLC playbook as the `friday` plugin
+# Intent: Ship the SDLC playbook as the `sdlc` plugin
 
 Author: Joe Takara (Developer Productivity). Status: accepted.
 
@@ -11,7 +11,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Proposed outcome
 
-- One plugin named `friday` holds everything that implements the SDLC playbook. A person runs the loop with the plugin's `sdlc` skill.
+- One plugin named `sdlc` holds everything that implements the SDLC playbook. A person runs the loop with the plugin's `sdlc` skill.
 - The plugin's content is tool-neutral. Its skills, playbooks, eval cases, and scripts name no model and no vendor's agent tool, so any agent tool that can load a skill can run them, with any model.
 - What one agent tool needs to load the plugin, such as its manifest, its command name, and its settings keys, is a thin adapter kept beside the content. The first adapters are for the tools the company uses today, Claude Code and Cursor; another tool is added by adding an adapter, with no change to the content.
 - The plugin holds: the `sdlc` skill and every playbook, `sdlc-help`, `setup-sdlc`, the verifier subagent, the eval cases, and the scripts behind `plan:check`, `bands:check`, `loop:measure`, and `evals:run`.
@@ -42,12 +42,12 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 - The plugin lives in this repository, in one directory that reads no file outside itself, so the directory can move to a repository of its own, or to a public marketplace, later without a change to its contents.
 - No file in the plugin's content names a model or depends on one vendor's agent tool. A file that only one tool reads lives in that tool's adapter.
-- The plugin is named `friday`. The product owner decided this name; it is an exception to `.agents/rules/descriptive-naming.md`, which forbids an organization name in an identifier.
+- The plugin is named `sdlc`; the product owner decided this name.
 - No running cost: the plugin's source is this git repository, and nothing the plugin adds calls a model unless a person runs it or a project turns a workflow on.
 - Rules, hooks, and agent settings stay under each project's code owners, and a person commits a change to them.
 - The human gates stay as they are.
 - What the Claude Code adapter has to work with, from its documentation:
-  - A plugin skill is run as `/friday:sdlc`: "plugin skills are namespaced as `/plugin-name:skill-name`" ([Claude Code: Skills](https://code.claude.com/docs/en/skills.md)).
+  - A plugin skill is run as `/sdlc:sdlc`: "plugin skills are namespaced as `/plugin-name:skill-name`" ([Claude Code: Skills](https://code.claude.com/docs/en/skills.md)).
   - A project names the plugin's source and enables it with `extraKnownMarketplaces` and `enabledPlugins` in `.claude/settings.json` ([Claude Code: Plugins for an organization](https://code.claude.com/docs/en/plugins/org.md)).
   - Only the plugin directory is copied: "Files outside the plugin directory aren't copied" ([Claude Code: Plugin loading](https://code.claude.com/docs/en/plugins/loading.md)).
   - Each contributor installs the plugin once; otherwise Claude Code reports `Plugin "<name>" is enabled in project settings but isn't installed here` (same page).
@@ -61,7 +61,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 - Where `setup-sdlc` writes the model choices so that each tool reads them.
 - How many repositories in the company use the stack today; no file in this repository says.
 - Cursor adapter: the plugin format, and how a project enables a plugin for its team. The source so far is the `cursor/plugins` repository.
-- Claude Code adapter: whether `claude -p "/friday:sdlc …"` runs a plugin skill headless; the documentation says user-invoked skills work in `-p` and installed plugins load, but does not state the two together. The workflows and `evals:run` depend on it.
+- Claude Code adapter: whether `claude -p "/sdlc:sdlc …"` runs a plugin skill headless; the documentation says user-invoked skills work in `-p` and installed plugins load, but does not state the two together. The workflows and `evals:run` depend on it.
 - Whether a contributor without the plugin installed gets a clear message, and from what.
 - Which version each project runs: in Claude Code the plugin's `version` field "pins the plugin to that version until you change it" ([Claude Code: Plugin manifest reference](https://code.claude.com/docs/en/plugins/manifest-reference.md)), and without it the version is the commit. The spec decides which.
 - What `sdlc-help` and the eval cases read when the project holds no copy of the playbooks.

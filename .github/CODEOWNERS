@@ -6,10 +6,10 @@
 /intent/ @joetakara
 
 # Plugin owners: the plugin, in the source and in the adapters the agents load
-/plugins/friday/ @joetakara @next-friday-engineer
+/plugins/sdlc/ @joetakara @next-friday-engineer
 
 # Policy owner: policy skills and the loop's own skill
-/plugins/friday/source/skills/*-policy/ @joetakara
-/plugins/friday/source/skills/sdlc/ @joetakara
-/plugins/friday/adapters/*/skills/*-policy/ @joetakara
-/plugins/friday/adapters/*/skills/sdlc/ @joetakara
+/plugins/sdlc/source/skills/*-policy/ @joetakara
+/plugins/sdlc/source/skills/sdlc/ @joetakara
+/plugins/sdlc/adapters/*/skills/*-policy/ @joetakara
+/plugins/sdlc/adapters/*/skills/sdlc/ @joetakara

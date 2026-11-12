@@ -10,6 +10,7 @@ type Change = {
 type SelfTestCase = {
   actor?: string;
   addedChangesets?: Record<string, string>;
+  authors?: string[];
   changedManifestFields?: string[];
   changes: Change[];
   expectedMessagePart?: string;
@@ -308,6 +309,12 @@ const selfTestCases: SelfTestCase[] = [
   {
     actor: dependencyBot,
     name: "no changeset on a dependency bot's template update",
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    actor: "someone",
+    name: "no changeset on a dependency bot's branch that a person updated",
+    authors: [dependencyBot],
     changes: [modifiedFile(templateManifest)],
   },
   {

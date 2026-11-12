@@ -1,6 +1,15 @@
 import {execFileSync} from "node:child_process";
-import {existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
+import {tmpdir} from "node:os";
 
 type AgentConfig = {
   description: string;
@@ -9,14 +18,18 @@ type AgentConfig = {
 };
 
 type HookConfig = {
+  argument?: string;
   event: string;
+  loopLimit?: number;
   script: string;
 };
 
 type HookCase = {
+  argument?: string;
   expected: "block" | "pass";
   input: Record<string, unknown>;
   name: string;
+  savedReply?: string;
 };
 
 type Adapter = {
@@ -25,7 +38,7 @@ type Adapter = {
   hasAuthoredEvals: boolean;
   manifest: Record<string, string>;
   manifestPath: string;
-  renderHooks?: (hook: HookConfig) => string;
+  renderHooks?: (hooks: HookConfig[]) => string;
 };
 
 type SelfTestCase = {
@@ -77,26 +90,69 @@ function findCursorAgentFields(agent: AgentConfig): string[] {
 }
 
 /**
- * Render the hook file the Claude Code adapter loads from `hooks/hooks.json`.
- * @param hook The event and script that `hooks.json` names for the adapter.
- * @returns The file content, which runs the script through `sh`.
+ * Build the shell command that runs a hook script through `sh`.
+ * @param pluginRootVariable The variable the tool sets to the plugin directory.
+ * @param hook The event, script, and argument that `hooks.json` names for the adapter.
+ * @returns The command, with the argument after the script when the hook has one.
  */
-function renderClaudeHooks(hook: HookConfig): string {
+function renderHookCommand(pluginRootVariable: string, hook: HookConfig): string {
+  const argument = hook.argument === undefined ? "" : ` ${hook.argument}`;
+
+  return `sh "\${${pluginRootVariable}}/hooks/${hook.script}"${argument}`;
+}
+
+/**
+ * Render the hook file the Claude Code adapter loads from `hooks/hooks.json`.
+ * @param hooks The hooks that `hooks.json` names for the adapter.
+ * @returns The file content, which runs each script through `sh`.
+ */
+function renderClaudeHooks(hooks: HookConfig[]): string {
   return `${JSON.stringify(
     {
-      hooks: {
-        [hook.event]: [
-          {
-            hooks: [
-              {
-                timeout: hookTimeoutSeconds,
-                type: "command",
-                command: `sh "\${CLAUDE_PLUGIN_ROOT}/hooks/${hook.script}"`,
-              },
-            ],
-          },
-        ],
-      },
+      hooks: Object.fromEntries(
+        hooks.map(hook => [
+          hook.event,
+          [
+            {
+              hooks: [
+                {
+                  timeout: hookTimeoutSeconds,
+                  type: "command",
+                  command: renderHookCommand("CLAUDE_PLUGIN_ROOT", hook),
+                },
+              ],
+            },
+          ],
+        ]),
+      ),
+    },
+    undefined,
+    2,
+  )}\n`;
+}
+
+/**
+ * Render the hook file the Cursor adapter loads from `hooks/hooks.json`.
+ * @param hooks The hooks that `hooks.json` names for the adapter.
+ * @returns The file content, which runs each script through `sh` and caps the follow-ups of a `stop` hook.
+ */
+function renderCursorHooks(hooks: HookConfig[]): string {
+  return `${JSON.stringify(
+    {
+      version: 1,
+      hooks: Object.fromEntries(
+        hooks.map(hook => [
+          hook.event,
+          [
+            {
+              command: renderHookCommand("CURSOR_PLUGIN_ROOT", hook),
+              ...(hook.loopLimit !== undefined && {
+                loop_limit: hook.loopLimit,
+              }),
+            },
+          ],
+        ]),
+      ),
     },
     undefined,
     2,
@@ -114,6 +170,7 @@ const adapters: Adapter[] = [
   },
   {
     agentFields: findCursorAgentFields,
+    renderHooks: renderCursorHooks,
     directory: "cursor",
     manifestPath: ".cursor-plugin/plugin.json",
     hasAuthoredEvals: false,
@@ -121,6 +178,7 @@ const adapters: Adapter[] = [
       ...manifestFields,
       skills: "./skills/",
       agents: "./agents/",
+      hooks: "./hooks/hooks.json",
     },
   },
 ];
@@ -271,14 +329,25 @@ function findSettingsProblems(
 /**
  * Run a hook script on one input.
  * @param script Path of the script from the repository root.
+ * @param argument The script's argument, if any.
  * @param input The hook input.
+ * @param stateDirectory The temporary directory the script keeps its state in.
  * @returns The standard output, or a message when the script exits non-zero.
  */
-function runHookScript(script: string, input: Record<string, unknown>): string {
+function runHookScript(
+  script: string,
+  argument: string | undefined,
+  input: Record<string, unknown>,
+  stateDirectory: string,
+): string {
   try {
-    return execFileSync("sh", [script], {
+    return execFileSync("sh", argument === undefined ? [script] : [script, argument], {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        TMPDIR: stateDirectory,
+      },
       input: JSON.stringify(input),
     });
   } catch {
@@ -287,9 +356,40 @@ function runHookScript(script: string, input: Record<string, unknown>): string {
 }
 
 /**
+ * Run a hook script on one case in a private state directory.
+ * @param script Path of the script from the repository root.
+ * @param hookCase The case; a saved reply is stored first by the script's `save` argument.
+ * @returns The standard output of the script on the case input.
+ */
+function runHookCase(script: string, hookCase: HookCase): string {
+  const stateDirectory = mkdtempSync(path.join(tmpdir(), "sdlc-hook-case-"));
+
+  try {
+    if (hookCase.savedReply !== undefined) {
+      runHookScript(
+        script,
+        "save",
+        {
+          text: hookCase.savedReply,
+          conversation_id: hookCase.input.conversation_id,
+        },
+        stateDirectory,
+      );
+    }
+
+    return runHookScript(script, hookCase.argument, hookCase.input, stateDirectory);
+  } finally {
+    rmSync(stateDirectory, {
+      force: true,
+      recursive: true,
+    });
+  }
+}
+
+/**
  * Tell what a hook did from its standard output.
  * @param output Standard output of the hook script.
- * @returns `pass` for no output, `block` for a block decision, otherwise the output itself.
+ * @returns `pass` for no output, `block` for a block decision or a follow-up message, otherwise the output itself.
  */
 function findHookOutcome(output: string): string {
   if (output.trim() === "") {
@@ -297,9 +397,12 @@ function findHookOutcome(output: string): string {
   }
 
   try {
-    const {decision} = JSON.parse(output) as {decision?: string};
+    const {decision, followup_message: followupMessage} = JSON.parse(output) as {
+      decision?: string;
+      followup_message?: string;
+    };
 
-    return decision === "block" ? "block" : output;
+    return decision === "block" || followupMessage !== undefined ? "block" : output;
   } catch {
     return output;
   }
@@ -308,20 +411,20 @@ function findHookOutcome(output: string): string {
 /**
  * Find the cases of a hook script whose outcome differs from the expected one.
  * @param script Path of the script from the repository root.
- * @param cases Hook inputs with the expected outcome of each.
- * @param run Runs the script on one input and returns its standard output.
+ * @param cases Hook cases with the expected outcome of each.
+ * @param run Runs the script on one case and returns its standard output.
  * @returns One message per case that did not pass or block as expected.
  */
 function findHookCaseProblems(
   script: string,
   cases: HookCase[],
-  run: (input: Record<string, unknown>) => string,
+  run: (hookCase: HookCase) => string,
 ): string[] {
   return cases
-    .map(({expected, input, name}) => ({
-      expected,
-      name,
-      outcome: findHookOutcome(run(input)),
+    .map(hookCase => ({
+      expected: hookCase.expected,
+      name: hookCase.name,
+      outcome: findHookOutcome(run(hookCase)),
     }))
     .filter(({expected, outcome}) => outcome !== expected)
     .map(
@@ -353,7 +456,7 @@ function findScriptProblems(script: string): string[] {
     ? findHookCaseProblems(
         script,
         JSON.parse(readFileSync(casesPath, "utf8")) as HookCase[],
-        input => runHookScript(script, input),
+        hookCase => runHookCase(script, hookCase),
       )
     : [`${casesPath}: is missing`];
 }
@@ -384,7 +487,7 @@ function renderAdapters(): Map<string, string> {
 
   const hooksConfig = JSON.parse(readFileSync(hookConfigPath, "utf8")) as Record<
     string,
-    HookConfig
+    HookConfig[]
   >;
 
   for (const adapter of adapters) {
@@ -402,15 +505,19 @@ function renderAdapters(): Map<string, string> {
       );
     }
 
-    const hook = hooksConfig[adapter.directory];
+    const hooks = hooksConfig[adapter.directory];
 
-    if (hook !== undefined && adapter.renderHooks !== undefined) {
-      expected.set(path.join(adapterRoot, "hooks", "hooks.json"), adapter.renderHooks(hook));
+    if (hooks !== undefined && adapter.renderHooks !== undefined) {
+      expected.set(path.join(adapterRoot, "hooks", "hooks.json"), adapter.renderHooks(hooks));
 
-      expected.set(
-        path.join(adapterRoot, "hooks", hook.script),
-        readFileSync(path.join(hooksDirectory, hook.script), "utf8"),
-      );
+      const scripts = new Set(hooks.map(hook => hook.script));
+
+      for (const script of scripts) {
+        expected.set(
+          path.join(adapterRoot, "hooks", script),
+          readFileSync(path.join(hooksDirectory, script), "utf8"),
+        );
+      }
     }
 
     for (const [name, agent] of Object.entries(agentsConfig)) {
@@ -455,20 +562,29 @@ const hookCases: HookCase[] = [
 
 /**
  * Stand in for a hook script that blocks the inputs that say so.
- * @param input The hook input.
+ * @param hookCase The hook case.
  * @returns A block decision when the input blocks, otherwise no output.
  */
-function runBlockingStub(input: Record<string, unknown>): string {
-  return input.blocks === true ? blockingOutput : "";
+function runBlockingStub(hookCase: HookCase): string {
+  return hookCase.input.blocks === true ? blockingOutput : "";
 }
 
 /**
  * Stand in for a hook script that blocks the inputs that do not say so.
- * @param input The hook input.
+ * @param hookCase The hook case.
  * @returns A block decision when the input does not block, otherwise no output.
  */
-function runInvertedStub(input: Record<string, unknown>): string {
-  return runBlockingStub(input) === "" ? blockingOutput : "";
+function runInvertedStub(hookCase: HookCase): string {
+  return runBlockingStub(hookCase) === "" ? blockingOutput : "";
+}
+
+/**
+ * Stand in for a hook script that blocks only when it gets the `followup` argument.
+ * @param hookCase The hook case.
+ * @returns A follow-up message when the case carries the `followup` argument, otherwise no output.
+ */
+function runArgumentStub(hookCase: HookCase): string {
+  return hookCase.argument === "followup" ? '{"followup_message":"m"}' : "";
 }
 
 const selfTestCases: SelfTestCase[] = [
@@ -589,19 +705,72 @@ const selfTestCases: SelfTestCase[] = [
     problems: findHookCaseProblems("h.sh", hookCases.slice(0, 1), () => "oops"),
   },
   {
+    name: "a hook case hands its argument to the runner",
+    expected: [],
+    problems: findHookCaseProblems(
+      "h.sh",
+      [
+        {
+          name: "a",
+          expected: "block",
+          argument: "followup",
+          input: {},
+        },
+        {
+          name: "b",
+          expected: "pass",
+          input: {},
+        },
+      ],
+      runArgumentStub,
+    ),
+  },
+  {
     name: "a hook renders its event and script through sh",
     expected: [`sh "\${CLAUDE_PLUGIN_ROOT}/hooks/h.sh"`],
     problems: [
       (
         JSON.parse(
-          renderClaudeHooks({
-            event: "Stop",
-            script: "h.sh",
-          }),
+          renderClaudeHooks([
+            {
+              event: "Stop",
+              script: "h.sh",
+            },
+          ]),
         ) as {
           hooks: {Stop: {hooks: {command: string}[]}[]};
         }
       ).hooks.Stop[0]?.hooks[0]?.command ?? "",
+    ],
+  },
+  {
+    name: "a hook renders its argument and loop limit for Cursor",
+    expected: [
+      JSON.stringify({
+        version: 1,
+        hooks: {
+          stop: [
+            {
+              command: `sh "\${CURSOR_PLUGIN_ROOT}/hooks/h.sh" followup`,
+              loop_limit: 1,
+            },
+          ],
+        },
+      }),
+    ],
+    problems: [
+      JSON.stringify(
+        JSON.parse(
+          renderCursorHooks([
+            {
+              event: "stop",
+              script: "h.sh",
+              argument: "followup",
+              loopLimit: 1,
+            },
+          ]),
+        ),
+      ),
     ],
   },
   {

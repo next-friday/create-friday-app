@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterAgentResponse": [
+      {
+        "command": "sh \"${CURSOR_PLUGIN_ROOT}/hooks/check-reply-shape.sh\" save"
+      }
+    ],
+    "stop": [
+      {
+        "command": "sh \"${CURSOR_PLUGIN_ROOT}/hooks/check-reply-shape.sh\" followup",
+        "loop_limit": 1
+      }
+    ]
+  }
+}

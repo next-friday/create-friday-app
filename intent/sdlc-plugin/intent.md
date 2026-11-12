@@ -1,6 +1,6 @@
 # Intent: Ship the SDLC playbook as the `friday` plugin
 
-Author: Joe Takara (Developer Productivity). Status: accepted.
+Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Problem
 

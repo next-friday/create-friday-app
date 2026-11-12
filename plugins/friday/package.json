@@ -1,0 +1,51 @@
+{
+  "name": "@next-friday/sdlc",
+  "version": "0.0.0",
+  "description": "The checks behind the Next Friday SDLC loop: plan, bands, and loop measurements.",
+  "keywords": [
+    "sdlc",
+    "plan",
+    "next-friday"
+  ],
+  "homepage": "https://github.com/next-friday/next-friday-create-app/tree/main/plugins/friday#readme",
+  "bugs": {
+    "url": "https://github.com/next-friday/next-friday-create-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/next-friday/next-friday-create-app.git",
+    "directory": "plugins/friday"
+  },
+  "license": "MIT",
+  "author": "Next Friday",
+  "sideEffects": true,
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "sdlc-bands-check": "./dist/check-bands.mjs",
+    "sdlc-loop-measure": "./dist/measure-loop.mjs",
+    "sdlc-plan-check": "./dist/check-plan.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "tsdown": "0.23.5"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

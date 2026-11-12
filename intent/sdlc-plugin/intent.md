@@ -11,13 +11,13 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Proposed outcome
 
-- One plugin named `sdlc` holds everything that implements the SDLC playbook. A person runs the loop with the plugin's `sdlc` skill.
+- One plugin named `sdlc` holds everything that implements the SDLC playbook. A person runs the loop with the plugin's `sdlc-mode` skill.
 - The plugin's content is tool-neutral. Its skills, playbooks, eval cases, and scripts name no model and no vendor's agent tool, so any agent tool that can load a skill can run them, with any model.
 - What one agent tool needs to load the plugin, such as its manifest, its command name, and its settings keys, is a thin adapter kept beside the content. The first adapters are for the tools the company uses today, Claude Code and Cursor; another tool is added by adding an adapter, with no change to the content.
-- The plugin holds: the `sdlc` skill and every playbook, `sdlc-help`, `setup-sdlc`, the verifier subagent, the eval cases, and the scripts behind `plan:check`, `bands:check`, `loop:measure`, and `evals:run`.
+- The plugin holds: the `sdlc-mode` skill and every playbook, `sdlc-help`, `setup-sdlc`, the verifier subagent, the eval cases, and the scripts behind `plan:check`, `bands:check`, `loop:measure`, and `evals:run`.
 - The plugin holds the default brand, security, compliance, and UX policies. A project that has its own policy keeps a file of the same name, and the playbooks use the project's file instead of the default.
 - A generated project keeps what is its own: `AGENTS.md`, the rules, the hooks, the agent settings, `intent/`, `bands.yaml`, `SETUP.md`, the runbooks, and any policy it overrides. It holds no copy of the plugin's files; its agent settings name where the plugin comes from and enable it.
-- `AGENTS.md`, in the root and in every stack, states only facts about that repository and points to the plugin's `sdlc` skill for how work runs; the conventions that repeat a playbook are removed.
+- `AGENTS.md`, in the root and in every stack, states only facts about that repository and points to the plugin's `sdlc-mode` skill for how work runs; the conventions that repeat a playbook are removed.
 - A fix to a playbook reaches every project through the plugin, with no release of the CLI and no change in the project.
 - The plugin's `setup-sdlc` skill does three things, and can be run again at any time:
   1. Asks for a budget in one question and sets the model for each role from the models the session offers, as `setup-pstack` does (`cursor/plugins`, `pstack/skills/setup-pstack/SKILL.md`). The skill itself names no model.
@@ -47,7 +47,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 - Rules, hooks, and agent settings stay under each project's code owners, and a person commits a change to them.
 - The human gates stay as they are.
 - What the Claude Code adapter has to work with, from its documentation:
-  - A plugin skill is run as `/sdlc:sdlc`: "plugin skills are namespaced as `/plugin-name:skill-name`" ([Claude Code: Skills](https://code.claude.com/docs/en/skills.md)).
+  - A plugin skill is run as `/sdlc:sdlc-mode`: "plugin skills are namespaced as `/plugin-name:skill-name`" ([Claude Code: Skills](https://code.claude.com/docs/en/skills.md)).
   - A project names the plugin's source and enables it with `extraKnownMarketplaces` and `enabledPlugins` in `.claude/settings.json` ([Claude Code: Plugins for an organization](https://code.claude.com/docs/en/plugins/org.md)).
   - Only the plugin directory is copied: "Files outside the plugin directory aren't copied" ([Claude Code: Plugin loading](https://code.claude.com/docs/en/plugins/loading.md)).
   - Each contributor installs the plugin once; otherwise Claude Code reports `Plugin "<name>" is enabled in project settings but isn't installed here` (same page).
@@ -61,7 +61,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 - Where `setup-sdlc` writes the model choices so that each tool reads them.
 - How many repositories in the company use the stack today; no file in this repository says.
 - Cursor adapter: the plugin format, and how a project enables a plugin for its team. The source so far is the `cursor/plugins` repository.
-- Claude Code adapter: whether `claude -p "/sdlc:sdlc …"` runs a plugin skill headless; the documentation says user-invoked skills work in `-p` and installed plugins load, but does not state the two together. The workflows and `evals:run` depend on it.
+- Claude Code adapter: whether `claude -p "/sdlc:sdlc-mode …"` runs a plugin skill headless; the documentation says user-invoked skills work in `-p` and installed plugins load, but does not state the two together. The workflows and `evals:run` depend on it.
 - Whether a contributor without the plugin installed gets a clear message, and from what.
 - Which version each project runs: in Claude Code the plugin's `version` field "pins the plugin to that version until you change it" ([Claude Code: Plugin manifest reference](https://code.claude.com/docs/en/plugins/manifest-reference.md)), and without it the version is the commit. The spec decides which.
 - What `sdlc-help` and the eval cases read when the project holds no copy of the playbooks.

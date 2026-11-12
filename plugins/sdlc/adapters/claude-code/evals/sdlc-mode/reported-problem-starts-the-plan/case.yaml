@@ -1,0 +1,43 @@
+schema_version: "1.1"
+name: reported-problem-starts-the-plan
+expected_outcome: |
+  The message reports a problem through /sdlc:sdlc-mode without asking a question. The agent follows the plan playbook: it lists the steps and asks its first round. It does not tell the person to send /sdlc:sdlc-mode again.
+graders:
+  - name: reply-numbers-first-question
+    type: regex
+    pattern: '^\s*(?:\*\*)?1[.)]'
+    flags: mu
+  - name: reply-does-not-resend-the-command
+    type: regex
+    pattern: '(?<!skills)/sdlc:sdlc-mode(?![\w/-])'
+    flags: mu
+    match: not_contains
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu
+  - name: reply-has-no-machine-path
+    type: regex
+    pattern: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'
+    flags: mu
+    match: not_contains

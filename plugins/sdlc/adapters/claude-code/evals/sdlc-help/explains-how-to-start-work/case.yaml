@@ -5,7 +5,7 @@ expected_outcome: |
 graders:
   - name: reply-names-the-command
     type: regex
-    pattern: "/sdlc:sdlc"
+    pattern: "/sdlc:sdlc-mode"
     flags: mu
   - name: no-file-created
     type: file_exists

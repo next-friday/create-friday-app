@@ -34,7 +34,7 @@ The loop writes and cleans text as `pstack` does in the `cursor/plugins` reposit
 - **A pull request description is a briefing a reviewer reads in a minute** (`opening-a-pr.md`). "It says why the change exists, what it leaves out, what it could break, and how you proved it works." **Proposal:** these points go inside the sections of `.github/pull_request_template.md`, which keeps its headings.
 - **A change to a skill is tested blind.** The session under test does not know it is tested, and the judge does not know which version wrote which text (`pstack/skills/poteto-mode/playbooks/eval.md`).
 - **One step past `pstack`: a script checks every text, not only a plan.** `pstack` checks the text of a plan with a script, which fails on a long dash, a curly quote, and a colon in mid-sentence (`pstack/skills/poteto-mode/scripts/check-plan.mjs`). A person runs ours with one command, `pnpm verify` runs it, and CI runs it. It reads the Markdown files and the commit messages that a branch adds or changes. It fails with the file, the line, the rule number, and the fix. **Proposal:** it fails only on rules with one right answer, such as a listed word, an em dash, a semicolon, or heading case. It reports a long sentence without failing, so no one shortens a sentence only to pass.
-- The skills sit where the `sdlc` skill sits and move with it. When the `sdlc` skill ships in a plugin, they ship in the same plugin.
+- The skills sit where the `sdlc-mode` skill sits and move with it. When the `sdlc-mode` skill ships in a plugin, they ship in the same plugin.
 - A generated project gets the skills and the check, and so does this repository.
 - **Proposal** for the spec to compare, with sources: a maintained prose linter, such as Vale or textlint, against a script of our own. `.agents/rules/platform-and-library-first.md` puts a maintained library before custom code.
 - Out of scope:
@@ -45,8 +45,8 @@ The loop writes and cleans text as `pstack` does in the `cursor/plugins` reposit
 ## Affected users and systems
 
 - Every reader of an intent, a spec, a plan, a changelog, or a pull request in this repository and in each generated project.
-- Every agent that writes one of those through the `sdlc` skill, and every person who reads its replies.
-- The playbooks `plan`, `design`, `build`, `fix`, `maintain`, `review`, and `open-pr`, the reply shape in the `sdlc` skill, the eval cases, the scripts of `pnpm verify`, and CI, in the root and in `templates/base/`.
+- Every agent that writes one of those through the `sdlc-mode` skill, and every person who reads its replies.
+- The playbooks `plan`, `design`, `build`, `fix`, `maintain`, `review`, and `open-pr`, the reply shape in the `sdlc-mode` skill, the eval cases, the scripts of `pnpm verify`, and CI, in the root and in `templates/base/`.
 
 ## Constraints
 

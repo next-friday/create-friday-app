@@ -104,22 +104,22 @@ A repository admin sets these once in the GitHub repository settings. Git does n
 
 ## The loop
 
-A change moves through the playbooks in `plugins/sdlc/source/skills/sdlc/playbooks/`: plan, design, build, review, deploy, and maintain, plus fix for a defect and question for a question. [`plugins/sdlc/source/skills/sdlc/SKILL.md`](plugins/sdlc/source/skills/sdlc/SKILL.md) matches a request to one playbook and runs it to the next human gate.
+A change moves through the playbooks in `plugins/sdlc/source/skills/sdlc-mode/playbooks/`: plan, design, build, review, deploy, and maintain, plus fix for a defect and question for a question. [`plugins/sdlc/source/skills/sdlc-mode/SKILL.md`](plugins/sdlc/source/skills/sdlc-mode/SKILL.md) matches a request to one playbook and runs it to the next human gate.
 
 This repository is the source of truth for intents, specs, plans, and lessons (the playbook asks for one named source of truth per artifact, page 22). This repository's own choice is that GitHub pull requests are the source of truth for reviews and approvals. No other tracker is used.
 
 ### Plays this repository has
 
-| Play (playbook page)                     | Where it lives                                                                                                    |
-| :--------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| Intent home (12–13)                      | [`intent/`](intent/README.md)                                                                                     |
-| Interviews in Plan and Build (12, 19–20) | `plugins/sdlc/source/skills/sdlc/playbooks/plan.md` and `build.md`                                                |
-| Requirements and design (15–17)          | `plugins/sdlc/source/skills/sdlc/playbooks/design.md` and the four policy skills in `plugins/sdlc/source/skills/` |
-| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, `.agents/verifier.md`, and `plugins/sdlc/source/agents/verifier.md`       |
-| PR review loop, step 4 (38)              | `REVIEW.md` (rendered from `.agents/review.md`) and `plugins/sdlc/source/skills/sdlc/playbooks/review.md`         |
-| CI/CD step 1, triage (45)                | The **Triage failed build** job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)                         |
-| Closing the loop (48–51)                 | [`bands.yaml`](bands.yaml)                                                                                        |
-| Claude Tag and the lessons file (52)     | [`lessons/`](lessons/README.md)                                                                                   |
+| Play (playbook page)                     | Where it lives                                                                                                         |
+| :--------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| Intent home (12–13)                      | [`intent/`](intent/README.md)                                                                                          |
+| Interviews in Plan and Build (12, 19–20) | `plugins/sdlc/source/skills/sdlc-mode/playbooks/plan.md` and `build.md`                                                |
+| Requirements and design (15–17)          | `plugins/sdlc/source/skills/sdlc-mode/playbooks/design.md` and the four policy skills in `plugins/sdlc/source/skills/` |
+| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, `.agents/verifier.md`, and `plugins/sdlc/source/agents/verifier.md`            |
+| PR review loop, step 4 (38)              | `REVIEW.md` (rendered from `.agents/review.md`) and `plugins/sdlc/source/skills/sdlc-mode/playbooks/review.md`         |
+| CI/CD step 1, triage (45)                | The **Triage failed build** job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)                              |
+| Closing the loop (48–51)                 | [`bands.yaml`](bands.yaml)                                                                                             |
+| Claude Tag and the lessons file (52)     | [`lessons/`](lessons/README.md)                                                                                        |
 
 ### How the loop is measured
 

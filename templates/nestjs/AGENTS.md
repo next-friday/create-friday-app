@@ -4,15 +4,15 @@ NestJS HTTP API in TypeScript on pnpm and Node.js `>=24.15.0 <25`.
 
 ## Commands
 
-| Task                        | Command                                             |
-| :-------------------------- | :-------------------------------------------------- |
-| Start with reload           | `pnpm start:dev`                                    |
-| One test                    | `pnpm vitest run src/port.test.ts -t "<test name>"` |
-| Unit tests                  | `pnpm test`, or `pnpm test:coverage`                |
-| End-to-end tests            | `pnpm test:e2e`                                     |
-| What `pre-push` runs        | `pnpm check`                                        |
-| Every check                 | `pnpm verify`                                       |
-| Render rules after a change | `pnpm rules:sync`                                   |
+| Task                        | Command                                             | Healthy output                                           |
+| :-------------------------- | :-------------------------------------------------- | :------------------------------------------------------- |
+| Start with reload           | `pnpm start:dev`                                    | `Nest application successfully started`                  |
+| One test                    | `pnpm vitest run src/port.test.ts -t "<test name>"` | `Tests  1 passed \| 9 skipped (10)`                      |
+| Unit tests                  | `pnpm test`, or `pnpm test:coverage`                | `Tests  12 passed (12)`                                  |
+| End-to-end tests            | `pnpm test:e2e`                                     | `Tests  2 passed (2)`                                    |
+| What `pre-push` runs        | `pnpm check`                                        | exits 0; the last line is `$ tsc -p tsconfig.build.json` |
+| Every check                 | `pnpm verify`                                       | exits 0; the last line is `$ tsc -p tsconfig.build.json` |
+| Render rules after a change | `pnpm rules:sync`                                   | `Synced 67 agent rule files; 0 updated.`                 |
 
 ## Verifying your work
 
@@ -37,6 +37,7 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 6. **Do not start work a person did not ask for.** When a message reports a problem without asking for work, answer in a few lines and end with the message that would start it: `/sdlc` followed by their own words.
 7. **Branch from the latest `origin/main`, and open the pull request ready for review.** Name the branch `<type>/<short-description>` and fill the body from `.github/pull_request_template.md`. `.github/workflows/ci.yml` runs full verification only on a pull request that is not a draft. Never merge a pull request: a person merges it with `--squash` after code owner approval, bottom-up for a stack of pull requests.
 8. **Write replies a person can check.** Reply in the language the person wrote in. Write paths from the project root, such as `README.md:12`, never from the machine's root. State as a fact only what you opened or ran in this turn, and say what you ran; mark anything else as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
+9. **Run parallel sessions in separate worktrees, on tasks that touch different files.** Start each with `claude --worktree <name>`: a worktree is its own checkout on its own branch. Tasks that share files run in one session, one after another. Start with two or three sessions, and add one only while you can review every stream properly.
 
 ## Things Claude gets wrong
 

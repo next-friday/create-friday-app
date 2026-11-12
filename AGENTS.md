@@ -41,7 +41,7 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 1. **Edit `src/`, `test/`, and `templates/`; never edit generated `dist/`.**
 2. **Preserve CLI arguments, prompts, and stack names** unless a major changeset declares the break. `.changeset/README.md` says when a change needs a changeset.
-3. **A stack replaces a `base` file only when that stack needs different content.** Today these replace `base`: `knip.json`, `pnpm-workspace.yaml`, `.github/dependabot.yml`, and `.github/workflows/deploy.yml` in `turborepo`. When you change one of those `base` files, make the same change in each replacement.
+3. **A stack replaces a `base` file only when that stack needs different content.** Today these replace `base`: `knip.json`, `pnpm-workspace.yaml`, `.github/dependabot.yml`, and `.github/workflows/deploy.yml` in `turborepo`, and `.agents/review.md` with its rendered `REVIEW.md` in `payload` and `turborepo`. When you change one of those `base` files, make the same change in each replacement.
 4. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 5. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.**
 6. **After changing a template, generate a project and run its `pnpm verify`.**
@@ -50,6 +50,7 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 9. **Do not start work a person did not ask for.** When a message reports a problem without asking for work, answer in a few lines and end with the message that would start it: `/sdlc` followed by their own words.
 10. **Branch from the latest `origin/main`, and open the pull request ready for review.** Name the branch `<type>/<short-description>` and fill the body from `.github/pull_request_template.md`. Never merge a pull request: a person merges it with `--squash` after code owner approval, bottom-up for a stack of pull requests. In a session on this repository, its skills and playbooks decide how branches, commits, and pull requests are made, over a skill from another checkout.
 11. **Write replies a person can check.** Reply in the language the person wrote in. Write paths from the project root, such as `README.md:12`, never from the machine's root. State as a fact only what you opened or ran in this turn, and say what you ran; mark anything else as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
+12. **Run parallel sessions in separate worktrees, on tasks that touch different files.** Start each with `claude --worktree <name>`: a worktree is its own checkout on its own branch. Tasks that share files run in one session, one after another. Start with two or three sessions, and add one only while you can review every stream properly.
 
 ## Things Claude gets wrong
 
@@ -58,7 +59,7 @@ When Claude makes a mistake twice, add the correction here.
 - **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back with your file-editing tool, because the shell gate blocks `cp` and `rsync` into `.agents`, `.claude/rules`, and `.cursor` paths.
 - **Commit messages**: commitlint accepts only `Co-Authored-By` trailers.
 - **Issues**: open an issue only to hand work to another person, never to give a pull request a number to close. A pull request closes an issue that already exists with `Closes #<issue>`.
-- **Testing a skill**: test a skill with Claude Code itself, in a generated project: `claude -p "/sdlc <request>" --model <small model> --strict-mcp-config`.
+- **Testing a skill**: test a skill with Claude Code itself, in a generated project: `claude -p "/sdlc <request>" --model <small model> --strict-mcp-config`. After you change `AGENTS.md`, a skill, or a hook, run `pnpm evals:run` (it uses your own Claude login) in the repository and in a generated project, and report its pass rate.
 - **Accepted is not built**: a spec with `Status: accepted.` is not built. Check each requirement against the tree before you call a change done.
 - **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
 - **CI-only jobs**: Template, Consumer Smoke, Compatibility, Dependency Audit, and Release Integrity run only in CI, as do the scorecard, secret-scan, zizmor, and dependency-review workflows. Do not report them as local results.

@@ -40,6 +40,7 @@
     "check:publint": "publint",
     "clean": "rm -rf dist coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "dev": "tsdown --watch",
+    "evals:run": "node scripts/run-agent-evals.ts",
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",

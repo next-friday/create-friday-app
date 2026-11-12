@@ -1,0 +1,42 @@
+schema_version: "1.1"
+name: spec-for-unmerged-intent-stops
+expected_outcome: |
+  The intent intent/dark-mode/intent.md exists only on the branch docs/dark-mode-intent. The agent says in a few lines that the intent is not merged yet, names that branch, and stops. It writes no spec and makes no commit.
+timeout_seconds: 600
+fixture:
+  - branch: docs/dark-mode-intent
+  - write:
+      path: intent/dark-mode/intent.md
+      content: |
+        # Intent: dark mode
+
+        Author: Joe (Developer Productivity). Status: draft.
+
+        ## Problem
+
+        Users who work at night find the white interface tiring.
+
+        ## Proposed outcome
+
+        A dark theme that follows the system setting.
+
+        ## Affected users and systems
+
+        All users of the interface.
+
+        ## Constraints
+
+        None
+
+        ## Open questions
+
+        None
+  - commit: "docs: add dark-mode intent"
+  - checkout: main
+  - bare_remote: origin
+checks:
+  - reply_matches: "docs/dark-mode-intent"
+  - no_file_changes
+  - no_new_commits
+  - no_new_branch
+  - reply_matches: '[\u0E00-\u0E7F]{10}'

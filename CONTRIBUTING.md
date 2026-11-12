@@ -51,6 +51,8 @@ Run the narrowest check that covers the change. Run `pnpm verify` before submitt
 
 For focused checks, use the relevant script in [`package.json`](package.json).
 
+Run `pnpm evals:run` after you change `AGENTS.md`, a skill under `.agents/skills/`, or a hook under `.agents/hooks/`, and add a case name to run one case. It runs the cases in `.agents/skill-evals/` with Claude Code on your own Claude login, so it spends your Claude usage, and it is not part of `pnpm verify`.
+
 Three jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) run only in CI: Template, which generates each stack and runs its checks; Consumer Smoke, which installs the packed CLI with npm and runs it; and Compatibility, which runs the tests on the Node.js versions and operating systems in its matrix. Run `pnpm audit` locally for the Dependency Audit job. These workflows have no local command: Dependency Review, Zizmor with Actionlint, Secret Scan (TruffleHog and Gitleaks), and pull request title validation run on pull requests; the Triage failed build job comments on a failing pull request from this repository; OpenSSF Scorecard runs on pushes to `main`, weekly, and when a branch protection rule changes. CodeQL on this repository stays on GitHub default setup so an advanced workflow does not conflict with it. Generated projects ship an advanced CodeQL workflow.
 
 ## Git hooks

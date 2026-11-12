@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: drafts-intent-and-waits-for-yes
+expected_outcome: |
+  The agent writes `intent/<change>/intent.md` from the template, shows the whole draft, and asks whether it matches. It does not commit, push, or open a pull request before the originator says yes.
+timeout_seconds: 600
+checks:
+  - file_matches:
+      path: intent/*/intent.md
+      regex: '(?=[\s\S]*^## Problem$)(?=[\s\S]*^## Proposed outcome$)(?=[\s\S]*^## Affected users and systems$)(?=[\s\S]*^## Constraints$)(?=[\s\S]*^## Open questions$)'
+  - no_new_commits
+  - no_new_branch
+  - reply_matches: '[\u0E00-\u0E7F]{10}'
+  - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

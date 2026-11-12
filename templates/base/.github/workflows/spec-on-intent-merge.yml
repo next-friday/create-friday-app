@@ -1,0 +1,108 @@
+name: Spec on intent merge
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - intent/*/intent.md
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  find:
+    name: Find accepted intents
+    if: vars.CLAUDE_CI_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      intents: ${{ steps.find.outputs.intents }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: List accepted intents without a spec
+        id: find
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          if [[ "$BEFORE" =~ ^0+$ ]]; then
+            changed="$(git ls-tree -r --name-only "$AFTER")"
+          else
+            changed="$(git diff --name-only --diff-filter=AM "$BEFORE" "$AFTER")"
+          fi
+          : > intents.txt
+          while IFS= read -r path; do
+            [[ "$path" =~ ^intent/[A-Za-z0-9._-]+/intent\.md$ ]] || continue
+            grep --fixed-strings --quiet 'Status: accepted.' "$path" || continue
+            [[ ! -e "$(dirname "$path")/spec.md" ]] || continue
+            echo "$path" >> intents.txt
+          done <<< "$changed"
+          echo "intents=$(jq --raw-input --null-input --compact-output '[inputs]' < intents.txt)" >> "$GITHUB_OUTPUT"
+
+  spec:
+    name: Write the spec for ${{ matrix.intent }}
+    needs: find
+    if: vars.CLAUDE_CI_ENABLED == 'true' && needs.find.outputs.intents != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # Needed to push the spec branch; the agent has no route to push main.
+      id-token: write # Needed to authenticate the Claude GitHub App with the workflow's OIDC token.
+      pull-requests: write # Needed to open the pull request.
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        intent: ${{ fromJSON(needs.find.outputs.intents) }}
+    env:
+      INTENT: ${{ matrix.intent }}
+    steps:
+      - name: Require a Claude credential
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [[ -n "$ANTHROPIC_API_KEY" || -n "$CLAUDE_CODE_OAUTH_TOKEN" ]] || { echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret"; exit 1; }
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create the spec branch
+        id: branch
+        run: |
+          change="${INTENT#intent/}"
+          change="${change%/intent.md}"
+          git switch --create "docs/spec-$change"
+          echo "name=docs/spec-$change" >> "$GITHUB_OUTPUT"
+      - name: Write the spec
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            /sdlc ${{ matrix.intent }}
+            The branch ${{ steps.branch.outputs.name }} exists and is checked out. Commit spec.md on it, push it with git push --set-upstream origin ${{ steps.branch.outputs.name }}, open the pull request, and stop at the product owner's gate.
+          claude_args: |
+            --model claude-haiku-5-5
+            --max-turns 30
+            --permission-mode acceptEdits
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git add *),Bash(git commit *),Bash(git status *),Bash(git log *),Bash(git push --set-upstream origin ${{ steps.branch.outputs.name }}),Bash(gh pr create *)"
+      - name: Require the pull request
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          count="$(gh pr list --repo "$REPOSITORY" --head "$BRANCH" --state open --json number --jq length)"
+          [[ "$count" -gt 0 ]] || { echo "::error::No pull request was opened from $BRANCH"; exit 1; }

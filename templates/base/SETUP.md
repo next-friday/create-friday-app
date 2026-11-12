@@ -92,14 +92,30 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 - **Higher risk (engineering lead):** decide which changes count as higher risk. A tech lead or architect approves their specs and plans.
 - **Policies (each policy owner, with an engineer):** each `.agents/skills/<area>-policy/SKILL.md` ships a default (security: OWASP ASVS 5.0.0 Level 1; UX: WCAG 2.2 Level AA; compliance: the OECD privacy principles; brand: one declared source for every brand value). Review it, replace or add the organization's own rules, then run `pnpm rules:sync`. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time. The policy owner approves every later change as its code owner.
 - **Production gate (engineering leadership, with change management and compliance):** name the release managers and add them as required reviewers on the `prod` environment, as the README's deploy section describes. `.agents/hooks/agent-production-gate.sh` blocks an agent's shell commands that dispatch a `prod` deploy, run a Railway command with `prod` as its environment, or push a release tag. It does not read MCP tools. A release manager whose own agent session must do one of these starts the agent with `RELEASE_APPROVAL` set to the approval record, for example `RELEASE_APPROVAL=CHG-123 claude`. Any value lifts the gate except an empty value, `0`, `false`, and `no`, in any letter case.
-- **Review (tech lead):** check that the generated files named in `.agents/review.md` match this project's generated paths, and change the list where they differ, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
+- **Review (tech lead):** `.agents/review.md` names this stack's generated files to skip; add a path when the project gains a generated file, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
 - **People without Git experience:** connect GitHub to Claude (claude.ai or Cowork), so Claude commits `intent.md` for them.
 
 ## 7. Later, as the guardrails mature
 
-- Send the intent's path with `/sdlc` by hand first. Then build a job that runs it when an `intent.md` merges. The job runs this in the repository: `claude -p "/sdlc intent/<change>/intent.md" --permission-mode acceptEdits --allowedTools "Bash(git switch *)" "Bash(git add *)" "Bash(git commit *)" "Bash(git status *)" "Bash(git log *)" "Read" "Write" "Edit" "Glob" "Grep"`. Without `--permission-mode acceptEdits` the session stays in plan mode and writes nothing. The job then pushes the branch and opens the pull request with its own token; the product owner's first step is the review.
+- Send the intent's path with `/sdlc` by hand first. Then turn on `Spec on intent merge` (step 8).
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
-- Set the metric in `bands.yaml`, then run `pnpm bands:check <file>` from a scheduled job with the metric's values, and send a `2sigma` or `3sigma` result to `/sdlc` as a finding.
+- Set the metric in `bands.yaml`, then turn on `Control band` (step 8).
+
+## 8. Claude in CI
+
+**Who:** a repository admin.
+
+Each workflow below stays off until the repository variable `CLAUDE_CI_ENABLED` is `true`; until then nothing runs, on a schedule or otherwise, and nothing calls a model. When it is on, each needs one secret: `CLAUDE_CODE_OAUTH_TOKEN`, a Claude subscription token from `claude setup-token`, or `ANTHROPIC_API_KEY`, an API key. Either works; with neither set the job fails and says so. The jobs run the small model with a turn cap. Jobs that write install the Claude GitHub App from step 4 on the repository, and every change they make arrives as a pull request.
+
+- **`Agent evals`:** runs `pnpm evals:run` when a pull request changes `AGENTS.md`, `CLAUDE.md`, `.agents`, `.claude`, or `.cursor`, and every night. The job fails below the pass threshold, and it needs `claude` on the `PATH` of the job.
+- **`Spec on intent merge`:** when an `intent.md` with `Status: accepted.` reaches `main`, runs `/sdlc intent/<change>/intent.md`, so that `spec.md` arrives as a pull request for the product owner.
+- **`Claude fix loop`:** when a person with write access comments `@claude` on a line of a pull request from this repository, Claude addresses the comment and pushes to that branch. It cannot approve or merge.
+- **`triage` job of `Verify`:** when a pull request from this repository fails a check, reads the failed logs with the `Read` tool only and posts a three-line summary.
+- **`Control band`:** every day, runs the command in the repository variable `CONTROL_BAND_METRIC_COMMAND`, which writes `metric-values.json` as `{"baseline": [...], "recent": [...]}`, then `pnpm bands:check metric-values.json`. A tier whose action is `diagnose` or `propose` runs `/sdlc` with the finding, and the `pull_request` route opens an intent pull request. It never acts on production.
+
+On a machine, `pnpm evals:run` runs the evals with the developer's own Claude login, and `pnpm loop:measure` reports the loop's measures. Neither is part of `pnpm verify`.
+
+**Check:** with `CLAUDE_CI_ENABLED` unset, **Actions** shows these jobs as skipped.
 
 ## References
 

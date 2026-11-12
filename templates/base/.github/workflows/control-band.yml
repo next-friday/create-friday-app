@@ -1,0 +1,115 @@
+name: Control band
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    name: Detect the tier
+    if: vars.CLAUDE_CI_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read # Needed by a metric command that reads workflow runs.
+      contents: read
+    outputs:
+      action: ${{ steps.tier.outputs.action }}
+      report: ${{ steps.tier.outputs.report }}
+      routes: ${{ steps.tier.outputs.routes }}
+      tools: ${{ steps.tier.outputs.tools }}
+      values: ${{ steps.tier.outputs.values }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js and pnpm
+        uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+        with:
+          cache: true
+          require-lockfile: true
+      - name: Measure the metric
+        env:
+          GH_TOKEN: ${{ github.token }}
+          METRIC_COMMAND: ${{ vars.CONTROL_BAND_METRIC_COMMAND }}
+        run: |
+          [[ -n "$METRIC_COMMAND" ]] || { echo "::error::Set the CONTROL_BAND_METRIC_COMMAND repository variable to a command that writes metric-values.json"; exit 1; }
+          bash -euo pipefail -c "$METRIC_COMMAND"
+          [[ -f metric-values.json ]] || { echo "::error::CONTROL_BAND_METRIC_COMMAND did not write metric-values.json"; exit 1; }
+      - name: Detect the tier
+        id: tier
+        run: |
+          report="$(pnpm --silent bands:check metric-values.json)"
+          {
+            echo "report=$report"
+            echo "action=$(jq --raw-output '.action // "none"' <<< "$report")"
+            echo "routes=$(jq --compact-output '.routes // []' <<< "$report")"
+            echo "tools=$(jq --raw-output '.tools // ""' <<< "$report")"
+            echo "values=$(jq --compact-output . metric-values.json)"
+          } >> "$GITHUB_OUTPUT"
+
+  respond:
+    name: Respond to the finding
+    needs: detect
+    if: vars.CLAUDE_CI_ENABLED == 'true' && (needs.detect.outputs.action == 'diagnose' || needs.detect.outputs.action == 'propose')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read # Needed by the tier's tools that read workflow runs.
+      contents: write # Needed to push the intent branch; the agent has no route to push main.
+      id-token: write # Needed to authenticate the Claude GitHub App with the workflow's OIDC token.
+      pull-requests: write # Needed to open the intent pull request.
+    steps:
+      - name: Require a Claude credential
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [[ -n "$ANTHROPIC_API_KEY" || -n "$CLAUDE_CODE_OAUTH_TOKEN" ]] || { echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret"; exit 1; }
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create the intent branch
+        if: contains(fromJSON(needs.detect.outputs.routes), 'pull_request')
+        run: git switch --create "docs/band-finding-$GITHUB_RUN_ID"
+      - name: Diagnose
+        if: ${{ !contains(fromJSON(needs.detect.outputs.routes), 'pull_request') }}
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            /sdlc A scheduled job found a control band deviation in production. No one can answer questions.
+            Detection report: ${{ needs.detect.outputs.report }}
+            Metric values, oldest first: ${{ needs.detect.outputs.values }}
+            The values come from the command in the CONTROL_BAND_METRIC_COMMAND repository variable. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          claude_args: |
+            --model claude-haiku-5-5
+            --max-turns 15
+            --allowedTools "${{ needs.detect.outputs.tools || 'Read,Grep,Glob' }}"
+      - name: Write the intent
+        if: contains(fromJSON(needs.detect.outputs.routes), 'pull_request')
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            /sdlc A scheduled job found a control band deviation in production. No one can answer questions.
+            Detection report: ${{ needs.detect.outputs.report }}
+            Metric values, oldest first: ${{ needs.detect.outputs.values }}
+            The values come from the command in the CONTROL_BAND_METRIC_COMMAND repository variable. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            The branch docs/band-finding-${{ github.run_id }} exists and is checked out. Commit intent.md on it, push it with git push --set-upstream origin docs/band-finding-${{ github.run_id }}, open the pull request, and stop at the service owner's gate. A route other than pull_request is a runbook: name its command in the intent and do not run it.
+          claude_args: |
+            --model claude-haiku-5-5
+            --max-turns 25
+            --permission-mode acceptEdits
+            --allowedTools "${{ needs.detect.outputs.tools || 'Read,Grep,Glob' }},Write,Edit,Bash(git add *),Bash(git commit *),Bash(git status *),Bash(git log *),Bash(git push --set-upstream origin docs/band-finding-${{ github.run_id }}),Bash(gh pr create *)"

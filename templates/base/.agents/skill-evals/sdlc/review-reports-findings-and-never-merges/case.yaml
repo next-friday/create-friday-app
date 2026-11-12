@@ -1,0 +1,79 @@
+schema_version: "1.1"
+name: review-reports-findings-and-never-merges
+expected_outcome: |
+  The branch feat/app-version holds a change with one bug. The agent follows the review playbook: it reviews the diff with a fresh context, reports the finding with its pass, severity, and path:line, and stops at the gate for the code owner. It neither approves nor merges.
+timeout_seconds: 1200
+fixture:
+  - write:
+      path: intent/app-version/intent.md
+      content: |
+        # Intent: app version endpoint
+
+        Author: Joe (Developer Productivity). Status: accepted.
+
+        ## Problem
+
+        Support cannot tell which version of the service a customer reaches. Each ticket about a regression starts with a question about the version, about ten times a week (count from the support queue).
+
+        ## Proposed outcome
+
+        A caller sees the running version at `GET /version`. Out of scope: build metadata.
+
+        ## Affected users and systems
+
+        Support engineers and the service's HTTP API.
+
+        ## Constraints
+
+        No authentication change.
+
+        ## Open questions
+
+        None
+  - write:
+      path: intent/app-version/spec.md
+      content: |
+        # Spec: app version endpoint
+
+        From `intent/app-version/intent.md`. Status: accepted.
+
+        Request: "add a version endpoint". Skills at `0000000`.
+
+        ## Requirements
+
+        1. `GET /version` answers 200 with the JSON body `{"version": "<version in package.json>"}` and no other field.
+
+        ## Design
+
+        `src/version/version.controller.ts` (new) reads the version from `package.json` and returns it.
+
+        ## Policies
+
+        - Brand: Does not apply, no user-visible text.
+        - Security: Does not apply, the endpoint exposes no secret.
+        - Compliance: Does not apply, no personal data.
+        - UX: Does not apply, no interface.
+
+        ## Areas of concern
+
+        None
+
+        ## Open questions
+
+        None
+  - commit: "docs: add app-version intent and spec"
+  - branch: feat/app-version
+  - write:
+      path: src/version/version.controller.ts
+      content: |
+        export function getVersion(): {build: string; version: string} {
+          return {build: "local", version: "1.0.0"};
+        }
+  - commit: "feat: add version controller"
+  - checkout: main
+  - bare_remote: origin
+checks:
+  - reply_matches: '\b(?:Important|Nit)\b'
+  - reply_matches: 'src/version/version\.controller\.ts:\d+'
+  - no_file_changes
+  - no_new_commits

@@ -1,4 +1,68 @@
 schema_version: "1.1"
 name: build-plans-and-waits-for-the-engineer
 expected_outcome: |
-  The spec intent/app-version/spec.md is merged and has no plan. The agent follows the build playbook: it reads the intent, the spec, and the code, shows the plan with the template's four headings, changes no code and makes no commit, and waits at the gate for the engineer to accept the plan.
+  The spec intent/app-version/spec.md is merged and has no plan, and the request already holds the engineer's answers about the files, the order of work, the tests, and the options ruled out. The agent follows the build playbook: it reads the intent, the spec, and the code, asks no question, shows the plan with the template's four headings, changes no code and makes no commit, and waits at the gate for the engineer to accept the plan.
+timeout_seconds: 900
+fixture:
+  - write:
+      path: intent/app-version/intent.md
+      content: |
+        # Intent: app version endpoint
+
+        Author: Joe (Developer Productivity). Status: accepted.
+
+        ## Problem
+
+        Support cannot tell which version of the service a customer reaches. Each ticket about a regression starts with a question about the version, about ten times a week (count from the support queue).
+
+        ## Proposed outcome
+
+        A caller sees the running version at `GET /version`. Out of scope: build metadata.
+
+        ## Affected users and systems
+
+        Support engineers and the service's HTTP API.
+
+        ## Constraints
+
+        No authentication change.
+
+        ## Open questions
+
+        None
+  - write:
+      path: intent/app-version/spec.md
+      content: |
+        # Spec: app version endpoint
+
+        From `intent/app-version/intent.md`. Status: accepted.
+
+        Request: "add a version endpoint". Skills at `0000000`.
+
+        ## Requirements
+
+        1. `GET /version` answers 200 with the JSON body `{"version": "<version in package.json>"}` and no other field.
+
+        ## Design
+
+        `src/version/version.controller.ts` (new) reads the version from `package.json` and returns it.
+
+        ## Policies
+
+        - Brand: Does not apply, no user-visible text.
+        - Security: Does not apply, the endpoint exposes no secret.
+        - Compliance: Does not apply, no personal data.
+        - UX: Does not apply, no interface.
+
+        ## Areas of concern
+
+        None
+
+        ## Open questions
+
+        None
+  - commit: "docs: add app-version intent and spec"
+checks:
+  - no_new_commits
+  - reply_matches: '(?=[\s\S]*Files that change)(?=[\s\S]*Order of work)(?=[\s\S]*Risks)(?=[\s\S]*Proof)'
+  - reply_matches: '[\u0E00-\u0E7F]{10}'

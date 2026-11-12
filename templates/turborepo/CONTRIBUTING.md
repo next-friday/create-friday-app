@@ -40,6 +40,7 @@ Run the narrowest check that covers the change while you work. Git hooks run the
 - **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. CodeQL, dependency-review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Dependabot and OSV-Scanner report vulnerable dependencies.
 - **End-to-end tests:** run `pnpm test:e2e` when you change pages or the admin panel. It builds both apps first, then starts both development servers unless they are already running. The build and the backoffice need `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL` from `.env`. Run `pnpm --filter ./apps/app exec playwright install chromium` once before the first run. CI runs it against the production build and a PostgreSQL service on every pull request that is ready for review and changes code.
 - **Coverage:** CI requires 95% branch coverage on changed lines in `apps/app/app/` and `apps/backoffice/src/`, except layouts, the Payload config, and generated files.
+- **Agent evals:** run `pnpm evals:run` after you change `AGENTS.md`, a skill under `.agents/skills/`, or a hook under `.agents/hooks/`, and add a case name to run one case. It runs the cases in `.agents/skill-evals/` with Claude Code on your own Claude login, so it spends your Claude usage, and it is not part of `pnpm verify`.
 
 Run `pnpm verify` for repository changes.
 

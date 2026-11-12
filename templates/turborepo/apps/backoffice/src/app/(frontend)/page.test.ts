@@ -8,7 +8,7 @@ describe("Page", () => {
   it("renders the template heading and the admin link", () => {
     const html = renderToStaticMarkup(createElement(Page));
 
-    expect(html).toContain("Next Friday Payload template");
+    expect(html).toContain("Payload application");
     expect(html).toContain('href="/admin"');
   });
 });

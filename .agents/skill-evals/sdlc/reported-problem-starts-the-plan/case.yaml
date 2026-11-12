@@ -2,3 +2,11 @@ schema_version: "1.1"
 name: reported-problem-starts-the-plan
 expected_outcome: |
   The message reports a problem through /sdlc without asking a question. The agent follows the plan playbook: it lists the steps and asks its first round. It does not tell the person to send /sdlc again.
+timeout_seconds: 600
+checks:
+  - reply_matches: '^\s*(?:\*\*)?1[.)]'
+  - reply_lacks: '(?<!skills)/sdlc(?![\w/-])'
+  - no_file_changes
+  - no_new_commits
+  - reply_matches: '[\u0E00-\u0E7F]{10}'
+  - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

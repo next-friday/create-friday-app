@@ -51,7 +51,9 @@ Run the narrowest check that covers the change. Run `pnpm verify` before submitt
 
 For focused checks, use the relevant script in [`package.json`](package.json).
 
-Three jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) run only in CI: Template, which generates each stack and runs its checks; Consumer Smoke, which installs the packed CLI with npm and runs it; and Compatibility, which runs the tests on the Node.js versions and operating systems in its matrix. Run `pnpm audit` locally for the Dependency Audit job. Pull requests also run Dependency Review and OpenSSF Scorecard. CodeQL on this repository stays on GitHub default setup so an advanced workflow does not conflict with it. Generated projects ship an advanced CodeQL workflow.
+Run `pnpm evals:run` after you change `AGENTS.md`, a skill under `.agents/skills/`, or a hook under `.agents/hooks/`, and add a case name to run one case. It runs the cases in `.agents/skill-evals/` with Claude Code on your own Claude login, so it spends your Claude usage, and it is not part of `pnpm verify`.
+
+Three jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) run only in CI: Template, which generates each stack and runs its checks; Consumer Smoke, which installs the packed CLI with npm and runs it; and Compatibility, which runs the tests on the Node.js versions and operating systems in its matrix. Run `pnpm audit` locally for the Dependency Audit job. These workflows have no local command: Dependency Review, Zizmor with Actionlint, Secret Scan (TruffleHog and Gitleaks), and pull request title validation run on pull requests; the Triage failed build job comments on a failing pull request from this repository; OpenSSF Scorecard runs on pushes to `main`, weekly, and when a branch protection rule changes. CodeQL on this repository stays on GitHub default setup so an advanced workflow does not conflict with it. Generated projects ship an advanced CodeQL workflow.
 
 ## Git hooks
 
@@ -69,7 +71,7 @@ Use [`.changeset/README.md`](.changeset/README.md) to decide whether the change 
 
 1. A pull request that adds a changeset merges into `main`.
 2. [`.github/workflows/release.yml`](.github/workflows/release.yml) opens or updates the `chore(release): version package` pull request, which bumps the version and writes `CHANGELOG.md`.
-3. Merging that pull request runs `pnpm verify`, stages the package on npm with provenance from the `Release` environment, and then creates the `v<version>` tag and GitHub release, before the version is on npm. Any later run on `main` skips a version whose tag exists: npm refuses to stage a version twice, and CI cannot list staged versions because npm lets a trusted-publishing token run only `npm stage publish` and `npm publish`.
+3. Merging that pull request runs `pnpm verify`, packs the package, stages it on npm with `npm stage publish` from the `Release` environment, and then creates the `v<version>` tag and GitHub release, before the version is on npm. Any later run on `main` skips a version whose tag exists, because CI cannot see what npm has staged.
 4. A package maintainer approves the staged version, with 2FA, under **Staged Packages** on the package's npmjs.com page. The new version reaches the registry only then. This is the production gate: CI can stage a release but cannot publish it.
 
 Two cases need a maintainer, because CI cannot see what npm has staged:
@@ -77,7 +79,7 @@ Two cases need a maintainer, because CI cannot see what npm has staged:
 - **Staged, but the run failed before it created the tag.** Every later run fails at `npm stage publish`. Create the tag and release from the commit the run built: `gh release create v<version> --target <commit> --title v<version> --notes-file <file>`, where the file holds that version's `CHANGELOG.md` section without its heading.
 - **A maintainer rejected the staged version.** Delete its release and tag with `gh release delete v<version> --cleanup-tag --yes`, then ship the fix as a new version through a changeset.
 
-The package's trusted publisher on npmjs.com is `next-friday/next-friday-create-app`, workflow `release.yml`, environment `Release`, with only `npm stage publish` allowed under **Allowed actions**. Allowing `npm publish` there would let CI publish directly and remove the gate. npm treats every field as case-sensitive and checks them only when a release publishes.
+The package's trusted publisher on npmjs.com is `next-friday/next-friday-create-app`, workflow `release.yml`, and environment `Release`. The workflow stages with `npm stage publish` and never runs `npm publish`; npm's own checks of these fields and of the allowed actions are not verified here.
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.
 
@@ -88,6 +90,10 @@ A repository admin sets these once in the GitHub repository settings. Git does n
 - **General → Pull Requests:** select **Automatically delete head branches**, so a branch is deleted when its pull request merges.
 - **General → Pull Requests → Allow squash merging:** set the default commit message to the pull request title alone ([configure commit squashing](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/configuring-commit-squashing-for-pull-requests)). Each commit on `main` is then the pull request title and number, with only co-author trailers in the body; the pull request description holds the why.
 - **Actions → General → Workflow permissions:** select **Read repository contents and packages permissions**, because every workflow declares the permissions it needs. Also select **Allow GitHub Actions to create and approve pull requests**, so [`.github/workflows/release.yml`](.github/workflows/release.yml) can open the `chore(release): version package` pull request.
+- **Actions variables:** set `ANTHROPIC_FEDERATION_RULE_ID` and `ANTHROPIC_ORGANIZATION_ID`, which the Triage failed build job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) passes to `anthropics/claude-code-action`. Without them the job runs with empty inputs.
+- **Branch protection for `main`:** require the status check `All Checks`, the job that fails when any verification job fails or is cancelled.
+- **Environments:** create `Release`, which the `Stage on npm` job in [`.github/workflows/release.yml`](.github/workflows/release.yml) runs in.
+- **Codecov:** the `Test & Coverage` job uploads `coverage/lcov.info` with `use_oidc` on pushes and on pull requests from this repository, and the upload does not fail the job.
 
 ## Pull requests
 
@@ -98,7 +104,7 @@ A repository admin sets these once in the GitHub repository settings. Git does n
 
 ## The loop
 
-A change moves through the stages of the AI-native SDLC Playbook: Plan, Design, Build, Test, Deploy, and Maintain. [`.agents/skills/sdlc/SKILL.md`](.agents/skills/sdlc/SKILL.md) starts each stage, and each stage's playbook in `.agents/skills/sdlc/playbooks/` names the gate that follows it.
+A change moves through the playbooks in `.agents/skills/sdlc/playbooks/`: plan, design, build, review, deploy, and maintain, plus fix for a defect and question for a question. [`.agents/skills/sdlc/SKILL.md`](.agents/skills/sdlc/SKILL.md) matches a request to one playbook and runs it to the next human gate.
 
 This repository is the source of truth for intents, specs, plans, and lessons (the playbook asks for one named source of truth per artifact, page 22). This repository's own choice is that GitHub pull requests are the source of truth for reviews and approvals. No other tracker is used.
 

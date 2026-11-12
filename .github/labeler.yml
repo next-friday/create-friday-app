@@ -1,8 +1,3 @@
-changes:
-  - changed-files:
-      - any-glob-to-any-file:
-          - "**"
-
 documentation:
   - changed-files:
       - any-glob-to-any-file:
@@ -15,6 +10,7 @@ ci:
           - ".github/actions/**"
           - ".github/file-filters.yml"
           - ".github/dependabot.yml"
+          - ".github/zizmor.yml"
 
 release:
   - changed-files:
@@ -41,3 +37,15 @@ cli:
           - "tsdown.config.ts"
           - "tsconfig.json"
           - "vitest.config.ts"
+
+templates:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "templates/**"
+
+tooling:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".agents/**"
+          - ".husky/**"
+          - "scripts/**"

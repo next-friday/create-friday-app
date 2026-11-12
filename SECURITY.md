@@ -2,9 +2,7 @@
 
 ## Supported versions
 
-Security fixes apply to the latest published version and the `main` branch.
-
-After the first published release, only the latest published release receives security updates. Earlier releases and prerelease versions are not supported.
+Security fixes apply to the latest published version and the `main` branch. Earlier releases and prerelease versions are not supported.
 
 ## Report a vulnerability
 

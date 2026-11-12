@@ -96,7 +96,15 @@ updates:
           - patch
 
   - package-ecosystem: github-actions
-    directory: /
+    directories:
+      - /
+      - /.github/actions/*
+      - /templates/base
+      - /templates/nodejs
+      - /templates/nestjs
+      - /templates/nextjs
+      - /templates/payload
+      - /templates/turborepo
     schedule:
       interval: weekly
       day: monday

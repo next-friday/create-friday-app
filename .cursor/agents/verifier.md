@@ -4,4 +4,4 @@ description: Runs the app and checks the change works before the session reports
 readonly: true
 ---
 
-Start the app with `pnpm build && node dist/main.mjs --help`. Exercise the changed behavior and the two nearest neighboring flows. Report what you ran, what you saw, and any behavior that does not match plan.md. Do not fix anything; report only.
+Run `pnpm build`, then generate a project for each stack the change touches into a new temporary directory with `node dist/main.mjs next-friday-template-<stack> --stack <stack> < /dev/null`, and run the checks that matter there, such as `pnpm verify`; for a change to the prompts or arguments, run `node dist/main.mjs` with those arguments. Exercise the changed behavior and the two nearest neighboring flows. Report what you ran, what you saw, and any behavior that does not match plan.md. Do not fix anything; report only.

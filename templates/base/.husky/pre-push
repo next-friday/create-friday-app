@@ -2,16 +2,9 @@
 set -e
 
 # The first push of a new repository creates main on the remote, so it is the only push allowed there.
-while read -r local_ref _ remote_ref remote_oid; do
+while read -r _ _ remote_ref remote_oid; do
   if [ "$remote_ref" = refs/heads/main ] && [ -n "$(printf '%s' "$remote_oid" | tr -d 0)" ]; then
     echo "pre-push: do not push to main. Push your branch and open a pull request." >&2
-    exit 1
-  fi
-  branch="${remote_ref#refs/heads/}"
-  if [ "$branch" != "$remote_ref" ] && [ -z "$(printf '%s' "$remote_oid" | tr -d 0)" ] \
-    && { git rev-parse --verify --quiet "refs/remotes/$1/$branch" > /dev/null \
-      || [ "$(git config "branch.${local_ref#refs/heads/}.merge" || true)" = "$remote_ref" ]; }; then
-    echo "pre-push: $branch no longer exists on $1. Push the work to a new branch from the latest $1/main and open a pull request. To reuse the name, run git fetch --prune and git branch --unset-upstream first." >&2
     exit 1
   fi
 done

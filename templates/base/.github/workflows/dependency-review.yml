@@ -12,6 +12,7 @@ concurrency:
 jobs:
   dependency-review:
     name: Dependency Review
+    if: github.event.repository.visibility == 'public' || vars.CODE_SCANNING == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

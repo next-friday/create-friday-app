@@ -20,8 +20,8 @@
     }
   ],
   "options": {
+    "parser": "swc",
     "skipAnalysisNotInRules": true,
-    "tsPreCompilationDeps": true,
     "enhancedResolveOptions": {
       "conditionNames": ["import", "require", "node", "default", "types"],
       "exportsFields": ["exports"]

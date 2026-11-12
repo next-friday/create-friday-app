@@ -8,7 +8,7 @@ Use this guide to prepare changes to this repository.
 - Change the Node.js version in `.nvmrc` and the `Dockerfile` together. Dependabot updates only the `Dockerfile`.
 - Install pnpm once with `npm install --global pnpm`. It switches to the version declared by `package.json#packageManager` automatically.
 - Use Claude Code v2.1.295 or later. It reads `CLAUDE.md`, which imports `AGENTS.md`, and supports the `onFailure` field the agent hooks use.
-- Install gitleaks 8.19 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
+- Install gitleaks 8.21 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
 
 From the repository root:
 
@@ -21,7 +21,7 @@ pnpm install
 
 - Fix lint, type, and test failures at their root cause.
 - Put unit tests next to the code as `*.test.ts` and Playwright end-to-end tests in `test/` as `*.e2e.test.ts`.
-- Change the database schema only through collections, then run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>` and commit the generated files. Production applies pending migrations when the server starts.
+- Change the database schema only through collections, then run `pnpm generate:types`, `pnpm generate:importmap`, and `pnpm migrate:create <name>` and commit the generated files. Production applies pending migrations when Payload first initialises, which `/health` triggers.
 - Treat `coverage/` as generated output.
 - Do not commit `.env` files or credentials.
 
@@ -36,9 +36,10 @@ Run the narrowest check that covers the change while you work. Git hooks run the
 | `pre-merge-commit` | blocks merge commits on `main`                                                                                                                                  |
 | `pre-push`         | blocks pushes to `main` except the push that creates it, then `pnpm check`: the static checks, the unit tests related to your changes, and the production build |
 
-- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. Dependabot and OSV-Scanner report vulnerable dependencies.
+- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. CodeQL, dependency-review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Dependabot and OSV-Scanner report vulnerable dependencies.
 - **End-to-end tests:** run `pnpm test:e2e` when you change pages or the admin panel. It starts the development server unless one is already running, and needs `DATABASE_URL` and `PAYLOAD_SECRET` from `.env`. Run `pnpm exec playwright install chromium` once before the first run. CI runs it against the production build and a PostgreSQL service on every pull request that is ready for review and changes code.
 - **Coverage:** CI requires 95% branch coverage on changed lines in `src/`, except layouts, the Payload config, and generated files.
+- **Agent evals:** run `pnpm evals:run` after you change `AGENTS.md`, a skill under `.agents/skills/`, or a hook under `.agents/hooks/`, and add a case name to run one case. It runs the cases in `.agents/skill-evals/` with Claude Code on your own Claude login, so it spends your Claude usage, and it is not part of `pnpm verify`.
 
 Run `pnpm verify` for repository changes.
 

@@ -1,6 +1,6 @@
 # next-friday-template-nestjs
 
-Next Friday starter for NestJS services.
+NestJS HTTP API.
 
 ## Getting started
 
@@ -28,20 +28,18 @@ Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, an
 | `pnpm test`        | Run unit tests (`src/**/*.test.ts`)                                                                    |
 | `pnpm test:e2e`    | Run end-to-end tests (`test/**/*.e2e.test.ts`)                                                         |
 | `pnpm check`       | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook) |
-| `pnpm verify`      | Run the static checks, all unit tests with coverage, and the production build                          |
+| `pnpm verify`      | Run the static checks, all unit tests with coverage, the end-to-end tests, and the production build    |
 
-CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
+CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL, dependency review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
 
 ## Container
 
-The `Dockerfile` builds a production image that runs as the `node` user. The platform must set `PORT`; Railway sets it automatically.
+The `Dockerfile` builds a production image that runs as a non-root user (UID 1000). The platform must set `PORT`; Railway sets it automatically. The build needs `pnpm-lock.yaml`, so run `pnpm install` once before the first `docker build`.
 
 ```sh
 docker build -t app .
 docker run --env PORT=3000 --publish 3000:3000 app
 ```
-
-On Vercel, the zero-configuration NestJS preset takes precedence over the `Dockerfile`. Set the project framework to Container to use the image, and set `PORT` in the project settings.
 
 ## Deploy
 

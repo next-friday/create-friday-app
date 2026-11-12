@@ -5,9 +5,10 @@
 # Product owner: the intent home
 /intent/ @joetakara
 
-# Policy owner: policy skills and the loop's own skill
-/.agents/skills/brand-policy/ @joetakara
-/.agents/skills/security-policy/ @joetakara
-/.agents/skills/compliance-policy/ @joetakara
-/.agents/skills/ux-policy/ @joetakara
+# Policy owner: policy skills and the loop's own skill, in the source and in the copies the agents load
+/.agents/skills/*-policy/ @joetakara
+/.claude/skills/*-policy/ @joetakara
+/.cursor/skills/*-policy/ @joetakara
 /.agents/skills/sdlc/ @joetakara
+/.claude/skills/sdlc/ @joetakara
+/.cursor/skills/sdlc/ @joetakara

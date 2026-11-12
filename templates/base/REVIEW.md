@@ -6,7 +6,7 @@ Run three passes and tag each finding with its pass:
 
 - Bugs: logic errors, broken edge cases, subtle regressions
 - Security: injection risks, authentication gaps, PII in logs
-- Compliance: the change matches spec.md, plan.md and our design principles; flag a plan.md that has no `Accepted by:` line
+- Compliance: the change matches spec.md, plan.md and the design principles that the four policies in `.agents/skills/` state; flag a plan.md that has no `Accepted by:` line and a change that makes `AGENTS.md` outdated
 
 ## What Important means here
 
@@ -18,4 +18,4 @@ Report at most five nits per review; summarize the rest as a count.
 
 ## Do not report
 
-Generated files under src/gen/ and anything CI already enforces.
+Generated files, such as `pnpm-lock.yaml`, and anything CI already enforces.

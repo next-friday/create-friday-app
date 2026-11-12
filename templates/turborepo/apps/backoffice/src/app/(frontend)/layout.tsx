@@ -3,8 +3,8 @@ import type {Metadata} from "next";
 import "./styles.css";
 
 export const metadata: Metadata = {
-  title: "Next Friday Payload template",
-  description: "Starter application for Next Friday Payload projects.",
+  title: "Payload application",
+  description: "A Payload application.",
 };
 
 export default function RootLayout(props: LayoutProps<"/">) {

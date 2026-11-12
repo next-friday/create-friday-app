@@ -6,14 +6,12 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "incremental": true,
-    "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strictPropertyInitialization": false,
     "outDir": "./dist",
     "rootDir": ".",
-    "types": ["vitest/globals", "node"]
+    "types": ["node"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]

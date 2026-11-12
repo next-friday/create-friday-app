@@ -2,3 +2,41 @@ schema_version: "1.1"
 name: writes-spec-from-merged-intent
 expected_outcome: |
   The intent intent/csv-export/intent.md is merged and has no spec. The agent follows the design playbook: it reads the four policies, writes intent/csv-export/spec.md from the template, pushes a branch, and waits at the gate for the product owner. It does not merge.
+timeout_seconds: 900
+fixture:
+  - write:
+      path: intent/csv-export/intent.md
+      content: |
+        # Intent: csv export
+
+        Author: Joe (Developer Productivity). Status: accepted.
+
+        ## Problem
+
+        The accounting team of 12 copies the report table into Excel by hand at every month end, about 20 minutes each (figure from the accounting lead).
+
+        ## Proposed outcome
+
+        One button downloads the open report as a CSV file. Out of scope: PDF and Excel export.
+
+        ## Affected users and systems
+
+        The accounting team and the report page.
+
+        ## Constraints
+
+        Report access rights do not change.
+
+        ## Open questions
+
+        None
+  - commit: "docs: add csv-export intent"
+checks:
+  - file_exists: intent/csv-export/spec.md
+  - file_matches:
+      path: intent/csv-export/spec.md
+      regex: '(?=[\s\S]*^## Requirements$)(?=[\s\S]*^## Design$)(?=[\s\S]*^## Policies$)(?=[\s\S]*^## Areas of concern$)(?=[\s\S]*^## Open questions$)'
+  - commit_touches_only: intent/csv-export/spec.md
+  - branch_matches: "^(?!main$).+"
+  - reply_matches: '[\u0E00-\u0E7F]{10}'
+  - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

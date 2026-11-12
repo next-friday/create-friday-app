@@ -5,27 +5,9 @@ base="${1-}"
 head="${2:-HEAD}"
 
 if [[ -z "$base" ]]; then
-  printf '%s\n' app backoffice
-  exit 0
-fi
-
-query="$(pnpm exec turbo query affected --packages --base "$base" --head "$head")"
-paths="$(printf '%s' "$query" | jq -r '.data.affectedPackages.items[].path // empty')"
-
-app=false
-backoffice=false
-
-while IFS= read -r path; do
-  case "$path" in
-    apps/app) app=true ;;
-    apps/backoffice) backoffice=true ;;
-  esac
-done <<< "$paths"
-
-if [[ "$app" == true ]]; then
-  printf '%s\n' app
-fi
-
-if [[ "$backoffice" == true ]]; then
-  printf '%s\n' backoffice
+  query="$(pnpm exec turbo query 'query { packages { items { path } } }')"
+  printf '%s' "$query" | jq --compact-output '[.data.packages.items[].path | select(startswith("apps/")) | ltrimstr("apps/")]'
+else
+  query="$(pnpm exec turbo query affected --packages --base "$base" --head "$head")"
+  printf '%s' "$query" | jq --compact-output '[.data.affectedPackages.items[].path | select(startswith("apps/")) | ltrimstr("apps/")]'
 fi

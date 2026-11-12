@@ -1,8 +1,27 @@
 #!/bin/sh
 command -v jq > /dev/null || exit 0
+mode=${1:-}
 input=$(cat)
-[ "$(printf '%s' "$input" | jq -r '.stop_hook_active // false')" = true ] && exit 0
-reply=$(printf '%s' "$input" | jq -r '.last_assistant_message // ""')
+state_directory=${TMPDIR:-/tmp}/sdlc-reply-shape
+conversation=$(printf '%s' "$input" | jq -r '.conversation_id // ""' | tr -cd 'A-Za-z0-9_-')
+case $mode in
+  save)
+    text=$(printf '%s' "$input" | jq -r '.text // ""')
+    [ -n "$text" ] && [ -n "$conversation" ] || exit 0
+    mkdir -p "$state_directory" && printf '%s' "$text" > "$state_directory/$conversation"
+    exit 0
+    ;;
+  followup)
+    [ -n "$conversation" ] && [ -f "$state_directory/$conversation" ] || exit 0
+    reply=$(cat "$state_directory/$conversation")
+    rm -f "$state_directory/$conversation"
+    [ "$(printf '%s' "$input" | jq -r '"\(.status // "") \(.loop_count // "")"')" = 'completed 0' ] || exit 0
+    ;;
+  *)
+    [ "$(printf '%s' "$input" | jq -r '.stop_hook_active // false')" = true ] && exit 0
+    reply=$(printf '%s' "$input" | jq -r '.last_assistant_message // ""')
+    ;;
+esac
 first=$(printf '%s\n' "$reply" | awk 'NF{print; exit}')
 case $first in '**Request:**'*) ;; *) exit 0 ;; esac
 
@@ -35,4 +54,5 @@ case $last in
 esac
 
 [ -z "$problems" ] && exit 0
-jq -n --arg reason "${problems}Send the whole reply again, in the language it is written in." '{decision:"block",reason:$reason}'
+jq -n --arg mode "$mode" --arg reason "${problems}Send the whole reply again, in the language it is written in." \
+  'if $mode == "followup" then {followup_message:$reason} else {decision:"block",reason:$reason} end'

@@ -310,5 +310,68 @@
       "last_assistant_message": "**Request:** Where is it?\n\nRun \"ls /tmp/scratch/x\" to see.\n\n**Status:** Not checked."
     },
     "expected": "block"
+  },
+  {
+    "name": "save mode: prints nothing",
+    "argument": "save",
+    "input": {
+      "conversation_id": "c1",
+      "text": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "followup mode: faulty saved reply",
+    "argument": "followup",
+    "input": {
+      "conversation_id": "c1",
+      "status": "completed",
+      "loop_count": 0
+    },
+    "expected": "block",
+    "savedReply": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+  },
+  {
+    "name": "followup mode: good saved reply",
+    "argument": "followup",
+    "input": {
+      "conversation_id": "c1",
+      "status": "completed",
+      "loop_count": 0
+    },
+    "expected": "pass",
+    "savedReply": "**Request:** Explain the gate.\n\nText.\n\n**Status:** Done, waits for nobody."
+  },
+  {
+    "name": "followup mode: second loop",
+    "argument": "followup",
+    "input": {
+      "conversation_id": "c1",
+      "status": "completed",
+      "loop_count": 1
+    },
+    "expected": "pass",
+    "savedReply": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+  },
+  {
+    "name": "followup mode: aborted",
+    "argument": "followup",
+    "input": {
+      "conversation_id": "c1",
+      "status": "aborted",
+      "loop_count": 0
+    },
+    "expected": "pass",
+    "savedReply": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+  },
+  {
+    "name": "followup mode: nothing saved",
+    "argument": "followup",
+    "input": {
+      "conversation_id": "c1",
+      "status": "completed",
+      "loop_count": 0
+    },
+    "expected": "pass"
   }
 ]

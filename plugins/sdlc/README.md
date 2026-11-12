@@ -12,12 +12,17 @@ The `sdlc` plugin runs the software development loop: a skill that matches a req
 
 ## Hook
 
-For Claude Code the plugin ships a `Stop` hook, `check-reply-shape.sh`, a POSIX `sh` script that reads the hook input with `jq`. It checks only a reply whose first line starts with `**Request:**`, and it blocks that reply once, with a reason that asks for the whole reply again, when the reply:
+The plugin ships `check-reply-shape.sh`, a POSIX `sh` script that reads the hook input with `jq`, as a `Stop` hook for Claude Code and as a pair of hooks for Cursor. It checks only a reply whose first line starts with `**Request:**`, and it blocks that reply once, with a reason that asks for the whole reply again, when the reply:
 
 - names a pull request or an issue by number outside a URL, a fenced block, and a code span that holds more than the bare number;
 - does not end with a line that starts with `**Status:**`;
 - has a URL on its **Request** line, and a **Status** line that neither ends with `Next: <URL>` nor says "no next page";
 - holds a path from the machine's root, such as `/home/…` or `C:\…`, outside a URL and a fenced block.
+
+Cursor's `stop` hook gets no reply text, so the Cursor adapter runs the script twice, from `hooks/hooks.json`:
+
+- `afterAgentResponse` runs `check-reply-shape.sh save`, which writes the reply text to a file named after the conversation under `${TMPDIR:-/tmp}/sdlc-reply-shape/` and prints nothing;
+- `stop` runs `check-reply-shape.sh followup` with `loop_limit` 1. It reads that file and deletes it, and after a completed run with `loop_count` 0 it runs the same checks, and prints a `followup_message` with the same reason, which Cursor sends as the next message. Cursor therefore sends at most one follow-up.
 
 The hook needs `jq` on the `PATH` and does nothing without it. `pnpm plugin:check` runs the hook against the cases in `source/hooks/check-reply-shape.cases.json`.
 

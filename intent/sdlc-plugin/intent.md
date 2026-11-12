@@ -11,13 +11,13 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 ## Proposed outcome
 
 - One plugin named `sdlc` holds everything that implements the SDLC playbook. A person runs the loop with the plugin's `sdlc-mode` skill.
-- The plugin's content is tool-neutral. Its skills, playbooks, eval cases, and scripts name no model and no vendor's agent tool, so any agent tool that can load a skill can run them, with any model.
+- The plugin's content is tool-neutral. Its skills, playbooks, eval cases, and scripts name no vendor's agent tool, so any agent tool that can load a skill can run them.
 - What one agent tool needs to load the plugin, such as its manifest, its command name, and its settings keys, is a thin adapter kept beside the content. The first adapters are for the tools the company uses today, Claude Code and Cursor; another tool is added by adding an adapter, with no change to the content.
 - The plugin holds: the `sdlc-mode` skill and every playbook, `sdlc-help`, `setup-sdlc`, the verifier subagent, the eval cases, and the scripts behind `plan:check`, `bands:check`, `loop:measure`, and `evals:run`.
 - The plugin holds the default brand, security, compliance, and UX policies. A project that has its own policy keeps a file of the same name, and the playbooks use the project's file instead of the default.
 - `AGENTS.md`, in the root, states only facts about this repository and points to the plugin's `sdlc-mode` skill for how work runs; the conventions that repeat a playbook are removed.
 - The plugin's `setup-sdlc` skill does three things, and can be run again at any time:
-  1. Asks for a budget in one question and sets the model for each role from the models the session offers, as `setup-pstack` does (`cursor/plugins`, `pstack/skills/setup-pstack/SKILL.md`). The skill itself names no model.
+  1. Asks for a budget in one question and sets the model for each role from the models the session offers, as `setup-pstack` does (`cursor/plugins`, `pstack/skills/setup-pstack/SKILL.md`).
   2. Reads the project's `SETUP.md` and reports which steps are done and which are not.
   3. Does the steps an agent can do, and names the steps a person does outside the repository.
 - Out of scope:
@@ -37,7 +37,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 ## Constraints
 
 - The plugin lives in this repository, in one directory that reads no file outside itself, so the directory can move to a repository of its own, or to a public marketplace, later without a change to its contents.
-- No file in the plugin's content names a model or depends on one vendor's agent tool. A file that only one tool reads lives in that tool's adapter.
+- No file in the plugin's content depends on one vendor's agent tool. A file that only one tool reads lives in that tool's adapter.
 - The plugin is named `sdlc`; the product owner decided this name.
 - No running cost: the plugin's source is this git repository, and nothing the plugin adds calls a model unless a person runs it or a project turns a workflow on.
 - Rules, hooks, and agent settings stay under each project's code owners, and a person commits a change to them.

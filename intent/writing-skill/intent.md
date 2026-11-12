@@ -53,7 +53,7 @@ The loop writes and cleans text as `pstack` does in the `cursor/plugins` reposit
 - The check reads only what a branch adds or changes, so no accepted file has to change to pass it.
 - The check costs nothing to run: it calls no model and no paid service.
 - The source skills are under the MIT License: `pstack` with "Copyright (c) 2026 Lauren Tan" (`pstack/LICENSE`), and `cursor-team-kit` with "Copyright (c) 2026 Cursor" (`cursor-team-kit/LICENSE`). A file that carries their text carries the notice.
-- The skills name no model and no vendor's agent tool, as `intent/sdlc-plugin/intent.md` asks of every skill that will move into the plugin.
+- The skills name no vendor's agent tool, as `intent/sdlc-plugin/intent.md` asks of every skill that will move into the plugin.
 - `.agents/rules/code-comments.md` stays the rule for comments. The subagent that reads comments applies it and adds no second rule.
 - The product owner decided that each skill is made and changed with Anthropic's `skill-creator` skill (`anthropics/skills`, `skills/skill-creator/SKILL.md`): "Create new skills, modify and improve existing skills, and measure skill performance." Its loop runs each test case with the skill and against a baseline, grades the runs, and shows the results to a person.
 - A rule that a script cannot decide stays in a skill as guidance and is not half-checked.

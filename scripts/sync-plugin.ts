@@ -157,7 +157,7 @@ function findEscapingReferences(filePath: string, text: string): string[] {
  * Find the names a file must not contain.
  * @param filePath Path of the file from the repository root.
  * @param text File content.
- * @param names Model and agent tool names from `vendor-names.json`.
+ * @param names Agent tool names from `vendor-names.json`.
  * @returns One message per name found.
  */
 function findVendorNames(filePath: string, text: string, names: string[]): string[] {
@@ -308,13 +308,13 @@ const selfTestCases: SelfTestCase[] = [
   },
   {
     name: "a listed name fails in any case and an unlisted one passes",
-    expected: ['a.md: names "Vendor"'],
-    problems: findVendorNames("a.md", "VENDOR and others", ["Vendor", "Other"]),
+    expected: ['a.md: names "Cursor"'],
+    problems: findVendorNames("a.md", "CURSOR and others", ["Cursor", "Other"]),
   },
   {
     name: "a listed name inside a longer word passes",
     expected: [],
-    problems: findVendorNames("a.md", "vendors and unvendored", ["Vendor"]),
+    problems: findVendorNames("a.md", "cursors and precursor", ["Cursor"]),
   },
   {
     name: "a manifest with a version fails",

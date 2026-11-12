@@ -2,7 +2,7 @@
 
 Accepted by: @joetakara.
 
-The defect: a reply of the `sdlc-mode` skill names a pull request by its number, such as "PR #42", and its **Status** line often ends without the URL of the page to open. Requirement 27 of `intent/sdlc-plugin/spec.md` asks for the full URL in both places. The eval case `reply-gives-full-urls` shows it: no run passes.
+The defect: a reply of the `sdlc-mode` skill names a pull request by its number, such as "PR #42", and its **Status** line often ends without the URL of the page to open. Requirement 19 of `intent/sdlc-plugin/spec.md` asks for the full URL in both places. The eval case `reply-gives-full-urls` shows it: no run passes.
 
 The cause: the rule sat apart from the lines it governs, and the person's own wording, a number beside a repository URL, was repeated on the **Request** line as written.
 
@@ -24,7 +24,7 @@ The cause: the rule sat apart from the lines it governs, and the person's own wo
 
 - The riskiest step is 2: the reply shape governs every reply of the skill, so the other eval cases read the same text.
 - The change publishes nothing: it touches no file under `src/` or `templates/`, no publish field of `package.json`, and adds no changeset.
-- Option not taken: changing the graders of the eval case. They state requirement 27 as written.
+- Option not taken: changing the graders of the eval case. They state requirement 19 as written.
 
 ## Proof
 

@@ -279,7 +279,7 @@ const selfTestCases: SelfTestCase[] = [
     name: "a link into the plugin passes",
     expected: [],
     problems: findEscapingReferences(
-      path.join(pluginRoot, "source/skills/sdlc/SKILL.md"),
+      path.join(pluginRoot, "source/skills/sdlc-mode/SKILL.md"),
       "[a](playbooks/build.md) and `../../brand-policy/SKILL.md` and [b](https://example.com/../x)",
     ),
   },

@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-The reply says to send the request with `/sdlc:sdlc` instead
+The reply says to send the request with `/sdlc:sdlc-mode` instead

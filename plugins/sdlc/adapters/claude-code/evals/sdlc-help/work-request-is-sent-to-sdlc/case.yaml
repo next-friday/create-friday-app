@@ -1,11 +1,11 @@
 schema_version: "1.1"
 name: work-request-is-sent-to-sdlc
 expected_outcome: |
-  The message asks for work. The agent says to send it with /sdlc:sdlc and changes nothing.
+  The message asks for work. The agent says to send it with /sdlc:sdlc-mode and changes nothing.
 graders:
   - name: reply-names-the-command
     type: regex
-    pattern: "/sdlc:sdlc"
+    pattern: "/sdlc:sdlc-mode"
     flags: mu
   - name: no-file-created
     type: file_exists

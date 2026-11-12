@@ -1,5 +1,5 @@
 import {execFileSync} from "node:child_process";
-import {readFileSync} from "node:fs";
+import {existsSync, readFileSync} from "node:fs";
 
 type Change = {
   paths: string[];
@@ -8,12 +8,13 @@ type Change = {
 };
 
 type SelfTestCase = {
-  actor?: string;
   addedChangesets?: Record<string, string>;
+  authors?: string[];
   changedManifestFields?: string[];
   changes: Change[];
   expectedMessagePart?: string;
   name: string;
+  pullRequestAuthor?: string;
 };
 
 const defaultBranch = "origin/main";
@@ -48,6 +49,7 @@ const publishedManifestFields = [
 
 const breakingManifestFields = new Set(["bin", "engines", "name"]);
 const dependencyBot = "dependabot[bot]";
+const dependencyBotAuthor = `${dependencyBot} <49699333+dependabot[bot]@users.noreply.github.com>`;
 const templateManifest = "templates/nestjs/package.json";
 const contractMessagePart = "only for a removed or renamed CLI argument";
 
@@ -84,17 +86,33 @@ function hasCliContractChange(changes: Change[], changedManifestFields: string[]
 }
 
 /**
+ * Tell whether the dependency bot wrote a branch.
+ * @param authors The author of each commit on the branch that is not a merge, as `name <email>`.
+ * @param pullRequestAuthor The account that opened the pull request, or undefined outside a pull request run.
+ * @returns True when every author is the bot and no other account opened the pull request.
+ */
+function isDependencyBotBranch(authors: string[], pullRequestAuthor: string | undefined): boolean {
+  const isBotPullRequest = pullRequestAuthor === undefined || pullRequestAuthor === dependencyBot;
+
+  return (
+    isBotPullRequest &&
+    authors.length > 0 &&
+    authors.every(author => author === dependencyBotAuthor)
+  );
+}
+
+/**
  * Find the problems a branch's changes have with the changesets it adds.
  * @param changes Changed paths with their git status.
  * @param addedChangesets Text of each changeset the branch adds, by path.
- * @param actor The GitHub account that triggered the run, or undefined outside GitHub Actions.
+ * @param isBotBranch Whether the dependency bot wrote the branch.
  * @param changedManifestFields Published `package.json` fields the branch changes.
  * @returns One message per problem.
  */
 function findChangesetProblems(
   changes: Change[],
   addedChangesets: Record<string, string>,
-  actor: string | undefined,
+  isBotBranch: boolean,
   changedManifestFields: string[],
 ): string[] {
   const addedPaths = Object.keys(addedChangesets);
@@ -106,8 +124,7 @@ function findChangesetProblems(
 
   if (addedPaths.length === 0) {
     const isDependencyUpdate =
-      actor === dependencyBot &&
-      publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
+      isBotBranch && publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
 
     return isDependencyUpdate || publishedPaths.length === 0
       ? []
@@ -210,6 +227,24 @@ function findChangedManifestFields(baseCommit: string): string[] {
 }
 
 /**
+ * Read the account that opened the pull request from the event of this workflow run.
+ * @returns The login, or undefined when the run has no pull request event.
+ */
+function readPullRequestAuthor(): string | undefined {
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+
+  if (eventPath === undefined || !existsSync(eventPath)) {
+    return undefined;
+  }
+
+  const event = JSON.parse(readFileSync(eventPath, "utf8")) as {
+    pull_request?: {user?: {login?: string}};
+  };
+
+  return event.pull_request?.user?.login;
+}
+
+/**
  * Find the commit where this branch left the default branch.
  * @returns The merge base, or undefined when the default branch is not available.
  */
@@ -301,19 +336,55 @@ const selfTestCases: SelfTestCase[] = [
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
-    actor: dependencyBot,
+    pullRequestAuthor: dependencyBot,
     name: "no changeset on a dependency bot's commit that changes source",
+    authors: [dependencyBotAuthor],
     changes: [modifiedFile(sourceFile)],
   },
   {
-    actor: dependencyBot,
+    pullRequestAuthor: dependencyBot,
     name: "no changeset on a dependency bot's template update",
+    authors: [dependencyBotAuthor],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    name: "no changeset on a dependency bot's commits outside a pull request run",
+    authors: [dependencyBotAuthor],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    pullRequestAuthor: dependencyBot,
+    name: "no changeset on a dependency bot's branch with a person's commit",
+    authors: [dependencyBotAuthor, "someone <someone@example.com>"],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    name: "no changeset on a person's pull request whose commits carry the bot's name",
+    pullRequestAuthor: "someone",
+    authors: [dependencyBotAuthor],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    pullRequestAuthor: dependencyBot,
+    name: "no changeset on a commit with the bot's name and another email",
+    authors: [`${dependencyBot} <someone@example.com>`],
+    changes: [modifiedFile(templateManifest)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    pullRequestAuthor: dependencyBot,
+    name: "no changeset on a template update with no commit author",
+    authors: [],
     changes: [modifiedFile(templateManifest)],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
     name: "no changeset on a template update by another account",
-    actor: "someone",
+    pullRequestAuthor: "someone",
+    authors: ["someone <someone@example.com>"],
     changes: [modifiedFile(templateManifest)],
   },
   {
@@ -401,11 +472,18 @@ const selfTestCases: SelfTestCase[] = [
 
 const selfTestFailures = selfTestCases
   .filter(
-    ({actor, changes, expectedMessagePart, changedManifestFields = [], addedChangesets = {}}) => {
+    ({
+      changes,
+      expectedMessagePart,
+      pullRequestAuthor,
+      authors = [],
+      changedManifestFields = [],
+      addedChangesets = {},
+    }) => {
       const problems = findChangesetProblems(
         changes,
         addedChangesets,
-        actor,
+        isDependencyBotBranch(authors, pullRequestAuthor),
         changedManifestFields,
       );
 
@@ -443,7 +521,12 @@ if (selfTestFailures.length > 0) {
     const problems = findChangesetProblems(
       changes,
       addedChangesets,
-      process.env.GITHUB_ACTOR,
+      isDependencyBotBranch(
+        runGit(["log", "--no-merges", "--format=%an <%ae>", `${mergeBase}..HEAD`])
+          .split("\n")
+          .filter(author => author !== ""),
+        readPullRequestAuthor(),
+      ),
       findChangedManifestFields(mergeBase),
     );
 

@@ -1,3 +1,4 @@
+import {execFileSync} from "node:child_process";
 import {existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import path from "node:path";
 
@@ -7,12 +8,24 @@ type AgentConfig = {
   tools?: string[];
 };
 
+type HookConfig = {
+  event: string;
+  script: string;
+};
+
+type HookCase = {
+  expected: "block" | "pass";
+  input: Record<string, unknown>;
+  name: string;
+};
+
 type Adapter = {
   agentFields: (agent: AgentConfig) => string[];
   directory: string;
   hasAuthoredEvals: boolean;
   manifest: Record<string, string>;
   manifestPath: string;
+  renderHooks?: (hook: HookConfig) => string;
 };
 
 type SelfTestCase = {
@@ -26,6 +39,10 @@ const sourceRoot = path.join(pluginRoot, "source");
 const adaptersRoot = path.join(pluginRoot, "adapters");
 const vendorNamesPath = path.join(adaptersRoot, "vendor-names.json");
 const subagentConfigPath = path.join(adaptersRoot, "agents.json");
+const hookConfigPath = path.join(adaptersRoot, "hooks.json");
+const hooksDirectory = path.join(sourceRoot, "hooks");
+const hookCasesSuffix = ".cases.json";
+const hookTimeoutSeconds = 10;
 const claudeMarketplacePath = ".claude-plugin/marketplace.json";
 const settingsPath = ".claude/settings.json";
 const marketplacePaths = [claudeMarketplacePath, ".cursor-plugin/marketplace.json"];
@@ -59,10 +76,38 @@ function findCursorAgentFields(agent: AgentConfig): string[] {
   return agent.readonly === undefined ? [] : [`readonly: ${agent.readonly}`];
 }
 
+/**
+ * Render the hook file the Claude Code adapter loads from `hooks/hooks.json`.
+ * @param hook The event and script that `hooks.json` names for the adapter.
+ * @returns The file content, which runs the script through `sh`.
+ */
+function renderClaudeHooks(hook: HookConfig): string {
+  return `${JSON.stringify(
+    {
+      hooks: {
+        [hook.event]: [
+          {
+            hooks: [
+              {
+                timeout: hookTimeoutSeconds,
+                type: "command",
+                command: `sh "\${CLAUDE_PLUGIN_ROOT}/hooks/${hook.script}"`,
+              },
+            ],
+          },
+        ],
+      },
+    },
+    undefined,
+    2,
+  )}\n`;
+}
+
 const adapters: Adapter[] = [
   {
     manifest: manifestFields,
     agentFields: findClaudeAgentFields,
+    renderHooks: renderClaudeHooks,
     directory: "claude-code",
     manifestPath: ".claude-plugin/plugin.json",
     hasAuthoredEvals: true,
@@ -224,6 +269,106 @@ function findSettingsProblems(
 }
 
 /**
+ * Run a hook script on one input.
+ * @param script Path of the script from the repository root.
+ * @param input The hook input.
+ * @returns The standard output, or a message when the script exits non-zero.
+ */
+function runHookScript(script: string, input: Record<string, unknown>): string {
+  try {
+    return execFileSync("sh", [script], {
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
+      input: JSON.stringify(input),
+    });
+  } catch {
+    return "script failed";
+  }
+}
+
+/**
+ * Tell what a hook did from its standard output.
+ * @param output Standard output of the hook script.
+ * @returns `pass` for no output, `block` for a block decision, otherwise the output itself.
+ */
+function findHookOutcome(output: string): string {
+  if (output.trim() === "") {
+    return "pass";
+  }
+
+  try {
+    const {decision} = JSON.parse(output) as {decision?: string};
+
+    return decision === "block" ? "block" : output;
+  } catch {
+    return output;
+  }
+}
+
+/**
+ * Find the cases of a hook script whose outcome differs from the expected one.
+ * @param script Path of the script from the repository root.
+ * @param cases Hook inputs with the expected outcome of each.
+ * @param run Runs the script on one input and returns its standard output.
+ * @returns One message per case that did not pass or block as expected.
+ */
+function findHookCaseProblems(
+  script: string,
+  cases: HookCase[],
+  run: (input: Record<string, unknown>) => string,
+): string[] {
+  return cases
+    .map(({expected, input, name}) => ({
+      expected,
+      name,
+      outcome: findHookOutcome(run(input)),
+    }))
+    .filter(({expected, outcome}) => outcome !== expected)
+    .map(
+      ({expected, name, outcome}) =>
+        `${script}: case "${name}" expected ${expected}, got ${outcome}`,
+    );
+}
+
+/**
+ * Find the problems of one hook script.
+ * @param script Path of the script from the repository root.
+ * @returns A message when the script fails `sh -n`, has no case file, or has a case that fails.
+ */
+function findScriptProblems(script: string): string[] {
+  const casesPath = path.join(
+    path.dirname(script),
+    `${path.basename(script, ".sh")}${hookCasesSuffix}`,
+  );
+
+  try {
+    execFileSync("sh", ["-n", script], {
+      stdio: "pipe",
+    });
+  } catch {
+    return [`${script}: fails \`sh -n\``];
+  }
+
+  return existsSync(casesPath)
+    ? findHookCaseProblems(
+        script,
+        JSON.parse(readFileSync(casesPath, "utf8")) as HookCase[],
+        input => runHookScript(script, input),
+      )
+    : [`${casesPath}: is missing`];
+}
+
+/**
+ * Find the problems of every hook script in the source.
+ * @returns The problems of each script, in file order.
+ */
+function findHookProblems(): string[] {
+  return listFiles(hooksDirectory, false)
+    .filter(file => path.extname(file) === ".sh")
+    .flatMap(file => findScriptProblems(path.join(hooksDirectory, file)));
+}
+
+/**
  * Render every adapter from the source.
  * @returns The expected content of each adapter file, by path from the repository root.
  */
@@ -235,6 +380,11 @@ function renderAdapters(): Map<string, string> {
   const agentsConfig = JSON.parse(readFileSync(subagentConfigPath, "utf8")) as Record<
     string,
     AgentConfig
+  >;
+
+  const hooksConfig = JSON.parse(readFileSync(hookConfigPath, "utf8")) as Record<
+    string,
+    HookConfig
   >;
 
   for (const adapter of adapters) {
@@ -249,6 +399,17 @@ function renderAdapters(): Map<string, string> {
       expected.set(
         path.join(adapterRoot, "skills", file),
         readFileSync(path.join(skillsDirectory, file), "utf8"),
+      );
+    }
+
+    const hook = hooksConfig[adapter.directory];
+
+    if (hook !== undefined && adapter.renderHooks !== undefined) {
+      expected.set(path.join(adapterRoot, "hooks", "hooks.json"), adapter.renderHooks(hook));
+
+      expected.set(
+        path.join(adapterRoot, "hooks", hook.script),
+        readFileSync(path.join(hooksDirectory, hook.script), "utf8"),
       );
     }
 
@@ -273,6 +434,42 @@ const versionProblem = "m.json: holds a version key";
 const testPluginKey = "p@m";
 const testMarketplaceName = "m";
 const settingsProblem = `${settingsPath}: must enable "${testPluginKey}" under enabledPlugins and name "${testMarketplaceName}" under extraKnownMarketplaces; a person commits this file`;
+const blockingOutput = '{"decision":"block"}';
+
+const hookCases: HookCase[] = [
+  {
+    name: "a",
+    expected: "pass",
+    input: {
+      blocks: false,
+    },
+  },
+  {
+    name: "b",
+    expected: "block",
+    input: {
+      blocks: true,
+    },
+  },
+];
+
+/**
+ * Stand in for a hook script that blocks the inputs that say so.
+ * @param input The hook input.
+ * @returns A block decision when the input blocks, otherwise no output.
+ */
+function runBlockingStub(input: Record<string, unknown>): string {
+  return input.blocks === true ? blockingOutput : "";
+}
+
+/**
+ * Stand in for a hook script that blocks the inputs that do not say so.
+ * @param input The hook input.
+ * @returns A block decision when the input does not block, otherwise no output.
+ */
+function runInvertedStub(input: Record<string, unknown>): string {
+  return runBlockingStub(input) === "" ? blockingOutput : "";
+}
 
 const selfTestCases: SelfTestCase[] = [
   {
@@ -374,6 +571,40 @@ const selfTestCases: SelfTestCase[] = [
     problems: findSettingsProblems(undefined, testPluginKey, testMarketplaceName),
   },
   {
+    name: "a hook case that passes or blocks as expected passes",
+    expected: [],
+    problems: findHookCaseProblems("h.sh", hookCases, runBlockingStub),
+  },
+  {
+    name: "a hook case with the other outcome fails",
+    expected: [
+      'h.sh: case "a" expected pass, got block',
+      'h.sh: case "b" expected block, got pass',
+    ],
+    problems: findHookCaseProblems("h.sh", hookCases, runInvertedStub),
+  },
+  {
+    name: "a hook that prints anything but a block decision fails",
+    expected: ['h.sh: case "a" expected pass, got oops'],
+    problems: findHookCaseProblems("h.sh", hookCases.slice(0, 1), () => "oops"),
+  },
+  {
+    name: "a hook renders its event and script through sh",
+    expected: [`sh "\${CLAUDE_PLUGIN_ROOT}/hooks/h.sh"`],
+    problems: [
+      (
+        JSON.parse(
+          renderClaudeHooks({
+            event: "Stop",
+            script: "h.sh",
+          }),
+        ) as {
+          hooks: {Stop: {hooks: {command: string}[]}[]};
+        }
+      ).hooks.Stop[0]?.hooks[0]?.command ?? "",
+    ],
+  },
+  {
     name: "a subagent renders its tool's fields",
     expected: ["---\nname: a\ndescription: d\nreadonly: true\n---\n\nbody"],
     problems: [renderAgent("a", ["readonly: true"], subagent, "body")],
@@ -428,6 +659,7 @@ if (selfTestFailures.length > 0) {
       ...listFiles(sourceRoot, true)
         .map(file => path.join(sourceRoot, file))
         .flatMap(file => findVendorNames(file, readFileSync(file, "utf8"), vendorNames)),
+      ...findHookProblems(),
       ...[
         ...adapters.map(({directory, manifestPath}) =>
           path.join(adaptersRoot, directory, manifestPath),

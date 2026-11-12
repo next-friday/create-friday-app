@@ -1,0 +1,314 @@
+[
+  {
+    "name": "good: URL in Request and Next URL",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\nWaiting for a code owner.\n\n**Status:** Not checked. Next: https://github.com/acme/shop/pull/42"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "good: no URL subject, no Next",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain the gate.\n\nText.\n\n**Status:** Done, waits for nobody."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not the shape: plain reply with #42",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "I looked at #42 and it is fine."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a: #42 in prose",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+    },
+    "expected": "block"
+  },
+  {
+    "name": "a: PR 7",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Check PR 7.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "a: pull request 12 in any case",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Look at Pull Request 12.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "a: issue 3",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Look at issue 3.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "a ok: number inside a URL only",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** See https://github.com/acme/shop/pull/42#issuecomment-1 and https://github.com/a/b/issues/9.\n\n**Status:** Done. Next: https://github.com/acme/shop/pull/42"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a ok: command code span with #42",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Review.\n\nRun `gh pr view 42 --repo acme/shop #42` next.\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a ok: fenced block with #42",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Review.\n\n```sh\ngh pr merge #42\n```\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a: #42 alone in a code span",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Review `#42`.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "a ok: hex colour and step number",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Colour #123abc and step 1.\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "b: Status not last line",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Q.\n\n**Status:** Done.\n\nAnything else?"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "b: no Status line",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Q.\n\nAnswer."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "c: URL subject, Status without Next",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\n**Status:** Waiting for a code owner."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "c: Next with a number, not a URL",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\n**Status:** Waiting. Next: #42"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "c ok: Next URL followed by a closing parenthesis",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\n**Status:** Waiting (Next: https://github.com/acme/shop/pull/42)"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a+b+c together",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42? See #42.\n\n**Status:** Waiting."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "loop guard: bad reply but the stop hook is active",
+    "input": {
+      "stop_hook_active": true,
+      "last_assistant_message": "**Request:** Who approves #42?\n\n**Status:** Waiting."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "empty message",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": ""
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "c ok: URL subject and no next page",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain https://github.com/acme/shop/pull/42.\n\nIt adds a hook.\n\n**Status:** Answered; no next page."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a ok: issue 3 of the list",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain the list.\n\nThat is issue 3 of the list below.\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a ok: issue with a decimal number",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nSee issue 3.2 of the spec.\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a: issue 3 of a repository",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Look at issue 3 of acme/shop.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "a ok: #42 inside a code span without a space",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain `git log --grep=#42`.\n\nThe flag is `--pr=#42`.\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "a: PR #42 in a code span",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Review `PR #42`.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d: /home path in prose",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nThe file is /home/user/app/src/a.ts.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d: /root path",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nSee /root/app/a.ts:3 for it.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d: /tmp path",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nIt wrote /tmp/out.log.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d: /Users path",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nOpen /Users/ana/app/a.ts.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d: Windows drive path",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nOpen C:\\Users\\ana\\app\\a.ts now.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d: path in a code span",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nRun `cat /tmp/out.log`.\n\n**Status:** Done."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "d ok: root-relative path with tmp in it",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\nSee src/tmp/a.ts:3 and ./home/b.ts and README.md:12.\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "d ok: machine path inside a URL",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain https://example.com/home/user/page.\n\n**Status:** Done. Next: https://example.com/home/user/page"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "d ok: machine path in a fenced block",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Explain.\n\n```sh\ncd /home/user/app\n```\n\n**Status:** Done."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "good: a numbered step is not a pull request",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Do step #3.\n\nDone.\n\n**Status:** Verified."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "good: a colour value is not a pull request",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Set the colour.\n\nIt is #123456 now.\n\n**Status:** Verified."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "good: bold Next label and bracketed URL",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\nA code owner.\n\n**Status:** Not checked. **Next:** <https://github.com/acme/shop/pull/42>"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "bad: machine path inside double quotes",
+    "input": {
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Where is it?\n\nRun \"ls /tmp/scratch/x\" to see.\n\n**Status:** Not checked."
+    },
+    "expected": "block"
+  }
+]

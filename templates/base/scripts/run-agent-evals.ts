@@ -104,6 +104,18 @@ const allowedTools = [
   "Skill",
 ];
 
+const repositoryVariables = execFileSync("git", ["rev-parse", "--local-env-vars"], {
+  encoding: "utf8",
+}).split("\n");
+
+const childEnvironment = {
+  ...process.env,
+};
+
+for (const name of repositoryVariables) {
+  delete childEnvironment[name];
+}
+
 /**
  * Run git in a directory.
  * @param directory Working directory.
@@ -113,6 +125,7 @@ const allowedTools = [
 function runGit(directory: string, gitArguments: string[]): string {
   return execFileSync("git", gitArguments, {
     cwd: directory,
+    env: childEnvironment,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   }).trim();
@@ -796,6 +809,7 @@ function runAgent(directory: string, prompt: string, timeoutSeconds: number): Ag
     ],
     {
       cwd: directory,
+      env: childEnvironment,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
       maxBuffer: 64 * 1024 * 1024,

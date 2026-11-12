@@ -10,9 +10,9 @@ The `sdlc` plugin runs the software development loop: a skill that matches a req
 | `adapters/`                   | The render of `source/` for each agent tool, and `agents.json` with each tool's subagent fields. `pnpm plugin:sync` writes it. |
 | `adapters/claude-code/evals/` | The eval cases, authored there.                                                                                                |
 
-## Enable it in a project
+## Use it in this repository
 
-This repository registers the plugin in `.claude/settings.json` as a local `directory` marketplace named `next-friday-plugins` and enables `sdlc@next-friday-plugins`, so a session here loads it once the folder is trusted. A project in another checkout adds the marketplace and enables the plugin the same way.
+This repository registers the plugin in `.claude/settings.json` as a local `directory` marketplace named `next-friday-plugins` and enables `sdlc@next-friday-plugins`, so a session here loads it once the folder is trusted.
 
 ## Checks
 

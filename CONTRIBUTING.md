@@ -55,11 +55,11 @@ Three jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) run only in
 
 ## Git hooks
 
-| Hook         | What it does                                                                                               |
-| :----------- | :--------------------------------------------------------------------------------------------------------- |
-| `pre-commit` | Rejects commits on `main`, scans staged changes with gitleaks (`.gitleaks.toml`), runs lint-staged.        |
-| `commit-msg` | Checks the message with `@next-friday/commitlint-config-friday`.                                           |
-| `pre-push`   | Rejects pushes to `main` and pushes that recreate a branch deleted on the remote, then runs `pnpm verify`. |
+| Hook         | What it does                                                                                        |
+| :----------- | :-------------------------------------------------------------------------------------------------- |
+| `pre-commit` | Rejects commits on `main`, scans staged changes with gitleaks (`.gitleaks.toml`), runs lint-staged. |
+| `commit-msg` | Checks the message with `@next-friday/commitlint-config-friday`.                                    |
+| `pre-push`   | Rejects pushes to `main`, then runs `pnpm verify`.                                                  |
 
 ## Release intent
 

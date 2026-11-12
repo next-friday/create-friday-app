@@ -15,7 +15,12 @@ block() {
 trap 'block ".agents/hooks/agent-production-gate.sh failed. Stop and report this error to the user; agents may not edit the gate."' ERR
 command -v jq > /dev/null || block "jq is required to read the hook input. Install it: https://jqlang.org/download/"
 command=$(jq -r '.command // .tool_input.command // empty')
-[[ -n $command && -z ${RELEASE_APPROVAL:-} ]] || allow
+[[ -n $command ]] || allow
+approval=$(tr '[:upper:]' '[:lower:]' <<< "${RELEASE_APPROVAL:-}")
+case $approval in
+  "" | 0 | false | no) ;;
+  *) allow ;;
+esac
 
 release_gate="A release manager runs prod deploys, commands against prod, and release tag pushes. Do not run this; report what is ready to promote, such as the commit SHA. If a gated command appears only inside a message, write the text to a file and pass it with git commit -F <file> or gh pr create --body-file <file>."
 

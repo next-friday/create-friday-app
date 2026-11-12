@@ -1,6 +1,7 @@
 import {execFileSync} from "node:child_process";
-import {existsSync, readdirSync, readFileSync} from "node:fs";
+import {existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import path from "node:path";
+import {tmpdir} from "node:os";
 
 type BranchChanges = {
   changedPaths: string[];
@@ -18,6 +19,7 @@ const defaultBranch = "origin/main";
 const intentDirectory = "intent";
 const planFileName = "plan.md";
 const specFileName = "spec.md";
+const intentFileName = "intent.md";
 const proofHeading = "## Proof";
 const requirementsHeading = "## Requirements";
 const acceptancePlaceholder = "@<engineer>";
@@ -114,12 +116,12 @@ function splitLines(text: string): string[] {
 }
 
 /**
- * Collect the text of a level-2 section.
+ * Find the lines of a level-2 section.
  * @param maskedLines Document lines with fenced code blocks emptied.
  * @param heading The section heading.
- * @returns The lines under the heading up to the next level-2 heading, or undefined when the heading is absent.
+ * @returns The first line after the heading and the line of the next level-2 heading, or undefined when the heading is absent.
  */
-function readSection(maskedLines: string[], heading: string): string[] | undefined {
+function findSectionBounds(maskedLines: string[], heading: string): [number, number] | undefined {
   const start = maskedLines.findIndex(line => line.trimEnd() === heading);
 
   if (start === -1) {
@@ -130,7 +132,19 @@ function readSection(maskedLines: string[], heading: string): string[] | undefin
     (line, index) => index > start && line.startsWith("## "),
   );
 
-  return maskedLines.slice(start + 1, nextHeading === -1 ? maskedLines.length : nextHeading);
+  return [start + 1, nextHeading === -1 ? maskedLines.length : nextHeading];
+}
+
+/**
+ * Collect the text of a level-2 section.
+ * @param maskedLines Document lines with fenced code blocks emptied.
+ * @param heading The section heading.
+ * @returns The lines under the heading up to the next level-2 heading, or undefined when the heading is absent.
+ */
+function readSection(maskedLines: string[], heading: string): string[] | undefined {
+  const bounds = findSectionBounds(maskedLines, heading);
+
+  return bounds === undefined ? undefined : maskedLines.slice(...bounds);
 }
 
 /**
@@ -287,26 +301,71 @@ function findProofProblems(maskedLines: string[], specLines: string[]): string[]
 }
 
 /**
+ * Find an empty Proof section in a plan that has no spec to prove.
+ * @param lines Plan lines.
+ * @param maskedLines Plan lines with fenced code blocks emptied.
+ * @returns At most one message.
+ */
+function findFixProofProblems(lines: string[], maskedLines: string[]): string[] {
+  const bounds = findSectionBounds(maskedLines, proofHeading);
+
+  return bounds === undefined || lines.slice(...bounds).some(line => line.trim() !== "")
+    ? []
+    : [
+        `the section "${proofHeading}" is empty; name the test that fails today and passes once the cause is fixed`,
+      ];
+}
+
+/**
+ * Tell whether a change folder holds a fix plan: a plan with neither an intent nor a spec.
+ * @param folder The `intent/<change>` folder.
+ * @returns True when the folder has no `intent.md` and no `spec.md`.
+ */
+function isFixPlanFolder(folder: string): boolean {
+  return (
+    !existsSync(path.join(folder, intentFileName)) && !existsSync(path.join(folder, specFileName))
+  );
+}
+
+/**
+ * Find a missing spec, or a spec the plan does not prove.
+ * @param maskedLines Plan lines with fenced code blocks emptied.
+ * @param specText Content of the `spec.md` beside the plan, or undefined when there is none.
+ * @returns One message per problem.
+ */
+function findSpecProblems(maskedLines: string[], specText: string | undefined): string[] {
+  if (specText === undefined) {
+    return [`there is no ${specFileName} beside the plan; write the spec the plan builds`];
+  }
+
+  const specLines = splitLines(specText);
+
+  return [...findRequirementProblems(specLines), ...findProofProblems(maskedLines, specLines)];
+}
+
+/**
  * Check one plan against the template in `.agents/skills/sdlc/playbooks/build.md` and the spec beside it.
  * @param planText Plan content.
  * @param specText Content of the `spec.md` beside the plan, or undefined when there is none.
  * @param isAcceptanceRequired Whether the branch changes a file outside `intent/`.
+ * @param isFixPlan Whether the folder holds a fix plan, which has no spec to prove.
  * @returns One message per problem.
  */
 function checkPlan(
   planText: string,
   specText: string | undefined,
   isAcceptanceRequired: boolean,
+  isFixPlan = false,
 ): string[] {
-  const maskedLines = maskFencedBlocks(splitLines(planText));
-  const specLines = specText === undefined ? undefined : splitLines(specText);
+  const lines = splitLines(planText);
+  const maskedLines = maskFencedBlocks(lines);
 
   return [
     ...findHeadingProblems(maskedLines),
     ...findAcceptanceProblems(maskedLines, isAcceptanceRequired),
-    ...(specLines === undefined
-      ? [`there is no ${specFileName} beside the plan; write the spec the plan builds`]
-      : [...findRequirementProblems(specLines), ...findProofProblems(maskedLines, specLines)]),
+    ...(isFixPlan
+      ? findFixProofProblems(lines, maskedLines)
+      : findSpecProblems(maskedLines, specText)),
   ];
 }
 
@@ -355,6 +414,7 @@ const proofSpec = [
 ].join("\n");
 
 const allUnnamedPart = "does not name requirement 1, 2, 3, 4, 5";
+const headingsMessagePart = "level-2 headings";
 const acceptanceRequiredProblem = "acceptance is required";
 const doneSpec = proofSpec.replace("Status: accepted.", "Status: done.");
 const placeholderLine = `${acceptedByPrefix}${acceptancePlaceholder}.`;
@@ -405,13 +465,32 @@ const branchWithCode: BranchChanges = {
   changedPaths: ["intent/health/plan.md", "src/health.ts"],
 };
 
+/**
+ * Create a change folder that holds the named files, for a self-test.
+ * @param fileNames The files to create in the folder.
+ * @returns The folder path.
+ */
+function createChangeFolder(fileNames: string[]): string {
+  const folder = mkdtempSync(path.join(tmpdir(), "plan-check-"));
+
+  for (const fileName of fileNames) {
+    writeFileSync(path.join(folder, fileName), "");
+  }
+
+  return folder;
+}
+
+const fixPlanFolder = createChangeFolder([planFileName]);
+const intentOnlyFolder = createChangeFolder([intentFileName, planFileName]);
+const specOnlyFolder = createChangeFolder([specFileName, planFileName]);
+
 const selfTestCases: SelfTestCase[] = [
   {
     name: "a complete plan",
     problems: checkAgainstProofSpec(buildPlan({})),
   },
   {
-    expectedMessagePart: "level-2 headings",
+    expectedMessagePart: headingsMessagePart,
     name: "a heading is misspelled",
     problems: checkAgainstProofSpec(
       buildPlan({
@@ -420,7 +499,7 @@ const selfTestCases: SelfTestCase[] = [
     ),
   },
   {
-    expectedMessagePart: "level-2 headings",
+    expectedMessagePart: headingsMessagePart,
     name: "headings are out of order",
     problems: checkAgainstProofSpec(
       buildPlan({
@@ -598,6 +677,66 @@ const selfTestCases: SelfTestCase[] = [
     ),
   },
   {
+    name: "a fix plan with no intent and no spec",
+    problems: checkPlan(buildPlan({}), undefined, true, isFixPlanFolder(fixPlanFolder)),
+  },
+  {
+    name: "a fix plan with an empty Proof",
+    expectedMessagePart: "is empty",
+    problems: checkPlan(
+      buildPlan({
+        proof: "",
+      }),
+      undefined,
+      true,
+      isFixPlanFolder(fixPlanFolder),
+    ),
+  },
+  {
+    name: "a fix plan whose Proof holds only a fenced block",
+    problems: checkPlan(
+      buildPlan({
+        proof: "```\npnpm test\n```",
+      }),
+      undefined,
+      true,
+      isFixPlanFolder(fixPlanFolder),
+    ),
+  },
+  {
+    expectedMessagePart: acceptedByPrefix,
+    name: "a fix plan with the placeholder engineer on a branch that changes code",
+    problems: checkPlan(
+      buildPlan({
+        accepted: placeholderLine,
+      }),
+      undefined,
+      requiresAcceptance(branchWithCode),
+      isFixPlanFolder(fixPlanFolder),
+    ),
+  },
+  {
+    expectedMessagePart: headingsMessagePart,
+    name: "a fix plan with a misspelled heading",
+    problems: checkPlan(
+      buildPlan({
+        headings: requiredHeadings.map(heading => heading.replace("Risks", "Risk")),
+      }),
+      undefined,
+      true,
+      isFixPlanFolder(fixPlanFolder),
+    ),
+  },
+  {
+    name: "a folder with an intent and a plan but no spec is not a fix plan",
+    expectedMessagePart: `no ${specFileName} beside the plan`,
+    problems: checkPlan(buildPlan({}), undefined, true, isFixPlanFolder(intentOnlyFolder)),
+  },
+  {
+    name: "a folder with a spec and a plan is not a fix plan",
+    problems: checkPlan(buildPlan({}), proofSpec, true, isFixPlanFolder(specOnlyFolder)),
+  },
+  {
     name: "a missing default branch is reported",
     expectedMessagePart: "cannot be found",
     problems: [describeMissingDefaultBranch(undefined) ?? "no note"],
@@ -663,6 +802,13 @@ const selfTestFailures = selfTestCases
   .filter(testCase => isSelfTestFailure(testCase))
   .map(({name}) => name);
 
+for (const folder of [fixPlanFolder, intentOnlyFolder, specOnlyFolder]) {
+  rmSync(folder, {
+    recursive: true,
+    force: true,
+  });
+}
+
 /**
  * Read a spec when it exists.
  * @param specPath Path of the `spec.md`.
@@ -709,11 +855,14 @@ function findMissingPlanLines(changeFolders: string[]): string[] {
  * @returns One line per problem.
  */
 function findPlanFileLines(planPath: string, isAcceptanceRequired: boolean): string[] {
-  const specPath = path.join(path.dirname(planPath), specFileName);
+  const folder = path.dirname(planPath);
 
-  return checkPlan(readFileSync(planPath, "utf8"), readSpec(specPath), isAcceptanceRequired).map(
-    message => `${planPath}: ${message}`,
-  );
+  return checkPlan(
+    readFileSync(planPath, "utf8"),
+    readSpec(path.join(folder, specFileName)),
+    isAcceptanceRequired,
+    isFixPlanFolder(folder),
+  ).map(message => `${planPath}: ${message}`);
 }
 
 /**

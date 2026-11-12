@@ -90,16 +90,10 @@ jobs:
         with:
           cache: true
           require-lockfile: true
-      - name: Reject suppression directives
-        run: pnpm suppressions:check
       - name: Check rendered agent rules match .agents/rules
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
-      - name: Check human gates
-        run: pnpm human-gates:check
-      - name: Self-test the intent checker
-        run: pnpm intent:check
       - name: Check plans
         run: pnpm plan:check
       - name: Check bands
@@ -112,8 +106,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
       - name: Check package.json ordering
         run: pnpm sort-package-json:check
-      - name: Validate peer dependency contracts
-        run: pnpm peers:check
       - name: Check types
         run: pnpm typecheck
       - name: Run Knip

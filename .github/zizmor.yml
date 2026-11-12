@@ -4,7 +4,7 @@
 rules:
   adhoc-packages:
     ignore:
-      - ci.yml:241
+      - ci.yml:237
   self-repository:
     disable: true
   use-trusted-publishing:

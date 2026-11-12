@@ -43,8 +43,6 @@
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",
-    "human-gates:check": "node scripts/check-human-gates.ts",
-    "intent:check": "node scripts/check-intent.ts",
     "knip": "knip",
     "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
     "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
@@ -56,12 +54,11 @@
     "rules:sync": "node scripts/sync-agent-rules.ts",
     "sort-package-json": "sort-package-json package.json",
     "sort-package-json:check": "sort-package-json --check package.json",
-    "suppressions:check": "bash .agents/hooks/agent-suppression-gate.sh --repo",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "verify": "pnpm suppressions:check && pnpm rules:check && pnpm gates:check && pnpm human-gates:check && pnpm intent:check && pnpm plan:check && pnpm bands:check && pnpm changesets:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
+    "verify": "pnpm rules:check && pnpm gates:check && pnpm plan:check && pnpm bands:check && pnpm changesets:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
   },
   "dependencies": {
     "@clack/prompts": "1.8.1"

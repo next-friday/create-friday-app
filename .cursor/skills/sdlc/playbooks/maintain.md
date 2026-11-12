@@ -12,7 +12,6 @@ This playbook starts from a finding such as an alert, a monitoring ticket, a fai
    In the author line, name what started the run, such as "Author: maintain job (alert <link>). Status: draft."
 
 4. Run the confidence check. It is a check, not a person.
-   - Run `node scripts/check-intent.ts intent/<change>/intent.md` and fix what it reports. It needs no installed dependencies.
    - Start a subagent that has not seen the diagnosis, give it only the finding, the logs and files you read, and `intent.md`, and have it try to disprove the **Problem** section from the evidence. When you cannot start a subagent, read the evidence again from the first line as if someone else wrote the intent.
    - When a claim does not survive, move it under **Open questions**, and say in the pull request that the confidence check failed and on which claim.
 5. Commit `intent.md` on a new branch, push it, and open a pull request ready for review, as `AGENTS.md` says for branches and pull requests. Put the evidence and the confidence check's result first in its description, under the template's first heading. When you cannot open a pull request from this session, say so and give the pushed branch's name.

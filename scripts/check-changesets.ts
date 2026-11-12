@@ -357,7 +357,7 @@ const selfTestCases: SelfTestCase[] = [
       addedFile(minorChangesetPath),
       modifiedFile(".agents/skills/sdlc/SKILL.md"),
       modifiedFile("AGENTS.md"),
-      modifiedFile("scripts/check-intent.ts"),
+      modifiedFile("scripts/check-plan.ts"),
     ],
   },
   {

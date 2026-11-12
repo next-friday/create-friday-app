@@ -30,7 +30,7 @@ const claudeMarketplacePath = ".claude-plugin/marketplace.json";
 const settingsPath = ".claude/settings.json";
 const marketplacePaths = [claudeMarketplacePath, ".cursor-plugin/marketplace.json"];
 const textExtensions = new Set([".json", ".md", ".sh", ".ts", ".yaml", ".yml"]);
-const ignoredDirectories = new Set(["dist", "node_modules", "results"]);
+const ignoredDirectories = new Set(["results"]);
 
 const manifestFields = {
   name: "friday",
@@ -86,7 +86,7 @@ const urlScheme = /^[a-z][\d+.a-z-]*:/i;
 /**
  * List every text file under a directory, as paths relative to it.
  * @param directory Directory to read; a missing directory has no files.
- * @param shouldSkipResults Whether to skip the folders that tools write, such as `node_modules` and `results`.
+ * @param shouldSkipResults Whether to skip the folders that tools write, such as `results`.
  * @returns Relative file paths.
  */
 function listFiles(directory: string, shouldSkipResults: boolean): string[] {

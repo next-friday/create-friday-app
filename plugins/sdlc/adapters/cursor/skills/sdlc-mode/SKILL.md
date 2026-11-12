@@ -25,7 +25,7 @@ Do these steps in order.
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line. A problem reported with `/sdlc:sdlc-mode` is the person's ask for `plan`.
 
-   Do not start work a person did not ask for. When a message reports a problem without asking for work, answer in a few lines and end with the message that would start it: `/sdlc:sdlc-mode` followed by their own words.
+   Do not start work a person did not ask for. When a message reports a problem without asking for work, answer in a few lines and give, on the **Status** line, the message that would start it: `/sdlc:sdlc-mode` followed by their own words.
 
 2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Next** line chains another playbook, add that playbook's steps when you start it.
 3. **Do the playbook's steps yourself,** stopping only as `.agents/rules/agent-owned-work.md` says. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
@@ -35,10 +35,17 @@ Do these steps in order.
 
 Write replies a person can check. Write the reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, and a draft file's own text stay as they are. Write paths from the project root, such as `README.md:12`, never from the machine's root. State as a fact only what you opened or ran in this turn, and say what you ran; mark anything else as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
 
-Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The **Status** line gives the URL of the page where the person acts next, when there is one.
+Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The person often reads the reply on a phone: a URL opens the page with one tap, and a number opens nothing.
+
+When the person writes a number and a repository, build the URL before you write anything else: the repository's URL, then the host's path for the thing, such as `/pull/<number>` for a pull request or `/issues/<number>` for an issue. Use that URL where the person wrote the number, from the **Request** line on. After the first mention you may say "this pull request", with no number.
+
+For example, the person writes "who must approve pull request #7 of https://host.example/acme/shop":
+
+- **Request** line: "**Request:** Who must approve https://host.example/acme/shop/pull/7, and which page to open next."
+- **Status** line: "**Status:** Not checked yet who must approve this pull request. It waits for a code owner. Next: https://host.example/acme/shop/pull/7"
 
 ```markdown
-**Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>
+**Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question. Where the request holds a number, write the URL you built from it.>
 
 **Steps:** <only when the session has no task-list tool, and never for the `question` playbook. One line for each numbered step of the playbook: `1. <the step, copied word for word>: done | open | skip: <reason>`. When the turn ran more than one playbook, one list for each, under its file name on a line of its own, such as `playbooks/build.md`.>
 
@@ -46,8 +53,12 @@ Name a pull request, an issue, a branch, a workflow run, or a file by its full U
 
 <What the current step produces: the round of questions, or the whole draft. For a question or a request no row fits, the answer.>
 
-**Status:** <what is done, what comes next, and which gate it waits on and for whom, ending with the full URL of the page where the person acts next when there is one.>
+**Status:** <what is done, what comes next, and which gate it waits on and for whom, all on this one line. When there is a page where the person acts next, the line ends with `Next: <its full URL>`, and nothing follows that URL.>
 ```
+
+The **Status** line is the last line of the reply.
+
+Before you send the reply, check two things. No line names a pull request or an issue by its number: each such place holds the URL or "this pull request". The last line starts with `**Status:**`, and when there is a page to open it ends with `Next: <URL>`.
 
 A step that is not finished is `open`, including one at its Gate.
 

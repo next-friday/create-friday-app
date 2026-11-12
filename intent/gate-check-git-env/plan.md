@@ -14,13 +14,13 @@ The cause: both scripts pass the whole environment to `git` and to the gate scri
 | :---------------------------------------------------------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------- |
 | `test/check-agent-gates.test.ts`                                              | new     | Runs the gate check with `GIT_DIR` set to a scratch repository and expects that repository's `HEAD` and branches to stay as they were. |
 | `scripts/check-agent-gates.ts`, `templates/base/scripts/check-agent-gates.ts` | changed | Each child `git` and each gate script runs without the variables `git rev-parse --local-env-vars` lists. A person commits these files. |
-| `scripts/run-agent-evals.ts`, `templates/base/scripts/run-agent-evals.ts`     | changed | The same, for the fixture commands and the agent command.                                                                              |
+| `templates/base/scripts/run-agent-evals.ts`                                   | changed | The same, for the fixture commands and the agent command.                                                                              |
 | `.changeset/gate-check-git-env.md`                                            | new     | Patch: a generated project's `pnpm gates:check` and `pnpm evals:run` no longer write to the repository a git hook runs them in.        |
 
 ## Order of work
 
 1. Add the test. Check: `pnpm vitest run test/check-agent-gates.test.ts` fails because `HEAD` moved.
-2. Change `scripts/run-agent-evals.ts` and its template copy. Check: its self-tests pass with `GIT_DIR` set to a scratch repository, and that repository is unchanged.
+2. Change `templates/base/scripts/run-agent-evals.ts`; the root's copy left `main` with the `friday` plugin. Check: its self-tests pass with `GIT_DIR` set to a scratch repository, and that repository is unchanged.
 3. A person commits the change to `scripts/check-agent-gates.ts` and its template copy, from an issue that carries the exact text. Check: the test of step 1 passes, and `pnpm verify` exits 0.
 4. Generate the `nodejs` project and run `GIT_DIR=<scratch>/.git pnpm gates:check` in it. Check: exit 0, and the scratch repository is unchanged.
 

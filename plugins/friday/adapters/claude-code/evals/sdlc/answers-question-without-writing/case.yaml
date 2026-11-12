@@ -1,0 +1,44 @@
+schema_version: "1.1"
+name: answers-question-without-writing
+expected_outcome: |
+  The agent answers why `pnpm verify` runs knip and cites the files it read. It writes no file and makes no commit.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-names-knip
+    type: regex
+    pattern: "knip"
+    flags: mu
+  - name: reply-cites-a-file
+    type: regex
+    pattern: '[\w./-]+\.(?:json|md|ts|ya?ml)'
+    flags: mu
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu
+  - name: reply-has-no-machine-path
+    type: regex
+    pattern: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'
+    flags: mu
+    match: not_contains

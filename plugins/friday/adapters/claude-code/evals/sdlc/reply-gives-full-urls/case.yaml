@@ -1,0 +1,21 @@
+schema_version: "1.1"
+name: reply-gives-full-urls
+expected_outcome: |
+  The agent names the pull request by its full URL on the host the person gave, and the Status line ends with the URL of the page where the person acts next. It starts no work.
+graders:
+  - name: reply-names-the-pull-request-url
+    type: regex
+    pattern: 'https://github\.com/acme/shop/pull/42\b'
+    flags: mu
+  - name: status-line-gives-the-pull-request-url
+    type: regex
+    pattern: '^\*\*Status:\*\*.*https://github\.com/acme/shop/pull/42[).\]*_]*\s*$'
+    flags: mu
+  - name: reply-is-in-thai
+    type: regex
+    pattern: "[฀-๿]{10}"
+    flags: mu
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false

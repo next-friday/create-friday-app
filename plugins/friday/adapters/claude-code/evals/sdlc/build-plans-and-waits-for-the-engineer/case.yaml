@@ -1,0 +1,21 @@
+schema_version: "1.1"
+name: build-plans-and-waits-for-the-engineer
+expected_outcome: |
+  The spec intent/app-version/spec.md is merged and has no plan, and the request already holds the engineer's answers about the files, the order of work, the tests, and the options ruled out. The agent follows the build playbook: it reads the intent, the spec, and the code, asks no question, shows the plan with the template's four headings, changes no code and makes no commit, and waits at the gate for the engineer to accept the plan.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: reply-has-plan-headings
+    type: regex
+    pattern: '(?=[\s\S]*Files that change)(?=[\s\S]*Order of work)(?=[\s\S]*Risks)(?=[\s\S]*Proof)'
+    flags: mu
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu

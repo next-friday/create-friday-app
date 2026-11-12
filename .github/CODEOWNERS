@@ -5,10 +5,11 @@
 # Product owner: the intent home
 /intent/ @joetakara
 
-# Policy owner: policy skills and the loop's own skill, in the source and in the copies the agents load
-/.agents/skills/*-policy/ @joetakara
-/.claude/skills/*-policy/ @joetakara
-/.cursor/skills/*-policy/ @joetakara
-/.agents/skills/sdlc/ @joetakara
-/.claude/skills/sdlc/ @joetakara
-/.cursor/skills/sdlc/ @joetakara
+# Plugin owners: the plugin, in the source and in the adapters the agents load
+/plugins/friday/ @joetakara @next-friday-engineer
+
+# Policy owner: policy skills and the loop's own skill
+/plugins/friday/source/skills/*-policy/ @joetakara
+/plugins/friday/source/skills/sdlc/ @joetakara
+/plugins/friday/adapters/*/skills/*-policy/ @joetakara
+/plugins/friday/adapters/*/skills/sdlc/ @joetakara

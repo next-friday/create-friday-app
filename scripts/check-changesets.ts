@@ -22,7 +22,17 @@ const argumentsFile = "src/arguments.ts";
 const promptsFile = "src/create.ts";
 const stacksFile = "src/stacks.ts";
 const {name: packageName} = JSON.parse(readFileSync("package.json", "utf8")) as {name: string};
-const escapedPackageName = packageName.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
+
+/**
+ * Escape text for use inside a regular expression.
+ * @param text Literal text.
+ * @returns The text with every pattern character escaped.
+ */
+function escapePattern(text: string): string {
+  return text.replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`);
+}
+
+const escapedPackageName = escapePattern(packageName);
 
 const majorDeclaration = new RegExp(
   String.raw`^\s*(["']?)` + escapedPackageName + String.raw`\1\s*:\s*(["']?)major\2\s*$`,
@@ -33,6 +43,15 @@ const frontMatter = /^---\r?\n([\s\S]*?)\r?\n---/;
 const changesetFile = /^\.changeset\/(?!README\.md$)[^/]+\.md$/;
 const stackManifest = /^templates\/(?!base\/)[^/]+\/package\.json$/;
 const publishedPrefixes = ["src/", "templates/"];
+const pluginPackageName = "@next-friday/sdlc";
+
+const pluginPublishedPaths = [
+  "plugins/friday/source/scripts/",
+  "plugins/friday/package.json",
+  "plugins/friday/README.md",
+  "plugins/friday/LICENSE",
+];
+
 const manifestFile = "package.json";
 
 const publishedManifestFields = [
@@ -63,6 +82,27 @@ const dependencyFile =
  */
 function isPublished(changedPath: string): boolean {
   return publishedPrefixes.some(prefix => changedPath.startsWith(prefix));
+}
+
+/**
+ * Tell whether a changed path is part of what the plugin package publishes: its scripts, manifest, README, or license.
+ * @param changedPath Path from the project root.
+ * @returns True when a change to the path reaches a project that installs the plugin package.
+ */
+function isPluginPublished(changedPath: string): boolean {
+  return pluginPublishedPaths.some(published => changedPath.startsWith(published));
+}
+
+/**
+ * Tell whether the front matter of a changeset has a line for a package.
+ * @param changesetText Text of the changeset.
+ * @param name Package name.
+ * @returns True when the front matter declares a release type for the package.
+ */
+function isPackageDeclared(changesetText: string, name: string): boolean {
+  return new RegExp(String.raw`^\s*(["']?)` + escapePattern(name) + String.raw`\1\s*:`, "m").test(
+    frontMatter.exec(changesetText)?.at(1) ?? "",
+  );
 }
 
 /**
@@ -102,6 +142,34 @@ function isDependencyBotBranch(authors: string[], pullRequestAuthor: string | un
 }
 
 /**
+ * Find the problem a package has with the changesets that name it.
+ * @param name Package name.
+ * @param publishedPaths Changed paths and `package.json` fields that the package publishes.
+ * @param packageChangesets Paths of the added changesets that name the package.
+ * @param isBotBranch Whether the dependency bot wrote the branch.
+ * @returns A message, or undefined when the package has no problem.
+ */
+function findPackageProblem(
+  name: string,
+  publishedPaths: string[],
+  packageChangesets: string[],
+  isBotBranch: boolean,
+): string | undefined {
+  if (packageChangesets.length > 0) {
+    return publishedPaths.length === 0
+      ? `${packageChangesets.join(", ")} would release a version of ${name}, but this branch changes nothing the package publishes (see .changeset/README.md); delete it`
+      : undefined;
+  }
+
+  const isDependencyUpdate =
+    isBotBranch && publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
+
+  return isDependencyUpdate || publishedPaths.length === 0
+    ? undefined
+    : `this branch changes ${publishedPaths.length} files or package.json fields that ${name} publishes (first: ${publishedPaths.at(0) ?? ""}) and adds no changeset for it; run "pnpm changeset" (see .changeset/README.md)`;
+}
+
+/**
  * Find the problems a branch's changes have with the changesets it adds.
  * @param changes Changed paths with their git status.
  * @param addedChangesets Text of each changeset the branch adds, by path.
@@ -115,33 +183,36 @@ function findChangesetProblems(
   isBotBranch: boolean,
   changedManifestFields: string[],
 ): string[] {
-  const addedPaths = Object.keys(addedChangesets);
+  const changedPaths = changes.flatMap(({paths}) => paths);
 
-  const publishedPaths = [
-    ...changes.flatMap(({paths}) => paths).filter(changedPath => isPublished(changedPath)),
-    ...changedManifestFields.map(field => `${manifestFile} (${field})`),
+  const releasedPackages = [
+    {
+      name: packageName,
+      publishedPaths: [
+        ...changedPaths.filter(changedPath => isPublished(changedPath)),
+        ...changedManifestFields.map(field => `${manifestFile} (${field})`),
+      ],
+    },
+    {
+      name: pluginPackageName,
+      publishedPaths: changedPaths.filter(changedPath => isPluginPublished(changedPath)),
+    },
   ];
 
-  if (addedPaths.length === 0) {
-    const isDependencyUpdate =
-      isBotBranch && publishedPaths.every(publishedPath => dependencyFile.test(publishedPath));
+  const problems = releasedPackages
+    .map(({name, publishedPaths}) =>
+      findPackageProblem(
+        name,
+        publishedPaths,
+        Object.keys(addedChangesets).filter(addedPath =>
+          isPackageDeclared(addedChangesets[addedPath] ?? "", name),
+        ),
+        isBotBranch,
+      ),
+    )
+    .filter(problem => problem !== undefined);
 
-    return isDependencyUpdate || publishedPaths.length === 0
-      ? []
-      : [
-          `this branch changes ${publishedPaths.length} published files or package.json fields (first: ${publishedPaths.at(0) ?? ""}) and adds no changeset; run "pnpm changeset" (see .changeset/README.md)`,
-        ];
-  }
-
-  const problems: string[] = [];
-
-  if (publishedPaths.length === 0) {
-    problems.push(
-      `${addedPaths.join(", ")} would release a version, but this branch changes nothing the package publishes (see .changeset/README.md); delete it`,
-    );
-  }
-
-  const majorPaths = addedPaths.filter(addedPath =>
+  const majorPaths = Object.keys(addedChangesets).filter(addedPath =>
     majorDeclaration.test(frontMatter.exec(addedChangesets[addedPath] ?? "")?.at(1) ?? ""),
   );
 
@@ -283,6 +354,9 @@ function modifiedFile(changedPath: string, removedLines = 0): Change {
   return changeOf("M", changedPath, removedLines);
 }
 
+const pluginSkillFile = "plugins/friday/source/skills/sdlc/SKILL.md";
+const pluginScript = "plugins/friday/source/scripts/check-plan.ts";
+const pluginChangesetPath = ".changeset/sdlc-package.md";
 const minorChangesetPath = ".changeset/quiet-owls-sing.md";
 const majorChangesetPath = ".changeset/loud-owls-sing.md";
 const patchChangesetPath = ".changeset/calm-owls-sing.md";
@@ -291,6 +365,10 @@ const sourceFile = "src/setup.ts";
 
 const patchChangeset = {
   [patchChangesetPath]: '---\n"@next-friday/create-app": patch\n---\n\nNote.\n',
+};
+
+const pluginChangeset = {
+  [pluginChangesetPath]: `---\n"${pluginPackageName}": minor\n---\n\nNote.\n`,
 };
 
 const minorChangeset = {
@@ -322,12 +400,12 @@ const templateOnlyChanges = [
 const selfTestCases: SelfTestCase[] = [
   {
     name: "no changeset and nothing published changed",
-    changes: [modifiedFile(".agents/skills/sdlc/SKILL.md"), modifiedFile("AGENTS.md")],
+    changes: [modifiedFile(pluginSkillFile), modifiedFile("AGENTS.md")],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
     name: "no changeset with a template change",
-    changes: [modifiedFile("templates/base/.agents/skills/sdlc/SKILL.md")],
+    changes: [modifiedFile("templates/base/SETUP.md")],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
@@ -404,6 +482,28 @@ const selfTestCases: SelfTestCase[] = [
     changes: [addedFile(majorChangesetPath), modifiedFile(manifestFile)],
   },
   {
+    expectedMessagePart: missingChangesetMessagePart,
+    name: "no changeset with a change to a plugin script",
+    changes: [modifiedFile(pluginScript)],
+  },
+  {
+    expectedMessagePart: missingChangesetMessagePart,
+    addedChangesets: minorChangeset,
+    name: "a CLI changeset does not cover a change to a plugin script",
+    changes: [addedFile(minorChangesetPath), modifiedFile(sourceFile), modifiedFile(pluginScript)],
+  },
+  {
+    addedChangesets: pluginChangeset,
+    name: "a plugin changeset with a change to a plugin script",
+    changes: [addedFile(pluginChangesetPath), modifiedFile(pluginScript)],
+  },
+  {
+    addedChangesets: pluginChangeset,
+    expectedMessagePart: "would release a version of",
+    name: "a plugin changeset with only a change to a plugin skill",
+    changes: [addedFile(pluginChangesetPath), modifiedFile(pluginSkillFile)],
+  },
+  {
     addedChangesets: minorChangeset,
     name: "one changeset with a src change",
     changes: [addedFile(minorChangesetPath), modifiedFile(sourceFile)],
@@ -426,9 +526,9 @@ const selfTestCases: SelfTestCase[] = [
     expectedMessagePart: "would release a version",
     changes: [
       addedFile(minorChangesetPath),
-      modifiedFile(".agents/skills/sdlc/SKILL.md"),
+      modifiedFile(pluginSkillFile),
       modifiedFile("AGENTS.md"),
-      modifiedFile("scripts/check-plan.ts"),
+      modifiedFile("scripts/sync-plugin.ts"),
     ],
   },
   {

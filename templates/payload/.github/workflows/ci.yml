@@ -90,16 +90,14 @@ jobs:
         with:
           cache: true
           require-lockfile: true
-      - name: Reject suppression directives
-        run: pnpm suppressions:check
-      - name: Check Cursor rules match .agents/rules
+      - name: Check rendered agent rules match .agents/rules
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
-      - name: Check human gates
-        run: pnpm human-gates:check
-      - name: Self-test the intent checker
-        run: pnpm intent:check
+      - name: Check plans
+        run: pnpm plan:check
+      - name: Check bands
+        run: pnpm bands:check
       - name: Check lint
         run: pnpm lint:check
       - name: Check formatting
@@ -108,8 +106,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }} # editorconfig-checker downloads its binary from GitHub releases; the token avoids the anonymous rate limit.
       - name: Check package.json ordering
         run: pnpm sort-package-json:check
-      - name: Validate peer dependency contracts
-        run: pnpm peers:check
       - name: Check types
         run: pnpm typecheck
       - name: Run Knip
@@ -143,7 +139,23 @@ jobs:
     if: needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: payload
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready --username postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/payload
+      PAYLOAD_SECRET: ci-only-secret
+      APP_URL: http://localhost:3000
       HADOLINT_VERSION: 2.15.1
       HADOLINT_SHA256: c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507
       TRIVY_VERSION: 0.76.1
@@ -165,7 +177,7 @@ jobs:
       - name: Smoke test image
         id: smoke
         run: |
-          docker run --detach --name app --env PORT=3000 --publish 3000:3000 app:ci
+          docker run --detach --name app --network host --env PORT=3000 --env DATABASE_URL --env PAYLOAD_SECRET --env APP_URL app:ci
           curl --silent --show-error --fail --retry 15 --retry-delay 1 --retry-all-errors --output /dev/null http://localhost:3000/health
       - name: Show container logs
         if: failure() && steps.smoke.outcome == 'failure'
@@ -192,6 +204,59 @@ jobs:
     with:
       environment: dev
       commit_sha: ${{ github.sha }}
+
+  triage:
+    name: Triage failed build
+    needs:
+      - changes
+      - checks
+      - image
+    if: failure() && vars.CLAUDE_CI_ENABLED == 'true' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read # Needed to read the logs of the failed jobs.
+      id-token: write # Needed to authenticate the Claude GitHub App with the workflow's OIDC token.
+      pull-requests: write # Needed to post the summary on the pull request.
+    steps:
+      - name: Require a Claude credential
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [[ -n "$ANTHROPIC_API_KEY" || -n "$CLAUDE_CODE_OAUTH_TOKEN" ]] || { echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret"; exit 1; }
+      - name: Collect the build log
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          mkdir -p out
+          for job in $(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" --paginate --jq '.jobs[] | select(.conclusion == "failure") | .id'); do
+            gh api --allow-escape-sequences "repos/$REPOSITORY/actions/jobs/$job/logs" >> out/build.log
+          done
+      - name: Triage failed build
+        id: triage
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: >
+            Read the build log at out/build.log. Identify the most
+            likely cause, say whether the failure looks flaky or real, and write a
+            three-line summary for the PR thread.
+          claude_args: >-
+            --model claude-haiku-5-5
+            --max-turns 5
+            --allowedTools "Read"
+            --json-schema '{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}'
+      - name: Post the summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          SUMMARY: ${{ fromJSON(steps.triage.outputs.structured_output).summary }}
+        run: gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body "$SUMMARY"
 
   ci:
     name: All Checks

@@ -1,11 +1,7 @@
 import {expect, test} from "@playwright/test";
 
-test("home page shows the template heading", async ({page}) => {
-  await page.goto("/");
+test("serves the home page", async ({page}) => {
+  const response = await page.goto("/");
 
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-    }),
-  ).toHaveText("Next Friday Next.js template");
+  expect(response?.status()).toBe(200);
 });

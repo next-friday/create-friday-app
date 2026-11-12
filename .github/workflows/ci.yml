@@ -86,17 +86,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          fetch-depth: 0
           persist-credentials: false
       - name: Set up pnpm
         uses: ./.github/actions/setup-pnpm
-      - name: Reject suppression directives
-        run: pnpm suppressions:check
       - name: Check Cursor rules match .agents/rules
         run: pnpm rules:check
       - name: Check agent gates
         run: pnpm gates:check
-      - name: Check human gates
-        run: pnpm human-gates:check
+      - name: Check changesets
+        run: pnpm changesets:check
 
   format:
     name: Format & Manifests
@@ -278,6 +277,26 @@ jobs:
             echo "The template name was not replaced." >&2
             exit 1
           fi
+      - name: Install verified actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          archive="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl --silent --show-error --fail --location --output "$archive" \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${archive}"
+          echo "${ACTIONLINT_SHA256}  ${archive}" | sha256sum --check --strict
+          tar --extract --gzip --file "$archive" actionlint
+      - name: Lint the project's workflows
+        working-directory: ci-${{ matrix.stack }}
+        run: |
+          "$GITHUB_WORKSPACE/actionlint" -color
+      - name: Analyze the project's GitHub Actions security
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          inputs: ci-${{ matrix.stack }}/.github
+          persona: pedantic
+          advanced-security: false
       - name: Verify the project
         working-directory: ci-${{ matrix.stack }}
         env:

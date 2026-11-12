@@ -20,39 +20,55 @@ afterAll(() => {
   });
 });
 
-describe("initGit", () => {
-  const project = path.join(root, "project");
+/**
+ * Create a directory under the test root, and a repository in it when asked.
+ * @param name - Directory name.
+ * @param isRepository - Whether to run `git init` in it.
+ * @returns The directory path.
+ */
+function makeDirectory(name: string, isRepository = false): string {
+  const directory = path.join(root, name);
 
+  mkdirSync(directory);
+
+  if (isRepository) {
+    expect(initGit(directory)).toBe("initialized");
+  }
+
+  return directory;
+}
+
+describe("initGit", () => {
   it("creates a repository on main", () => {
-    mkdirSync(project);
+    const project = makeDirectory("project");
+
     expect(initGit(project)).toBe("initialized");
     expect(readFileSync(path.join(project, ".git", "HEAD"), "utf8")).toBe("ref: refs/heads/main\n");
   });
 
   it("leaves an existing repository alone", () => {
-    expect(initGit(project)).toBe("existing");
+    expect(initGit(makeDirectory("existing", true))).toBe("existing");
   });
 
   it("does not nest a repository inside another", () => {
-    const nested = path.join(project, "nested");
+    const nested = path.join(makeDirectory("parent", true), "nested");
 
     mkdirSync(nested);
     expect(initGit(nested)).toBe("parent");
   });
 
   it("ignores a repository that the inherited GIT_DIR names", () => {
-    const outside = path.join(root, "outside");
+    const repository = makeDirectory("named-repository", true);
+    const outside = makeDirectory("outside");
 
-    mkdirSync(outside);
-    vi.stubEnv("GIT_DIR", path.join(project, ".git"));
+    vi.stubEnv("GIT_DIR", path.join(repository, ".git"));
     expect(initGit(outside)).toBe("initialized");
     expect(existsSync(path.join(outside, ".git", "HEAD"))).toBe(true);
   });
 
   it("reports a failure when Git is missing", () => {
-    const bare = path.join(root, "bare");
+    const bare = makeDirectory("bare");
 
-    mkdirSync(bare);
     vi.stubEnv("PATH", "");
     expect(initGit(bare)).toBe("failed");
   });

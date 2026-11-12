@@ -1,44 +1,65 @@
 {
-  "$schema": "https://turbo.build/schema.json",
+  "$schema": "https://turborepo.dev/schema.json",
+  "futureFlags": {
+    "affectedUsingTaskInputs": true
+  },
+  "globalDependencies": [
+    ".dockerignore",
+    ".env",
+    "package.json",
+    "pnpm-workspace.yaml",
+    "railway.json"
+  ],
   "globalPassThroughEnv": [
     "APP_URL",
     "CI",
     "DATABASE_URL",
     "NEXT_TELEMETRY_DISABLED",
-    "PAYLOAD_SECRET",
-    "PORT"
+    "PAYLOAD_SECRET"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
-    "depcruise": {},
+    "depcruise": {
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
+    },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "start": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
-    "test": {},
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
+    },
     "test:changed": {
-      "cache": false
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "test:coverage": {
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"],
       "outputs": ["coverage/**"]
     },
     "test:e2e": {
       "cache": false,
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "test:watch": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"],
       "outputs": [".next/types/**", "next-env.d.ts"]
     }
   }

@@ -3,43 +3,45 @@ export const stacks = [
     id: "nodejs",
     label: "Node.js",
     hint: "HTTP service without a framework",
+    developmentScript: "start:dev",
     requiresDatabase: false,
   },
   {
     id: "nestjs",
     label: "NestJS",
     hint: "HTTP API",
+    developmentScript: "start:dev",
     requiresDatabase: false,
   },
   {
     id: "nextjs",
     label: "Next.js",
     hint: "Web app",
+    developmentScript: "dev",
     requiresDatabase: false,
   },
   {
     id: "payload",
     label: "Payload",
     hint: "Headless CMS on Next.js and PostgreSQL",
+    developmentScript: "dev",
     requiresDatabase: true,
   },
   {
     id: "turborepo",
     label: "Turborepo",
     hint: "Next.js app and Payload backoffice",
+    developmentScript: "dev",
     requiresDatabase: true,
   },
 ] as const;
 
 export type StackId = (typeof stacks)[number]["id"];
 
-export const developmentScripts: Record<StackId, string> = {
-  nodejs: "start:dev",
-  nestjs: "start:dev",
-  nextjs: "dev",
-  payload: "dev",
-  turborepo: "dev",
-};
+export const stackById = Object.fromEntries(stacks.map(stack => [stack.id, stack])) as Record<
+  StackId,
+  (typeof stacks)[number]
+>;
 
 /**
  * Check whether a string names a supported stack.

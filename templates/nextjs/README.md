@@ -1,6 +1,6 @@
 # next-friday-template-nextjs
 
-Next Friday starter for Next.js applications.
+Next.js application.
 
 ## Getting started
 
@@ -12,7 +12,7 @@ pnpm dev
 
 ## After creating a project from this template
 
-Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Next Friday Next.js template` text in `app/layout.tsx`, `app/page.tsx`, and their tests.
+Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Next.js application` text in `app/layout.tsx`, `app/page.tsx`, and `app/page.test.ts`.
 
 ## Scripts
 
@@ -26,7 +26,9 @@ Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, an
 | `pnpm check`    | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook)            |
 | `pnpm verify`   | Run the static checks, all unit tests with coverage, and the production build                                     |
 
-CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
+`pnpm build` copies `.env` into `.next/standalone`, where every secret sits in plain text. Keep that folder out of images and archives.
+
+CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL, dependency review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
 
 ## Container
 

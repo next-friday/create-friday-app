@@ -1,6 +1,6 @@
 # next-friday-template-turborepo
 
-Next Friday starter for a Turborepo workspace. `apps/app` is a Next.js site on port 3000. `apps/backoffice` is a Payload CMS on port 3001. The backoffice API is REST at `/api`.
+Turborepo workspace. `apps/app` is a Next.js site on port 3000. `apps/backoffice` is a Payload CMS on port 3001. The backoffice API is REST at `/api`.
 
 ## Getting started
 
@@ -10,7 +10,7 @@ pnpm install
 pnpm dev
 ```
 
-The CLI created `.env` from `.env.example` and set `PAYLOAD_SECRET` to a random secret. Before `pnpm dev`, set in `.env`:
+The CLI created `.env` from `.env.example` and set `PAYLOAD_SECRET` to a random secret. Before `pnpm dev`, `pnpm build`, `pnpm check`, or `pnpm verify`, set in `.env`:
 
 - `DATABASE_URL`: a PostgreSQL database.
 - `APP_URL`: the URL you open the backoffice at, such as `http://localhost:3001`.
@@ -20,11 +20,11 @@ Then open `http://localhost:3000` for the site and `http://localhost:3001/admin`
 
 **Warning:** until the first user exists, anyone who can reach the backoffice `/admin` can create it. Create the first user in each deployed environment right after its first deploy, before you share the URL.
 
-In development, Payload applies collection changes to the database directly. In production, the server applies the migrations in `apps/backoffice/src/migrations/` when it starts.
+In development, Payload applies collection changes to the database directly. In production, Payload applies the migrations in `apps/backoffice/src/migrations/` when it first initialises, which the backoffice `/health` triggers, so the first health check after a deploy applies them and fails while the database is unreachable.
 
 ## After creating a project from this template
 
-Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Next Friday Next.js template` text in `apps/app/app/layout.tsx`, `apps/app/app/page.tsx`, and their tests, and the `Next Friday Payload template` text in `apps/backoffice/src/app/(frontend)/layout.tsx`, `apps/backoffice/src/app/(frontend)/page.tsx`, and their tests.
+Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Next.js application` text in `apps/app/app/layout.tsx`, `apps/app/app/page.tsx`, and `apps/app/app/page.test.ts`, and the `Payload application` text in `apps/backoffice/src/app/(frontend)/layout.tsx`, `apps/backoffice/src/app/(frontend)/page.tsx`, and `apps/backoffice/src/app/(frontend)/page.test.ts`.
 
 ## Scripts
 
@@ -42,13 +42,13 @@ Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, an
 | `pnpm check`              | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook) |
 | `pnpm verify`             | Run the static checks, all unit tests with coverage, and the production build                          |
 
-CI also runs the build, the end-to-end tests, the container image scans, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Pull requests run Turborepo with `--affected` against the base branch, so only packages that changed are typed, tested, built, and scanned. Pushes to `main` and the weekly schedule still run every app. Patch coverage runs only for apps that produced a coverage file.
+CI also runs the build, the end-to-end tests, the container image scans, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL, dependency review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Pull requests run Turborepo with `--affected` against the base branch, so only packages that changed are typed, tested, built, and scanned. Pushes to `main` run every app. The weekly schedule rebuilds and scans every container image and runs nothing else. Patch coverage runs only for apps that produced a coverage file.
 
 To reuse task output across CI runs, create a Vercel team, add the repository variable `TURBO_TEAM`, and follow [Turborepo on GitHub Actions](https://turborepo.dev/docs/guides/ci-vendors/github-actions) to allow OIDC. The workflow exchanges GitHub OIDC for a short-lived Remote Cache token. If OIDC is unavailable, set the `TURBO_TOKEN` secret instead. Leave both unset to run without a Remote Cache.
 
 ## Container
 
-Each app has a Dockerfile. Build both from the workspace root. The images run as the `node` user. The app listens on `PORT`, or 3000 when it is unset. The backoffice listens on `PORT`, or 3000 when it is unset, and needs `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL`.
+Each app has a Dockerfile. Build both from the workspace root. The images run as the `node` user and listen on `PORT`, or 3000 when it is unset. The backoffice needs `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL`.
 
 ```sh
 docker build --file apps/app/Dockerfile --tag app .
@@ -81,14 +81,14 @@ On Vercel, deploy an app without its image. The Next.js preset takes precedence 
 
    Limit `dev`, `uat`, and `prod` to the `main` branch. Add the release managers as required reviewers on `prod` only; `dev` deploys on every push to `main`, so a reviewer there would hold each push. Environment secrets and variables in a private repository need GitHub Pro, Team, or Enterprise; required reviewers in a private repository need GitHub Enterprise.
 
-3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`. The workflow compares the commit with the last GitHub deployment to that environment and runs `railway up` only for services whose packages changed. A promotion through `uat` or `prod` uses the same comparison against the commit last deployed there, so several commits still ship every changed service. The first deploy to an environment ships both services.
+3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`. The workflow compares the commit with the commit of the last successful deploy to that environment, found from the successful `deploy.yml` and `ci.yml` runs on `main`, and runs `railway up` only for services whose packages changed. A promotion through `uat` or `prod` uses the same comparison against the commit last deployed there, so several commits still ship every changed service. The first deploy to an environment ships both services.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health` on each service it uploaded.
 
 Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
 
 ## Mobile app
 
-The template does not ship an Expo app. Add one under `apps/mobile` when you need it:
+To add an Expo app, create it under `apps/mobile`:
 
 1. Create the app from the workspace root with `pnpm create expo-app@latest apps/mobile`, then add `packages/*` workspace packages as you share code. Keep `eas.json` and `credentials.json` inside `apps/mobile` and run the EAS CLI from that directory ([Expo: Build with monorepos](https://docs.expo.dev/build-reference/build-with-monorepos/)).
 2. Use `@expo/fingerprint` with `expo-github-action/fingerprint` so a pull request requests a native build only when the native layer changed ([Expo fingerprint](https://docs.expo.dev/versions/latest/sdk/fingerprint/)).

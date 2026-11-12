@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc-help playbook deploy ใช้ยังไง
+/sdlc-help playbook rollback ใช้ยังไง

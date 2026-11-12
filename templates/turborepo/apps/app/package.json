@@ -2,7 +2,7 @@
   "name": "@next-friday-template-turborepo/app",
   "version": "0.1.0",
   "private": true,
-  "description": "Next Friday Next.js app.",
+  "description": "Next.js application.",
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "dev": "next dev --port 3000",
     "start": "cp -R .next/static .next/standalone/apps/app/.next/ && (test ! -d public || cp -R public .next/standalone/apps/app/) && node .next/standalone/apps/app/server.js",
     "test": "vitest run --passWithNoTests",
-    "test:changed": "if git rev-parse --quiet --verify origin/main > /dev/null && git diff --quiet \"$(git merge-base origin/main HEAD)\" -- pnpm-lock.yaml pnpm-workspace.yaml \"*package.json\" \"*tsconfig.json\" .husky; then vitest run --changed origin/main --passWithNoTests; else vitest run --passWithNoTests; fi",
+    "test:changed": "if git rev-parse --quiet --verify origin/main > /dev/null && git diff --quiet \"$(git merge-base origin/main HEAD)\" -- \":(top)pnpm-lock.yaml\" \":(top)pnpm-workspace.yaml\" \":(top)*package.json\" \":(top)*tsconfig.json\" \":(top).husky\"; then vitest run --changed origin/main --passWithNoTests; else vitest run --passWithNoTests; fi",
     "test:coverage": "vitest run --coverage --passWithNoTests",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
@@ -24,13 +24,13 @@
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
+    "@swc/core": "1.16.22",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitest/coverage-v8": "5.0.5",
     "dependency-cruiser": "18.7.1",
-    "fast-check": "4.10.2",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vitest": "5.0.5"

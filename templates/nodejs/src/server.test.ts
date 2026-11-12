@@ -1,3 +1,4 @@
+import {connect} from "node:net";
 import {describe, expect, it} from "vitest";
 import {once} from "node:events";
 import type {AddressInfo} from "node:net";
@@ -56,5 +57,27 @@ describe("createAppServer", () => {
     const response = await request("/missing");
 
     expect(response.status).toBe(404);
+  });
+
+  it("returns 404 for a request target that is not a valid URL", async () => {
+    const server = createAppServer();
+
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+
+    const {port} = server.address() as AddressInfo;
+    const socket = connect(port, "127.0.0.1");
+
+    socket.end("GET // HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n");
+
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of socket) {
+      chunks.push(chunk as Buffer);
+    }
+
+    server.close();
+    await once(server, "close");
+    expect(Buffer.concat(chunks).toString()).toMatch(/^HTTP\/1\.1 404 /);
   });
 });

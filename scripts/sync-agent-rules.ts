@@ -15,10 +15,6 @@ type SubagentConfig = {
 const sourceDirectory = ".agents/rules";
 const configPath = ".agents/rules.json";
 
-const claudeExtras: Record<string, string> = {
-  "agents-guide.md": "@../../AGENTS.md\n",
-};
-
 /**
  * List the names of files with an extension in a directory.
  * @param directory Directory to read.
@@ -90,10 +86,6 @@ for (const name of configNames) {
 
   expected.set(path.join(claudeDirectory, `${name}.md`), renderClaudeRule(name, rule, body));
   expected.set(path.join(cursorDirectory, `${name}.mdc`), renderCursorRule(rule, body));
-}
-
-for (const [file, content] of Object.entries(claudeExtras)) {
-  expected.set(path.join(claudeDirectory, file), content);
 }
 
 const skillSourceDirectory = ".agents/skills";

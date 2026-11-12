@@ -2,3 +2,11 @@ schema_version: "1.1"
 name: interviews-before-writing-intent
 expected_outcome: |
   The agent restates the goal, picks the plan playbook, and asks numbered questions that each carry a recommended answer. It writes no intent yet.
+timeout_seconds: 600
+checks:
+  - reply_matches: '^\s*(?:\*\*)?1[.)]'
+  - reply_matches: '^\s*(?:\*\*)?2[.)]'
+  - no_new_commits
+  - no_new_branch
+  - reply_matches: '[\u0E00-\u0E7F]{10}'
+  - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

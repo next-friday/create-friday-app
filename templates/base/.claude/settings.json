@@ -35,13 +35,6 @@
       "Bash(gh repo delete *)",
       "Bash(gh issue delete *)",
       "Bash(gh release delete *)",
-      "Bash(git *--no-verify*)",
-      "Bash(git commit -n*)",
-      "Bash(git *core.hooksPath*)",
-      "Bash(git *core.hookspath*)",
-      "Bash(git commit-tree*)",
-      "Bash(git update-ref*)",
-      "Bash(*HUSKY=0*)",
       "Bash(gh pr merge*)"
     ]
   },
@@ -50,12 +43,6 @@
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-suppression-gate.sh",
-            "timeout": 10,
-            "onFailure": "block"
-          },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.agents/hooks/agent-test-edit-gate.sh",

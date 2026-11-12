@@ -1,6 +1,13 @@
 import {describe, expect, it} from "vitest";
 
-import {parseCliArguments} from "../src/arguments.ts";
+import {parseCliArguments, usage} from "../src/arguments.ts";
+import {stacks} from "../src/stacks.ts";
+
+describe("usage", () => {
+  it("lists every supported stack id", () => {
+    expect(usage).toContain(`[--stack ${stacks.map(stack => stack.id).join("|")}]`);
+  });
+});
 
 describe("parseCliArguments", () => {
   it("leaves the name and stack unset so the CLI asks for them", () => {
@@ -40,6 +47,10 @@ describe("parseCliArguments", () => {
       skipGit: true,
       skipInstall: true,
     });
+  });
+
+  it.each(["--help", "--version"])("reads %s despite other bad arguments", flag => {
+    expect(parseCliArguments([flag, "--stack", "rails", "first", "second"]).stack).toBeUndefined();
   });
 
   it("rejects an unknown stack", () => {

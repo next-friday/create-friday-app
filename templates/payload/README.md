@@ -1,6 +1,6 @@
 # next-friday-template-payload
 
-Next Friday starter for Payload CMS on Next.js and PostgreSQL. The API is REST at `/api`.
+Payload CMS application on Next.js and PostgreSQL. The API is REST at `/api`.
 
 ## Getting started
 
@@ -20,11 +20,11 @@ Then open `http://localhost:3000/admin` to create the first user.
 
 **Warning:** until the first user exists, anyone who can reach `/admin` can create it. Create the first user in each deployed environment right after its first deploy, before you share the URL.
 
-In development, Payload applies collection changes to the database directly. In production, the server applies the migrations in `src/migrations/` when it starts.
+In development, Payload applies collection changes to the database directly. In production, Payload applies the migrations in `src/migrations/` when it first initialises, which `/health` triggers, so the first health check after a deploy applies them and fails while the database is unreachable.
 
 ## After creating a project from this template
 
-Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Next Friday Payload template` text in `src/app/(frontend)/layout.tsx`, `src/app/(frontend)/page.tsx`, and their tests.
+Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, and the AI-native SDLC. In step 1, also replace the `Payload application` text in `src/app/(frontend)/layout.tsx`, `src/app/(frontend)/page.tsx`, and `src/app/(frontend)/page.test.ts`.
 
 ## Scripts
 
@@ -42,7 +42,9 @@ Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, an
 | `pnpm check`              | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook)            |
 | `pnpm verify`             | Run the static checks, all unit tests with coverage, and the production build                                     |
 
-CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
+`pnpm build` copies `.env` into `.next/standalone`, where every secret sits in plain text. Keep that folder out of images and archives.
+
+CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL, dependency review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
 
 ## Container
 
@@ -54,6 +56,8 @@ docker run --publish 3000:3000 --env DATABASE_URL --env PAYLOAD_SECRET --env APP
 ```
 
 Uploaded images, up to 10 MB each, are written to the container filesystem, which a redeploy discards. Add a Payload storage adapter, for example `@payloadcms/storage-s3`, before storing media in production.
+
+The config sets no `email` adapter, so Payload writes every email, including password-reset links, to the server log. Set `email` in `src/payload.config.ts` before production.
 
 On Vercel, deploy without the image; the Next.js preset takes precedence over the `Dockerfile`.
 

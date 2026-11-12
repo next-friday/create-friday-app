@@ -1,0 +1,5 @@
+---
+"@next-friday/create-app": minor
+---
+
+Every generated project gets five workflows that call Claude, and all of them stay off until the repository variable `CLAUDE_CI_ENABLED` is `true`: `Agent evals` runs `pnpm evals:run` when a pull request changes the agent's configuration and every night; `Spec on intent merge` runs `/sdlc` on an accepted `intent.md` that reaches `main` and opens the spec as a pull request; `Claude fix loop` answers an `@claude` review comment on a pull request from the same repository and pushes to its branch; the `triage` job in `ci.yml` summarizes a failed build on a pull request with the `Read` tool only; `Control band` runs the command in the `CONTROL_BAND_METRIC_COMMAND` variable, then `pnpm bands:check`, and runs `/sdlc` with the finding when the tier's action is `diagnose` or `propose`. Each job accepts a `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` secret, runs the small model with a turn cap, and cannot approve, merge, or push to `main`. `SETUP.md` step 8 lists them.

@@ -1,0 +1,45 @@
+name: Claude fix loop
+
+on:
+  pull_request_review_comment:
+    types:
+      - created
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    name: Address the comment
+    if: vars.CLAUDE_CI_ENABLED == 'true' && contains(github.event.comment.body, '@claude') && !contains(github.event.comment.body, '@claude review') && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read # Needed to read the checks of the pull request.
+      contents: write # Needed to push to the pull request branch.
+      id-token: write # Needed to authenticate the Claude GitHub App with the workflow's OIDC token.
+      issues: write # Needed to answer in the pull request thread.
+      pull-requests: write # Needed to answer in the pull request thread.
+    steps:
+      - name: Require a Claude credential
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [[ -n "$ANTHROPIC_API_KEY" || -n "$CLAUDE_CODE_OAUTH_TOKEN" ]] || { echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret"; exit 1; }
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Address the comment
+        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --model claude-haiku-5-5
+            --max-turns 20
+            --disallowedTools "Bash(gh *)"

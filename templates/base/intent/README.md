@@ -4,6 +4,7 @@ This folder is the intent home. Every change starts here as an `intent.md`, and 
 
 - Each change has its own folder, `intent/<change>/`, where `<change>` is a short kebab-case name. The folder holds `intent.md` (Plan), then `spec.md` (Design), then `plan.md` (Build).
 - The playbooks in `.agents/skills/sdlc/playbooks/` say who writes and who accepts each file.
+- A change is `done` when the tree meets every numbered requirement of its `spec.md`. The agent sets `Status: done.` in `intent.md` and `spec.md` in the pull request that meets the last requirement, and the code owner's approval of that pull request accepts it.
 
 ## Which file holds what
 

@@ -1,6 +1,7 @@
 engineStrict: true
 savePrefix: ""
 allowBuilds:
+  "@swc/core": false
   esbuild: true
   unrs-resolver: true
 overrides:
@@ -13,31 +14,9 @@ overrides:
   "minimatch@<11.0.1": ^11.0.1
 minimumReleaseAgeExclude:
   - "@next-friday/commitlint-config-friday@4.0.0"
-  - "@next-friday/eslint-config-friday@5.0.0"
   - "@next-friday/eslint-config-friday@5.1.0"
   - "@next-friday/prettier-config-friday@4.0.0"
   - "@next-friday/eslint-plugin-friday@1.1.3"
-packageExtensions:
-  payload:
-    peerDependenciesMeta:
-      graphql:
-        optional: true
-  "@payloadcms/next":
-    peerDependenciesMeta:
-      graphql:
-        optional: true
-  "@payloadcms/graphql":
-    peerDependenciesMeta:
-      graphql:
-        optional: true
-  graphql-http:
-    peerDependenciesMeta:
-      graphql:
-        optional: true
-  graphql-scalars:
-    peerDependenciesMeta:
-      graphql:
-        optional: true
 peerDependencyRules:
   ignoreMissing:
     - graphql

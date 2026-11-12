@@ -22,5 +22,5 @@
 
 <!-- Select one option. -->
 
-- [ ] This pull request changes a file under `src/` or `templates/`, and adds a changeset of the type `.changeset/README.md` gives.
-- [ ] No changeset: nothing under `src/` or `templates/` changed.
+- [ ] This pull request changes a file under `src/` or `templates/`, or a published `package.json` field, and adds a changeset of the type `.changeset/README.md` gives.
+- [ ] No changeset: nothing under `src/` or `templates/` and no published `package.json` field changed. `.changeset/README.md` lists the fields.

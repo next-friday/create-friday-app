@@ -10,7 +10,7 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    mimeTypes: ["image/*"],
+    mimeTypes: ["image/avif", "image/gif", "image/jpeg", "image/png", "image/webp"],
   },
   access: {
     read: () => true,

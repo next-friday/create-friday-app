@@ -8,7 +8,7 @@ Use this guide to prepare changes to this repository.
 - Change the Node.js version in `.nvmrc` and the `Dockerfile` together. Dependabot updates only the `Dockerfile`.
 - Install pnpm once with `npm install --global pnpm`. It switches to the version declared by `package.json#packageManager` automatically.
 - Use Claude Code v2.1.295 or later. It reads `CLAUDE.md`, which imports `AGENTS.md`, and supports the `onFailure` field the agent hooks use.
-- Install gitleaks 8.19 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
+- Install gitleaks 8.21 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
 
 From the repository root:
 
@@ -35,8 +35,9 @@ Run the narrowest check that covers the change while you work. Git hooks run the
 | `pre-merge-commit` | blocks merge commits on `main`                                                                                                                                  |
 | `pre-push`         | blocks pushes to `main` except the push that creates it, then `pnpm check`: the static checks, the unit tests related to your changes, and the production build |
 
-- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. Dependabot and OSV-Scanner report vulnerable dependencies.
-- **Coverage:** CI requires 95% line coverage on changed lines in `src/`, except `main.ts`, which holds only wiring. Keep logic out of it, as `src/port.ts` and `src/server.ts` do.
+- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. CodeQL, dependency-review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Dependabot and OSV-Scanner report vulnerable dependencies.
+- **Coverage:** CI requires 95% line coverage on changed lines in `src/`, except `main.ts`, which starts the server and handles the shutdown signals. Keep other logic out of it, as `src/port.ts` and `src/server.ts` do.
+- **Agent evals:** run `pnpm evals:run` after you change `AGENTS.md`, a skill under `.agents/skills/`, or a hook under `.agents/hooks/`, and add a case name to run one case. It runs the cases in `.agents/skill-evals/` with Claude Code on your own Claude login, so it spends your Claude usage, and it is not part of `pnpm verify`.
 
 Run `pnpm verify` for repository changes.
 

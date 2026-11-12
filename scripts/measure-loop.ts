@@ -25,6 +25,9 @@ type SelfTestCase = {
 
 const intentDirectory = "intent";
 const millisecondsPerDay = 86_400_000;
+const secondDay = "2026-01-02T00:00:00+00:00";
+const thirdDay = "2026-01-03T00:00:00+00:00";
+const firstDay = "2026-01-01T00:00:00+00:00";
 
 const tableHeader = [
   "change",
@@ -38,11 +41,24 @@ const tableHeader = [
 
 /**
  * Find the oldest commit date.
- * @param dates Commit dates, newest first, as `git log` prints them.
- * @returns The last date, or undefined when there is no commit.
+ * @param dates Commit dates in any order.
+ * @returns The earliest instant, or undefined when there is no commit.
  */
 function findFirstDate(dates: string[]): string | undefined {
-  return dates.at(-1);
+  return dates.toSorted((left, right) => Date.parse(left) - Date.parse(right)).at(0);
+}
+
+/**
+ * Read the change name of a folder that is a direct child of `intent/`.
+ * @param changePath Path given on the command line.
+ * @returns The folder name, or undefined when the path is not `intent/<change>`.
+ */
+function readChangeName(changePath: string): string | undefined {
+  const segments = path.relative(intentDirectory, changePath).split(path.sep);
+
+  return segments.length === 1 && segments.at(0) !== "" && segments.at(0) !== ".."
+    ? segments.at(0)
+    : undefined;
 }
 
 /**
@@ -69,7 +85,7 @@ function countDaysBetween(from: string, to: string): number {
 
 /**
  * Compute the loop figures of one change from its commit dates.
- * @param dates Commit dates of `intent.md`, `spec.md` and `plan.md`, newest first.
+ * @param dates Commit dates of `intent.md`, `spec.md` and `plan.md`.
  * @returns The first commit of each file, the days from intent to spec, and the two rework counts.
  */
 function summarizeLoop(dates: CommitDates): LoopFigures {
@@ -173,13 +189,13 @@ const selfTestCases: SelfTestCase[] = [
   {
     name: "an intent without a spec",
     dates: {
-      intent: ["2026-01-02T00:00:00+00:00"],
+      intent: [secondDay],
       plan: [],
       spec: [],
     },
     expected: {
       ...noFigures,
-      firstIntent: "2026-01-02T00:00:00+00:00",
+      firstIntent: secondDay,
     },
   },
   {
@@ -187,15 +203,27 @@ const selfTestCases: SelfTestCase[] = [
     dates: {
       intent: ["2026-01-05T00:00:00+00:00", "2026-01-01T12:00:00+00:00"],
       plan: ["2026-01-09T00:00:00+00:00", "2026-01-04T00:00:00+00:00"],
-      spec: ["2026-01-10T00:00:00+00:00", "2026-01-06T00:00:00+00:00", "2026-01-03T00:00:00+00:00"],
+      spec: ["2026-01-10T00:00:00+00:00", "2026-01-06T00:00:00+00:00", thirdDay],
     },
     expected: {
+      firstSpec: thirdDay,
       firstIntent: "2026-01-01T12:00:00+00:00",
       firstPlan: "2026-01-04T00:00:00+00:00",
-      firstSpec: "2026-01-03T00:00:00+00:00",
       daysIntentToSpec: 1.5,
       intentCommitsAfterSpec: 1,
       specCommitsAfterPlan: 2,
+    },
+  },
+  {
+    name: "dates that are not in time order",
+    dates: {
+      intent: [firstDay, thirdDay, secondDay],
+      plan: [],
+      spec: [],
+    },
+    expected: {
+      ...noFigures,
+      firstIntent: firstDay,
     },
   },
   {
@@ -222,6 +250,14 @@ const selfTestFailures = selfTestCases
   })
   .map(({name}) => name);
 
+if (readChangeName("other/dir/change") !== undefined) {
+  selfTestFailures.push("a folder outside intent/ is not a change");
+}
+
+if (readChangeName("intent/change") !== "change") {
+  selfTestFailures.push("a direct child of intent/ is a change");
+}
+
 const changePaths = process.argv.slice(2);
 
 if (selfTestFailures.length > 0) {
@@ -231,10 +267,10 @@ if (selfTestFailures.length > 0) {
   process.exitCode = 1;
 } else {
   const missingLines = changePaths
-    .filter(changePath => !existsSync(changePath))
+    .filter(changePath => !existsSync(changePath) || readChangeName(changePath) === undefined)
     .map(
       changePath =>
-        `${changePath}: the folder does not exist; pass the path of an existing intent/<change> folder`,
+        `${changePath}: the folder does not exist or is not directly under ${intentDirectory}/; pass the path of an existing intent/<change> folder`,
     );
 
   if (missingLines.length > 0) {
@@ -243,7 +279,7 @@ if (selfTestFailures.length > 0) {
   } else {
     const changes =
       changePaths.length > 0
-        ? changePaths.map(changePath => path.basename(changePath))
+        ? changePaths.map(changePath => readChangeName(changePath) ?? "")
         : readdirSync(intentDirectory, {
             withFileTypes: true,
           })

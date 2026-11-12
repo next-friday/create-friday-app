@@ -1,0 +1,5 @@
+---
+"@next-friday/create-app": minor
+---
+
+Every generated project gets `pnpm evals:run`, which runs the agent evals in `.agents/skill-evals/` with Claude Code and the developer's own Claude login. Each case holds a prompt, a `case.yaml` with deterministic `checks` (files changed, commits made, the reply matching or lacking a pattern, the branch, the files of the first commit) and an optional fixture of files, commits, branches, and a local remote, and `graders/` that a model judges. The runner copies the project to a temporary directory, runs `claude -p` with the small model `claude-haiku-5-5` (set `AGENT_EVALS_MODEL` to change it), prints one line per case and the pass rate, and exits non-zero when a case that ran fails. A case whose fixture is only prose is reported as skipped. The command is not part of `pnpm verify`. `CONTRIBUTING.md` says to run it after changing `AGENTS.md`, a skill, or a hook. The project ships the same 18 cases as this repository, including one that checks the agent interviews the engineer before it plans.

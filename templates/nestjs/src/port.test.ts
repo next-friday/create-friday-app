@@ -1,4 +1,5 @@
 import {assert, integer, property} from "fast-check";
+import {describe, expect, it} from "vitest";
 
 import {parsePort} from "./port.js";
 

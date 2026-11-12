@@ -15,7 +15,6 @@ The cause: both scripts pass the whole environment to `git` and to the gate scri
 | `test/check-agent-gates.test.ts`                                              | new     | Runs the gate check with `GIT_DIR` set to a scratch repository and expects that repository's `HEAD` and branches to stay as they were. |
 | `scripts/check-agent-gates.ts`, `templates/base/scripts/check-agent-gates.ts` | changed | Each child `git` and each gate script runs without the variables `git rev-parse --local-env-vars` lists. A person commits these files. |
 | `templates/base/scripts/run-agent-evals.ts`                                   | changed | The same, for the fixture commands and the agent command.                                                                              |
-| `.changeset/gate-check-git-env.md`                                            | new     | Patch: a generated project's `pnpm gates:check` and `pnpm evals:run` no longer write to the repository a git hook runs them in.        |
 
 ## Order of work
 

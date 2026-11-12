@@ -122,35 +122,25 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PACK_DIR: ${{ runner.temp }}/changeset-pack
         run: |
-          releases="$(node -e '
+          release="$(node -e '
             const { readFileSync, writeFileSync } = require("node:fs");
-            const packages = {
-              "@next-friday/create-app": { changelog: "CHANGELOG.md", tagPrefix: "v", latest: "true" },
-              "@next-friday/sdlc": { changelog: "plugins/friday/CHANGELOG.md", tagPrefix: "sdlc-v", latest: "false" },
-            };
-            const [planPath, notesDirectory] = process.argv.slice(1);
-            const releases = JSON.parse(readFileSync(planPath, "utf8")).plan.flat().filter(({ kind }) => kind === "publish");
-            if (releases.length === 0) throw new Error("Expected a release in " + planPath);
-            for (const release of releases) {
-              const target = packages[release.name];
-              if (target === undefined) throw new Error("No changelog and tag prefix for " + release.name);
-              const [, entry] = readFileSync(target.changelog, "utf8").split("\n## " + release.version + "\n");
-              if (entry === undefined) throw new Error(target.changelog + " has no entry for " + release.version);
-              const tag = target.tagPrefix + release.version;
-              writeFileSync(notesDirectory + "/" + tag + ".md", entry.split("\n## ")[0].trim());
-              console.log([tag, release.tarball.path, release.access, release.tag, target.latest].join(" "));
-            }
-          ' "$PACK_DIR/publish-plan.json" "$RUNNER_TEMP")"
-          while read -r -u 3 tag tarball access dist_tag latest; do
-            tag_status=0
-            git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null || tag_status=$?
-            if [ "$tag_status" -eq 0 ]; then
-              echo "::notice::$tag exists, so this run does not stage it again. A maintainer approves it under Staged Packages on npmjs.com; CONTRIBUTING.md under Releasing covers a rejected version."
-              continue
-            fi
-            if [ "$tag_status" -ne 2 ]; then
-              exit "$tag_status"
-            fi
-            npm stage publish "$PACK_DIR/$tarball" --access "$access" --tag "$dist_tag"
-            gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file "$RUNNER_TEMP/$tag.md" --latest="$latest"
-          done 3<<< "$releases"
+            const [planPath, notesPath] = process.argv.slice(1);
+            const [release, ...others] = JSON.parse(readFileSync(planPath, "utf8")).plan.flat().filter(({ kind }) => kind === "publish");
+            if (!release || others.length > 0) throw new Error("Expected one release in " + planPath);
+            const [, entry] = readFileSync("CHANGELOG.md", "utf8").split("\n## " + release.version + "\n");
+            if (entry === undefined) throw new Error("CHANGELOG.md has no entry for " + release.version);
+            writeFileSync(notesPath, entry.split("\n## ")[0].trim());
+            console.log(["v" + release.version, release.tarball.path, release.access, release.tag].join(" "));
+          ' "$PACK_DIR/publish-plan.json" "$RUNNER_TEMP/release-notes.md")"
+          read -r tag tarball access dist_tag <<< "$release"
+          tag_status=0
+          git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null || tag_status=$?
+          if [ "$tag_status" -eq 0 ]; then
+            echo "::notice::$tag exists, so this run does not stage it again. A maintainer approves it under Staged Packages on npmjs.com; CONTRIBUTING.md under Releasing covers a rejected version."
+            exit 0
+          fi
+          if [ "$tag_status" -ne 2 ]; then
+            exit "$tag_status"
+          fi
+          npm stage publish "$PACK_DIR/$tarball" --access "$access" --tag "$dist_tag"
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file "$RUNNER_TEMP/release-notes.md"

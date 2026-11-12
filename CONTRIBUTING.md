@@ -51,7 +51,7 @@ Run the narrowest check that covers the change. Run `pnpm verify` before submitt
 
 For focused checks, use the relevant script in [`package.json`](package.json).
 
-Run `pnpm evals:run` and `pnpm evals:run:write` after you change `AGENTS.md`, a skill under `plugins/friday/source/skills/`, or a hook under `.agents/hooks/`, and add `--case <name>` to run one case. Together they run the cases in `plugins/friday/adapters/claude-code/evals/` with `claude plugin eval` on your own Claude login and score each case with and without the plugin, so they spend your Claude usage; neither is part of `pnpm verify`. [`plugins/friday/README.md`](plugins/friday/README.md) says which cases each one runs.
+Run `pnpm evals:run` and `pnpm evals:run:write` after you change `AGENTS.md`, a skill under `plugins/sdlc/source/skills/`, or a hook under `.agents/hooks/`, and add `--case <name>` to run one case. Together they run the cases in `plugins/sdlc/adapters/claude-code/evals/` with `claude plugin eval` on your own Claude login and score each case with and without the plugin, so they spend your Claude usage; neither is part of `pnpm verify`. [`plugins/sdlc/README.md`](plugins/sdlc/README.md) says which cases each one runs.
 
 Three jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) run only in CI: Template, which generates each stack and runs its checks; Consumer Smoke, which installs the packed CLI with npm and runs it; and Compatibility, which runs the tests on the Node.js versions and operating systems in its matrix. Run `pnpm audit` locally for the Dependency Audit job. These workflows have no local command: Dependency Review, Zizmor with Actionlint, Secret Scan (TruffleHog and Gitleaks), and pull request title validation run on pull requests; the Triage failed build job comments on a failing pull request from this repository; OpenSSF Scorecard runs on pushes to `main`, weekly, and when a branch protection rule changes. CodeQL on this repository stays on GitHub default setup so an advanced workflow does not conflict with it. Generated projects ship an advanced CodeQL workflow.
 
@@ -104,22 +104,22 @@ A repository admin sets these once in the GitHub repository settings. Git does n
 
 ## The loop
 
-A change moves through the playbooks in `plugins/friday/source/skills/sdlc/playbooks/`: plan, design, build, review, deploy, and maintain, plus fix for a defect and question for a question. [`plugins/friday/source/skills/sdlc/SKILL.md`](plugins/friday/source/skills/sdlc/SKILL.md) matches a request to one playbook and runs it to the next human gate.
+A change moves through the playbooks in `plugins/sdlc/source/skills/sdlc/playbooks/`: plan, design, build, review, deploy, and maintain, plus fix for a defect and question for a question. [`plugins/sdlc/source/skills/sdlc/SKILL.md`](plugins/sdlc/source/skills/sdlc/SKILL.md) matches a request to one playbook and runs it to the next human gate.
 
 This repository is the source of truth for intents, specs, plans, and lessons (the playbook asks for one named source of truth per artifact, page 22). This repository's own choice is that GitHub pull requests are the source of truth for reviews and approvals. No other tracker is used.
 
 ### Plays this repository has
 
-| Play (playbook page)                     | Where it lives                                                                                                        |
-| :--------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| Intent home (12–13)                      | [`intent/`](intent/README.md)                                                                                         |
-| Interviews in Plan and Build (12, 19–20) | `plugins/friday/source/skills/sdlc/playbooks/plan.md` and `build.md`                                                  |
-| Requirements and design (15–17)          | `plugins/friday/source/skills/sdlc/playbooks/design.md` and the four policy skills in `plugins/friday/source/skills/` |
-| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, `.agents/verifier.md`, and `plugins/friday/source/agents/verifier.md`         |
-| PR review loop, step 4 (38)              | `REVIEW.md` (rendered from `.agents/review.md`) and `plugins/friday/source/skills/sdlc/playbooks/review.md`           |
-| CI/CD step 1, triage (45)                | The **Triage failed build** job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)                             |
-| Closing the loop (48–51)                 | [`bands.yaml`](bands.yaml)                                                                                            |
-| Claude Tag and the lessons file (52)     | [`lessons/`](lessons/README.md)                                                                                       |
+| Play (playbook page)                     | Where it lives                                                                                                    |
+| :--------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| Intent home (12–13)                      | [`intent/`](intent/README.md)                                                                                     |
+| Interviews in Plan and Build (12, 19–20) | `plugins/sdlc/source/skills/sdlc/playbooks/plan.md` and `build.md`                                                |
+| Requirements and design (15–17)          | `plugins/sdlc/source/skills/sdlc/playbooks/design.md` and the four policy skills in `plugins/sdlc/source/skills/` |
+| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, `.agents/verifier.md`, and `plugins/sdlc/source/agents/verifier.md`       |
+| PR review loop, step 4 (38)              | `REVIEW.md` (rendered from `.agents/review.md`) and `plugins/sdlc/source/skills/sdlc/playbooks/review.md`         |
+| CI/CD step 1, triage (45)                | The **Triage failed build** job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)                         |
+| Closing the loop (48–51)                 | [`bands.yaml`](bands.yaml)                                                                                        |
+| Claude Tag and the lessons file (52)     | [`lessons/`](lessons/README.md)                                                                                   |
 
 ### How the loop is measured
 

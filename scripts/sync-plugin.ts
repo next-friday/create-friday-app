@@ -21,7 +21,7 @@ type SelfTestCase = {
   problems: string[];
 };
 
-const pluginRoot = "plugins/friday";
+const pluginRoot = "plugins/sdlc";
 const sourceRoot = path.join(pluginRoot, "source");
 const adaptersRoot = path.join(pluginRoot, "adapters");
 const vendorNamesPath = path.join(adaptersRoot, "vendor-names.json");
@@ -37,7 +37,7 @@ const manifestFields = {
   description:
     "Runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies.",
   license: "MIT",
-  homepage: "https://github.com/next-friday/next-friday-create-app/tree/main/plugins/friday",
+  homepage: "https://github.com/next-friday/next-friday-create-app/tree/main/plugins/sdlc",
   repository: "https://github.com/next-friday/next-friday-create-app",
 };
 
@@ -319,12 +319,12 @@ const selfTestCases: SelfTestCase[] = [
   {
     name: "a manifest with a version fails",
     expected: [versionProblem],
-    problems: findVersionKey("m.json", '{"name": "friday", "version": "1.0.0"}'),
+    problems: findVersionKey("m.json", '{"name": "sample", "version": "1.0.0"}'),
   },
   {
     name: "a marketplace entry with a version fails",
     expected: [versionProblem],
-    problems: findVersionKey("m.json", '{"plugins": [{"name": "friday", "version": "1.0.0"}]}'),
+    problems: findVersionKey("m.json", '{"plugins": [{"name": "sample", "version": "1.0.0"}]}'),
   },
   {
     name: "a marketplace with a version in its metadata fails",
@@ -334,12 +334,12 @@ const selfTestCases: SelfTestCase[] = [
   {
     name: "a marketplace with a version at its top level fails",
     expected: [versionProblem],
-    problems: findVersionKey("m.json", '{"version": "1.0.0", "plugins": [{"name": "friday"}]}'),
+    problems: findVersionKey("m.json", '{"version": "1.0.0", "plugins": [{"name": "sample"}]}'),
   },
   {
     name: "a manifest without a version passes",
     expected: [],
-    problems: findVersionKey("m.json", '{"name": "friday", "plugins": [{"name": "friday"}]}'),
+    problems: findVersionKey("m.json", '{"name": "sample", "plugins": [{"name": "sample"}]}'),
   },
   {
     name: "settings that enable the plugin and name the marketplace pass",

@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "friday",
-      "source": "./plugins/friday/adapters/claude-code",
+      "source": "./plugins/sdlc/adapters/claude-code",
       "description": "Runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies."
     }
   ]

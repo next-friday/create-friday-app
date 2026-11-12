@@ -1,0 +1,7 @@
+{
+  "name": "friday",
+  "description": "Runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies.",
+  "license": "MIT",
+  "homepage": "https://github.com/next-friday/next-friday-create-app/tree/main/plugins/sdlc",
+  "repository": "https://github.com/next-friday/next-friday-create-app"
+}

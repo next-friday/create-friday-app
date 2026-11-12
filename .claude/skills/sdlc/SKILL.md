@@ -36,14 +36,16 @@ Write the reply as the **Write replies a person can check** convention in `AGENT
 ```markdown
 **Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>
 
-**Steps:** <only when the session has no task-list tool, and never for the `question` playbook. One line for each numbered step of the playbook: `1. <the step, copied word for word>: done | open | skip: <reason>`.>
+**Steps:** <only when the session has no task-list tool, and never for the `question` playbook. One line for each numbered step of the playbook: `1. <the step, copied word for word>: done | open | skip: <reason>`. When the turn ran more than one playbook, one list for each, under its file name on a line of its own, such as `playbooks/build.md`.>
+
+**Checks:** <only when a step ran checks, and never for the `question` playbook. Each command, then the lines of its output that show the result, copied from the output.>
 
 <What the current step produces: the round of questions, or the whole draft. For a question or a request no row fits, the answer.>
 
 **Status:** <what is done, what comes next, and which gate it waits on and for whom.>
 ```
 
-When one turn runs more than one playbook, list each one's steps under its file name. A step that is not finished is `open`, including one at its Gate.
+A step that is not finished is `open`, including one at its Gate.
 
 A reply that ends before a **Gate** step says which step stopped it and why. "Waiting for an instruction" is not a reason.
 

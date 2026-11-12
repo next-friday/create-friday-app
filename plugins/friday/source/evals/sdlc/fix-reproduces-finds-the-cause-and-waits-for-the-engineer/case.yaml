@@ -1,0 +1,43 @@
+schema_version: "1.1"
+name: fix-reproduces-finds-the-cause-and-waits-for-the-engineer
+expected_outcome: |
+  The message reports a defect in behaviour that already exists: parseVersion("1.2") in src/version.ts returns "1.NaN.0". The agent follows the fix playbook: it runs the code and shows the reproduction output, names the one cause the evidence leaves after ruling out the others, shows a plan with the template's four headings, changes no file and makes no commit, and waits at the gate for the engineer to accept the plan.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-shows-reproduction-output
+    type: regex
+    pattern: '1\.NaN\.0'
+    flags: mu
+  - name: reply-has-plan-headings
+    type: regex
+    pattern: '(?=[\s\S]*Files that change)(?=[\s\S]*Order of work)(?=[\s\S]*Risks)(?=[\s\S]*Proof)'
+    flags: mu
+  - name: reply-names-plan-file
+    type: regex
+    pattern: 'intent/[\w-]+/plan\.md'
+    flags: mu
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu

@@ -1,0 +1,31 @@
+schema_version: "1.1"
+name: writes-spec-from-merged-intent
+expected_outcome: |
+  The intent intent/csv-export/intent.md is merged and has no spec. The agent follows the design playbook: it reads the four policies, writes intent/csv-export/spec.md from the template, pushes a branch, and waits at the gate for the product owner. It does not merge.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: spec-file-exists
+    type: file_exists
+    path: intent/csv-export/spec.md
+  - name: spec-has-five-headings
+    type: regex
+    pattern: '(?=[\s\S]*^## Requirements$)(?=[\s\S]*^## Design$)(?=[\s\S]*^## Policies$)(?=[\s\S]*^## Areas of concern$)(?=[\s\S]*^## Open questions$)'
+    flags: mu
+    target:
+      source: file
+      path: intent/csv-export/spec.md
+  - name: branch-is-checked-out
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\s+(?:checkout|switch)\s+(?:-\S+\s+)*(?!main$).+'
+    min: 1
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu
+  - name: reply-has-no-machine-path
+    type: regex
+    pattern: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'
+    flags: mu
+    match: not_contains

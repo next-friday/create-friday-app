@@ -1,0 +1,38 @@
+schema_version: "1.1"
+name: work-request-is-sent-to-sdlc
+expected_outcome: |
+  The message asks for work. The agent says to send it with /friday:sdlc and changes nothing.
+graders:
+  - name: reply-names-the-command
+    type: regex
+    pattern: "/friday:sdlc"
+    flags: mu
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: reply-is-in-thai
+    type: regex
+    pattern: '[\u0E00-\u0E7F]{10}'
+    flags: mu
+  - name: reply-has-no-machine-path
+    type: regex
+    pattern: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'
+    flags: mu
+    match: not_contains

@@ -1,0 +1,16 @@
+{
+  "name": "next-friday",
+  "owner": {
+    "name": "Next Friday"
+  },
+  "metadata": {
+    "description": "Plugins that run the Next Friday software development loop."
+  },
+  "plugins": [
+    {
+      "name": "friday",
+      "source": "./plugins/friday/adapters/cursor",
+      "description": "Runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies."
+    }
+  ]
+}

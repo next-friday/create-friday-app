@@ -11,9 +11,14 @@ The version number follows [Semantic Versioning](https://semver.org/). The publi
 
 The files under `templates/` are what the CLI produces. `src/create.ts` copies them into the new project once, so a later version changes no project that already exists. A template change is therefore `patch` or `minor`, never `major`.
 
+## The plugin package
+
+`plugins/friday/` is also the npm package `@next-friday/sdlc`. It holds `dist/` (built from `plugins/friday/source/scripts/`), `package.json`, `README.md`, and `LICENSE`, and its public API is the three commands `sdlc-plan-check`, `sdlc-bands-check`, and `sdlc-loop-measure`. Its skills, subagent, and eval cases are not in the package: they reach a project through the `friday` plugin, from the repository, with no release.
+
 ## Which pull requests need a changeset
 
 - A pull request adds a changeset when it changes a file under `src/` or `templates/`, or one of these `package.json` fields: `bin`, `dependencies`, `engines`, `exports`, `files`, `name`, `optionalDependencies`, `peerDependencies`, `type`.
+- A pull request adds a changeset for `@next-friday/sdlc` when it changes a file under `plugins/friday/source/scripts/`, or `plugins/friday/package.json`, `README.md`, or `LICENSE`. A changeset names the package it releases, and one pull request can add one for each package.
 - A pull request that changes none of those adds none. This repository's own agent instructions, scripts, tests, and CI are not in the package. `README.md` and `LICENSE` are, and a change to them goes out with the next version.
 - A pull request that Dependabot opens adds none when it changes only dependency files: `package.json`, `pnpm-workspace.yaml`, a `Dockerfile`, `.nvmrc`, or a workflow. A maintainer who wants it released on its own adds a `patch` changeset to that pull request; otherwise it goes out with the next version.
 - This repository does not use empty changesets (`changeset --empty`): a pull request that publishes nothing adds no file.

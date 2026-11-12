@@ -32,24 +32,26 @@
   ],
   "scripts": {
     "audit": "pnpm audit",
-    "bands:check": "node scripts/check-bands.ts",
+    "bands:check": "node plugins/friday/source/scripts/check-bands.ts",
     "build": "tsdown",
     "changeset": "changeset",
     "changeset:status": "changeset status --since main",
     "changesets:check": "node scripts/check-changesets.ts",
-    "check:publint": "publint",
+    "check:publint": "publint && pnpm --filter @next-friday/sdlc exec publint",
     "clean": "rm -rf dist coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "dev": "tsdown --watch",
-    "evals:run": "node scripts/run-agent-evals.ts",
+    "evals:run": "claude plugin eval plugins/friday/adapters/claude-code --scaffold",
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",
     "knip": "knip",
-    "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config",
-    "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config",
-    "loop:measure": "node scripts/measure-loop.ts",
+    "lint": "eslint . --fix --cache --max-warnings=0 --no-inline-config --ignore-pattern \"plugins/friday/dist/**\"",
+    "lint:check": "eslint . --cache --max-warnings=0 --no-inline-config --ignore-pattern \"plugins/friday/dist/**\"",
+    "loop:measure": "node plugins/friday/source/scripts/measure-loop.ts",
     "prepack": "pnpm build",
-    "plan:check": "node scripts/check-plan.ts",
+    "plan:check": "node plugins/friday/source/scripts/check-plan.ts",
+    "plugin:check": "node scripts/sync-plugin.ts --check",
+    "plugin:sync": "node scripts/sync-plugin.ts",
     "prepare": "husky",
     "rules:check": "node scripts/sync-agent-rules.ts --check",
     "rules:sync": "node scripts/sync-agent-rules.ts",
@@ -59,7 +61,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "verify": "pnpm rules:check && pnpm gates:check && pnpm plan:check && pnpm bands:check && pnpm changesets:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
+    "verify": "pnpm rules:check && pnpm plugin:check && pnpm gates:check && pnpm plan:check && pnpm bands:check && pnpm changesets:check && pnpm lint:check && pnpm format:check && pnpm sort-package-json:check && pnpm typecheck && pnpm test:coverage && pnpm knip && pnpm build && pnpm check:publint"
   },
   "dependencies": {
     "@clack/prompts": "1.8.1"
@@ -85,8 +87,7 @@
     "sort-package-json": "4.1.0",
     "tsdown": "0.23.5",
     "typescript": "7.0.2",
-    "vitest": "5.1.0",
-    "yaml": "2.9.1"
+    "vitest": "5.1.0"
   },
   "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec",
   "engines": {

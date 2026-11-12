@@ -12,6 +12,7 @@
 | Lint, types, unused code       | `pnpm lint:check`, `pnpm typecheck`, `pnpm knip`            |
 | Build `dist/main.mjs`          | `pnpm build`                                                |
 | Render agent rules             | `pnpm rules:sync`; `pnpm rules:check` fails on stale copies |
+| Render the plugin adapters     | `pnpm plugin:sync`; `pnpm plugin:check` fails on stale ones |
 | Release note, when one is due  | `pnpm changeset` (see `.changeset/README.md`)               |
 
 Check a template by generating a project under the template's own package name, so the rename changes nothing and edited files copy back as they are:
@@ -27,7 +28,7 @@ cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 
 - Build: `pnpm build` (its last line starts with `✔ Build complete`)
 - Test: `pnpm test:coverage` (all green, then the coverage summary; never skip or delete a failing test)
-- Lint: `pnpm lint:check` (prints nothing after `$ eslint . --cache --max-warnings=0 --no-inline-config`)
+- Lint: `pnpm lint:check` (prints nothing after `$ eslint . --cache --max-warnings=0 --no-inline-config --ignore-pattern "plugins/friday/dist/**"`)
 
 Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
 
@@ -35,7 +36,8 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 - `src/main.ts` calls `create()` in `src/create.ts`, which copies `templates/base`, then `templates/<stack>`, renames the project, and installs.
 - A stack is an entry in `src/stacks.ts` plus `templates/<stack>/`, whose `package.json` is named `next-friday-template-<stack>`.
-- Agent rules, skills, subagents, `review.md`, and `mcp.json`: the files under `.agents/` are the source; `pnpm rules:sync` renders them into `.claude/`, `.cursor/`, `REVIEW.md`, and the MCP configs. Never edit a rendered copy.
+- Agent rules, `review.md`, and `mcp.json`: the files under `.agents/` are the source; `pnpm rules:sync` renders them into `.claude/`, `.cursor/`, `REVIEW.md`, and the MCP configs. Never edit a rendered copy.
+- The `friday` plugin: `plugins/friday/source/` holds the skills, the subagent, the eval cases, and the scripts behind `plan:check`, `bands:check`, and `loop:measure`; `pnpm plugin:sync` renders them into `plugins/friday/adapters/`. Never edit an adapter. `plugins/friday/` is also the npm package `@next-friday/sdlc`.
 
 ## Conventions
 
@@ -45,12 +47,9 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 4. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 5. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.**
 6. **After changing a template, generate a project and run its `pnpm verify`.**
-7. **Start from the accepted spec, in plan mode** (Cursor: Plan Mode). Give the plan the change's `intent/<change>/intent.md` and `spec.md`. Commit the approved plan as `intent/<change>/plan.md` with an `Accepted by:` line naming the engineer, as `.agents/skills/sdlc/playbooks/build.md` describes.
-8. **Start a bug fix with a failing test.** A bug fix has no intent and no spec; its plan, `intent/<short-description>/plan.md`, is accepted by an engineer before any code changes. Reproduce the bug as a test, confirm it fails for the reason you expect, and commit it on a `fix/` branch. Then `.agents/hooks/agent-test-edit-gate.sh` blocks test edits by itself: make the test pass without editing it. On a branch with another name, create `.git/bug-fix-in-progress` first, and delete it once the test passes.
-9. **Do not start work a person did not ask for.** When a message reports a problem without asking for work, answer in a few lines and end with the message that would start it: `/sdlc` followed by their own words.
-10. **Branch from the latest `origin/main`, and open the pull request ready for review.** Name the branch `<type>/<short-description>` and fill the body from `.github/pull_request_template.md`. Never merge a pull request: a person merges it with `--squash` after code owner approval, bottom-up for a stack of pull requests. In a session on this repository, its skills and playbooks decide how branches, commits, and pull requests are made, over a skill from another checkout.
-11. **Write replies a person can check.** Reply in the language the person wrote in. Write paths from the project root, such as `README.md:12`, never from the machine's root. State as a fact only what you opened or ran in this turn, and say what you ran; mark anything else as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
-12. **Run parallel sessions in separate worktrees, on tasks that touch different files.** Start each with `claude --worktree <name>`: a worktree is its own checkout on its own branch. Tasks that share files run in one session, one after another. Start with two or three sessions, and add one only while you can review every stream properly.
+7. **Work runs through `/friday:sdlc`.** The `friday` plugin in `plugins/friday/` holds the skills, playbooks, and checks that say when work starts, where it stops for a person, and how a reply is written.
+8. **This repository's skills and playbooks decide how branches, commits, and pull requests are made,** over a skill from another checkout.
+9. **Run parallel sessions in separate worktrees, on tasks that touch different files.** Start each with `claude --worktree <name>`: a worktree is its own checkout on its own branch. Tasks that share files run in one session, one after another. Start with two or three sessions, and add one only while you can review every stream properly.
 
 ## Things Claude gets wrong
 
@@ -59,7 +58,7 @@ When Claude makes a mistake twice, add the correction here.
 - **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back with your file-editing tool, because the shell gate blocks `cp` and `rsync` into `.agents`, `.claude/rules`, and `.cursor` paths.
 - **Commit messages**: commitlint accepts only `Co-Authored-By` trailers.
 - **Issues**: open an issue only to hand work to another person, never to give a pull request a number to close. A pull request closes an issue that already exists with `Closes #<issue>`.
-- **Testing a skill**: test a skill with Claude Code itself, in a generated project: `claude -p "/sdlc <request>" --model <small model> --strict-mcp-config`. After you change `AGENTS.md`, a skill, or a hook, run `pnpm evals:run` (it uses your own Claude login) in the repository and in a generated project, and report its pass rate.
+- **Testing a skill**: test a skill with Claude Code itself, in a scratch project: `claude --plugin-dir plugins/friday/adapters/claude-code -p "/friday:sdlc <request>" --model <small model> --strict-mcp-config`. After you change `AGENTS.md`, a skill, or a hook, run `pnpm evals:run` (it uses your own Claude login) and report its scores.
 - **Accepted is not built**: a spec with `Status: accepted.` is not built. Check each requirement against the tree before you call a change done.
 - **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
 - **CI-only jobs**: Template, Consumer Smoke, Compatibility, Dependency Audit, and Release Integrity run only in CI, as do the scorecard, secret-scan, zizmor, and dependency-review workflows. Do not report them as local results.

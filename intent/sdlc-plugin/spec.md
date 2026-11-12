@@ -22,7 +22,7 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 12. The plugin's playbooks carry the text of these five conventions, and name no `AGENTS.md` convention by its heading: **Start from the accepted spec, in plan mode**; **Start a bug fix with a failing test**; **Do not start work a person did not ask for**; **Branch from the latest `origin/main`, and open the pull request ready for review**; **Write replies a person can check**.
 13. `AGENTS.md`, in the root and in each stack, holds none of the five conventions of requirement 12. One convention names the plugin's `sdlc` skill as the way work runs. The root keeps the sentence of its branch convention that is a fact about this repository: its skills and playbooks decide over a skill from another checkout.
 14. The plugin's skills name `.agents/rules/agent-owned-work.md` and `.agents/rules/evidence-before-claims.md` by path where they rely on them, and restate neither.
-15. Every step marked **Gate** in a playbook today is in the plugin's playbook word for word.
+15. Every step marked **Gate** in a playbook today is in the plugin's playbook word for word, except that `.agents/skills/sdlc/playbooks/<file>` is written `playbooks/<file>` and `/sdlc` is written `/friday:sdlc`.
 16. No file in a generated project names a path under `.agents/skills/sdlc/`.
 17. The `setup-sdlc` skill, run in a project:
     1. Asks for a budget in one question and writes the model for each role to `.agents/sdlc-models.md`, chosen from the models the session offers. **Proposal:** the four choices are those of `setup-pstack` (`unlimited`, `large`, `medium`, `small`), and the roles are build, review, verify, and evals.

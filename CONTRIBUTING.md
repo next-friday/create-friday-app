@@ -51,7 +51,7 @@ Run the narrowest check that covers the change. Run `pnpm verify` before submitt
 
 For focused checks, use the relevant script in [`package.json`](package.json).
 
-Run `pnpm evals:run` after you change `AGENTS.md`, a skill under `plugins/friday/source/skills/`, or a hook under `.agents/hooks/`, and add `--case <name>` to run one case. It runs the cases in `plugins/friday/adapters/claude-code/evals/` with `claude plugin eval` on your own Claude login, scores each case with and without the plugin, so it spends your Claude usage, and it is not part of `pnpm verify`.
+Run `pnpm evals:run` and `pnpm evals:run:write` after you change `AGENTS.md`, a skill under `plugins/friday/source/skills/`, or a hook under `.agents/hooks/`, and add `--case <name>` to run one case. Together they run the cases in `plugins/friday/adapters/claude-code/evals/` with `claude plugin eval` on your own Claude login and score each case with and without the plugin, so they spend your Claude usage; neither is part of `pnpm verify`. [`plugins/friday/README.md`](plugins/friday/README.md) says which cases each one runs.
 
 Three jobs in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) run only in CI: Template, which generates each stack and runs its checks; Consumer Smoke, which installs the packed CLI with npm and runs it; and Compatibility, which runs the tests on the Node.js versions and operating systems in its matrix. Run `pnpm audit` locally for the Dependency Audit job. These workflows have no local command: Dependency Review, Zizmor with Actionlint, Secret Scan (TruffleHog and Gitleaks), and pull request title validation run on pull requests; the Triage failed build job comments on a failing pull request from this repository; OpenSSF Scorecard runs on pushes to `main`, weekly, and when a branch protection rule changes. CodeQL on this repository stays on GitHub default setup so an advanced workflow does not conflict with it. Generated projects ship an advanced CodeQL workflow.
 
@@ -115,7 +115,7 @@ This repository is the source of truth for intents, specs, plans, and lessons (t
 | Intent home (12–13)                      | [`intent/`](intent/README.md)                                                                                         |
 | Interviews in Plan and Build (12, 19–20) | `plugins/friday/source/skills/sdlc/playbooks/plan.md` and `build.md`                                                  |
 | Requirements and design (15–17)          | `plugins/friday/source/skills/sdlc/playbooks/design.md` and the four policy skills in `plugins/friday/source/skills/` |
-| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, and `plugins/friday/source/agents/verifier.md`                                |
+| Feedback loop (31–33)                    | **Verifying your work** in `AGENTS.md`, `.agents/verifier.md`, and `plugins/friday/source/agents/verifier.md`         |
 | PR review loop, step 4 (38)              | `REVIEW.md` (rendered from `.agents/review.md`) and `plugins/friday/source/skills/sdlc/playbooks/review.md`           |
 | CI/CD step 1, triage (45)                | The **Triage failed build** job in [`.github/workflows/ci.yml`](.github/workflows/ci.yml)                             |
 | Closing the loop (48–51)                 | [`bands.yaml`](bands.yaml)                                                                                            |

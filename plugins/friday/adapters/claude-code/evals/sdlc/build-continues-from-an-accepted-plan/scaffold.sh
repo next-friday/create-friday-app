@@ -92,3 +92,34 @@ None
 EOF
 git add -A
 git commit -q -m "docs: add app-version intent and spec"
+remote="$(mktemp -d)/origin.git"
+git init -q --bare "$remote"
+git remote add origin "$remote"
+git checkout -q -b feat/app-version
+mkdir -p intent/app-version
+cat > intent/app-version/plan.md << 'PLAN'
+# Plan: app version endpoint (from intent.md 2026-01-05)
+
+## Files that change
+
+| File                                 | Change | Afterwards                                       |
+| :----------------------------------- | :----- | :----------------------------------------------- |
+| `src/version/version.controller.ts`  | new    | Answers `GET /version` with the package version. |
+
+## Order of work
+
+1. Write the test for `GET /version`. Check: the test fails.
+2. Write the controller. Check: the test passes.
+
+## Risks
+
+The route could shadow an existing one. The riskiest step is 2. Option not taken: reading the version from an environment variable.
+
+## Proof
+
+- Requirement 1: the unit test for `GET /version`.
+PLAN
+git add -A
+git commit -q -m "docs: add app-version plan"
+git checkout -q main
+git push -q origin --all

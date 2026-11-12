@@ -9,7 +9,7 @@ graders:
     flags: mu
   - name: status-line-gives-the-pull-request-url
     type: regex
-    pattern: '^\*\*Status:\*\*.*https://github\.com/acme/shop/pull/42\b'
+    pattern: '^\*\*Status:\*\*.*https://github\.com/acme/shop/pull/42[).\]*_]*\s*$'
     flags: mu
   - name: reply-is-in-thai
     type: regex

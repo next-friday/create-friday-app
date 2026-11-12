@@ -3,34 +3,34 @@ set -euo pipefail
 git init -q -b main
 git config user.name "Eval Author"
 git config user.email "eval@example.invalid"
-mkdir -p .github
-cat > AGENTS.md << 'EOF'
+mkdir -p .github/workflows
+cat > AGENTS.md << 'AGENTS'
 # Agent guide
 
 ## Verifying your work
 
 - Test: `pnpm test`
-- Lint: `pnpm lint:check`
-EOF
-cat > .github/pull_request_template.md << 'EOF'
-## What changed and why
-
-## Checks
-EOF
-cat > package.json << 'EOF'
+AGENTS
+cat > package.json << 'PACKAGE'
 {
   "name": "eval-project",
   "private": true,
   "scripts": {
-    "verify": "pnpm lint:check && pnpm knip && pnpm test"
+    "test": "node --test"
   }
 }
-EOF
-cat > knip.json << 'EOF'
-{
-  "ignore": ["templates/**"]
-}
-EOF
+PACKAGE
+cat > .github/workflows/deploy.yml << 'WORKFLOW'
+name: Deploy
+on:
+  workflow_dispatch:
+jobs:
+  deploy:
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo deploy
+WORKFLOW
 git add -A
 git commit -q -m "chore: add project"
 remote="$(mktemp -d)/origin.git"

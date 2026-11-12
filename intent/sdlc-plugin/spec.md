@@ -8,10 +8,10 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 
 ## Requirements
 
-1. The plugin's source is one directory, `plugins/friday/source/`. It holds the skills `sdlc` with every playbook, `sdlc-help`, `setup-sdlc`, and the four policy skills; the `verifier` subagent; the eval cases; and the scripts `check-plan.ts`, `check-bands.ts`, and `measure-loop.ts`.
+1. The plugin's source is one directory, `plugins/friday/source/`. It holds the skills `sdlc` with every playbook, `sdlc-help`, `setup-sdlc`, and the four policy skills; the text of the `verifier` subagent; and the scripts `check-plan.ts`, `check-bands.ts`, and `measure-loop.ts`.
 2. No file under `plugins/friday/` imports, links to, or copies a file of this repository outside `plugins/friday/`. `pnpm plugin:check` fails when one does.
 3. No file under `plugins/friday/source/` names a model or a vendor's agent tool. `pnpm plugin:check` fails when a name from `plugins/friday/adapters/vendor-names.json` appears there.
-4. `pnpm plugin:sync` renders the source into one adapter for each tool, `plugins/friday/adapters/claude-code/` and `plugins/friday/adapters/cursor/`. Each adapter holds the rendered skills and subagent and that tool's manifest, `.claude-plugin/plugin.json` or `.cursor-plugin/plugin.json`, with `"name": "friday"` and no person's name or email. `pnpm plugin:check` fails when an adapter is stale, and `pnpm verify` runs it.
+4. `pnpm plugin:sync` renders the source into one adapter for each tool, `plugins/friday/adapters/claude-code/` and `plugins/friday/adapters/cursor/`. Each adapter holds the rendered skills and subagent, whose tool-specific fields come from `plugins/friday/adapters/agents.json`, and that tool's manifest, `.claude-plugin/plugin.json` or `.cursor-plugin/plugin.json`, with `"name": "friday"` and no person's name or email. The Claude Code adapter also holds the eval cases, in `plugins/friday/adapters/claude-code/evals/`. `pnpm plugin:check` fails when an adapter is stale, and `pnpm verify` runs it.
 5. Adding a tool adds one directory under `plugins/friday/adapters/` and one entry in the render script. It changes no file under `plugins/friday/source/`.
 6. The repository root holds one marketplace file for each tool, `.claude-plugin/marketplace.json` and `.cursor-plugin/marketplace.json`. Each lists the plugin `friday` and points to that tool's adapter. **Proposal:** the marketplace is named `next-friday`, so a project enables `friday@next-friday`.
 7. In a project generated for Claude Code with the plugin installed, `/friday:sdlc <request>` runs the loop, and `claude -p "/friday:sdlc <request>"` runs it without a terminal session.
@@ -53,12 +53,11 @@ plugins/friday/
     skills/sdlc-help/SKILL.md
     skills/setup-sdlc/SKILL.md
     skills/<area>-policy/SKILL.md
-    agents/verifier.md, agents.json
-    evals/<skill>/<case>/
+    agents/verifier.md
     scripts/check-plan.ts, check-bands.ts, measure-loop.ts
   adapters/
-    vendor-names.json
-    claude-code/.claude-plugin/plugin.json, skills/, agents/, evals/
+    agents.json, vendor-names.json
+    claude-code/.claude-plugin/plugin.json, skills/, agents/, evals/<skill>/<case>/
     cursor/.cursor-plugin/plugin.json, skills/, agents/
 .claude-plugin/marketplace.json
 .cursor-plugin/marketplace.json
@@ -76,7 +75,7 @@ Moving the plugin to a repository of its own moves `plugins/friday/` and the two
 
 | File                                                                                                                    | Afterwards                                                                                                                                                                                                              |
 | :---------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.agents/skills/`, `.agents/agents/`, `.agents/agents.json`, `.agents/skill-evals/`, in the root and `templates/base/`  | Hold nothing the plugin holds. The files move to `plugins/friday/source/`.                                                                                                                                              |
+| `.agents/skills/`, `.agents/agents/`, `.agents/agents.json`, `.agents/skill-evals/`, in the root and `templates/base/`  | Hold nothing the plugin holds. The skills, the subagent's text, and the scripts move to `plugins/friday/source/`; the eval cases and `agents.json` move to `plugins/friday/adapters/`.                                  |
 | `.claude/skills/`, `.claude/agents/`, `.cursor/skills/`, `.cursor/agents/`, in the root and `templates/base/`           | The rendered copies of the moved skills and subagent are removed.                                                                                                                                                       |
 | `scripts/sync-plugin.ts` (new)                                                                                          | Renders `plugins/friday/source/` into the two adapters. With `--check` it fails on a stale adapter and runs the checks of requirements 2 and 3.                                                                         |
 | `scripts/sync-agent-rules.ts`, root and `templates/base/`                                                               | Renders rules, `review.md`, and `mcp.json`, and a project's own policy skill. A person commits this file.                                                                                                               |
@@ -116,9 +115,9 @@ Moving the plugin to a repository of its own moves `plugins/friday/` and the two
 - _How a playbook finds a project's own policy._ Answered by requirement 11: the project's file at `.agents/skills/<area>-policy/SKILL.md` wins, so a policy a project has already changed keeps its place and its code owner.
 - _Where `setup-sdlc` writes the model choices._ Proposed in area of concern 5.
 - _Which version each project runs._ Answered by requirement 8, from "without it the version is the commit" ([Claude Code: Plugin loading](https://code.claude.com/docs/en/plugins/loading.md)).
-- _What `sdlc-help` and the eval cases read._ The plugin's own files: both sit beside the playbooks in `plugins/friday/source/`. `claude plugin eval` reads the cases from the Claude Code adapter.
+- _What `sdlc-help` and the eval cases read._ The plugin's own files: `sdlc-help` sits beside the playbooks in `plugins/friday/source/`, and the eval cases sit in the Claude Code adapter, where `claude plugin eval` reads them.
 - _Whether an open skill format covers every agent tool._ Carried forward. `pstack/plugin.json` names a plugin manifest schema, `https://agent-plugins.org/schemas/1.0.0/plugin.schema.json`; it is not a skill format. The adapters of requirement 4 do not depend on the answer.
-- _How the eval cases stay tool-neutral._ The cases in the source name no tool. Requirement 21 runs them with Claude Code's runner; a runner for another tool is carried forward.
+- _How the eval cases stay tool-neutral._ The cases are written for Claude Code's runner and sit in its adapter, so the source names no tool. Requirement 21 runs them with that runner; a runner for another tool, with its own cases, is carried forward.
 - _Cursor adapter: how a project enables a plugin for its team._ Carried forward. The `cursor/plugins` repository shows the manifest and the marketplace file.
 - _Whether `claude -p "/friday:sdlc …"` runs headless._ Carried forward as requirement 7; the plan proves it with a run before any copy is removed. A plugin enabled in project settings loads only in a folder the person has trusted, and "running with `-p` isn't enough" (same page), so the run in CI is part of that proof.
 - _Whether the short form `/sdlc` works._ Carried forward. Every file writes the full form.

@@ -35,7 +35,7 @@ Do these steps in order.
 
 Write replies a person can check. Write the reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, and a draft file's own text stay as they are. Write paths from the project root, such as `README.md:12`, never from the machine's root. State as a fact only what you opened or ran in this turn, and say what you ran; mark anything else as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
 
-Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The **Status** line gives the URL of the page where the person acts next.
+Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The **Status** line gives the URL of the page where the person acts next, when there is one.
 
 ```markdown
 **Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question.>
@@ -46,7 +46,7 @@ Name a pull request, an issue, a branch, a workflow run, or a file by its full U
 
 <What the current step produces: the round of questions, or the whole draft. For a question or a request no row fits, the answer.>
 
-**Status:** <what is done, what comes next, and which gate it waits on and for whom, ending with the full URL of the page where the person acts next.>
+**Status:** <what is done, what comes next, and which gate it waits on and for whom, ending with the full URL of the page where the person acts next when there is one.>
 ```
 
 A step that is not finished is `open`, including one at its Gate.

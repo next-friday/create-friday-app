@@ -10,7 +10,7 @@ type AgentConfig = {
 type Adapter = {
   agentFields: (agent: AgentConfig) => string[];
   directory: string;
-  hasEvals: boolean;
+  hasAuthoredEvals: boolean;
   manifest: Record<string, string>;
   manifestPath: string;
 };
@@ -25,8 +25,10 @@ const pluginRoot = "plugins/friday";
 const sourceRoot = path.join(pluginRoot, "source");
 const adaptersRoot = path.join(pluginRoot, "adapters");
 const vendorNamesPath = path.join(adaptersRoot, "vendor-names.json");
-const marketplacePaths = [".claude-plugin/marketplace.json", ".cursor-plugin/marketplace.json"];
-const resultsDirectory = path.join("evals", "results");
+const subagentConfigPath = path.join(adaptersRoot, "agents.json");
+const claudeMarketplacePath = ".claude-plugin/marketplace.json";
+const settingsPath = ".claude/settings.json";
+const marketplacePaths = [claudeMarketplacePath, ".cursor-plugin/marketplace.json"];
 const textExtensions = new Set([".json", ".md", ".sh", ".ts", ".yaml", ".yml"]);
 const ignoredDirectories = new Set(["dist", "node_modules", "results"]);
 
@@ -63,13 +65,13 @@ const adapters: Adapter[] = [
     agentFields: findClaudeAgentFields,
     directory: "claude-code",
     manifestPath: ".claude-plugin/plugin.json",
-    hasEvals: true,
+    hasAuthoredEvals: true,
   },
   {
     agentFields: findCursorAgentFields,
     directory: "cursor",
     manifestPath: ".cursor-plugin/plugin.json",
-    hasEvals: false,
+    hasAuthoredEvals: false,
     manifest: {
       ...manifestFields,
       skills: "./skills/",
@@ -159,27 +161,66 @@ function findEscapingReferences(filePath: string, text: string): string[] {
  * @returns One message per name found.
  */
 function findVendorNames(filePath: string, text: string, names: string[]): string[] {
-  return names.filter(name => text.includes(name)).map(name => `${filePath}: names "${name}"`);
+  const lowerText = text.toLowerCase();
+
+  return names
+    .filter(name => {
+      const parts = lowerText.split(name.toLowerCase());
+
+      return parts
+        .slice(0, -1)
+        .some((before, index) => !/\w$/.test(before) && !/^\w/.test(parts[index + 1] ?? ""));
+    })
+    .map(name => `${filePath}: names "${name}"`);
 }
 
 /**
- * Find a `version` key in a manifest or in a marketplace entry.
+ * Find a `version` key in a manifest or in a marketplace file.
  * @param filePath Path of the manifest from the repository root.
  * @param text Manifest content.
- * @returns A message when the manifest holds a version for the plugin.
+ * @returns A message when the file holds a version at its top level, in `metadata`, or in a plugin entry.
  */
 function findVersionKey(filePath: string, text: string): string[] {
-  const {plugins, version} = JSON.parse(text) as {
+  const {
+    metadata,
+    version,
+    plugins = [],
+  } = JSON.parse(text) as {
+    metadata?: {version?: string};
     plugins?: {version?: string}[];
     version?: string;
   };
 
-  const hasVersion =
-    plugins === undefined
-      ? version !== undefined
-      : plugins.some(entry => entry.version !== undefined);
+  const hasVersion = [version, metadata?.version, ...plugins.map(entry => entry.version)].some(
+    value => value !== undefined,
+  );
 
   return hasVersion ? [`${filePath}: holds a version key`] : [];
+}
+
+/**
+ * Find what the repository's Claude Code settings lack to load the plugin from this tree.
+ * @param settingsText Content of the settings file, or undefined when the file is missing.
+ * @param pluginKey The plugin as `<plugin>@<marketplace>`.
+ * @param marketplaceName The marketplace name.
+ * @returns A message when the settings do not enable the plugin and register its marketplace.
+ */
+function findSettingsProblems(
+  settingsText: string | undefined,
+  pluginKey: string,
+  marketplaceName: string,
+): string[] {
+  const {enabledPlugins, extraKnownMarketplaces} = JSON.parse(settingsText ?? "{}") as {
+    enabledPlugins?: Record<string, boolean>;
+    extraKnownMarketplaces?: Record<string, unknown>;
+  };
+
+  return enabledPlugins?.[pluginKey] === true &&
+    extraKnownMarketplaces?.[marketplaceName] !== undefined
+    ? []
+    : [
+        `${settingsPath}: must enable "${pluginKey}" under enabledPlugins and name "${marketplaceName}" under extraKnownMarketplaces; a person commits this file`,
+      ];
 }
 
 /**
@@ -189,12 +230,12 @@ function findVersionKey(filePath: string, text: string): string[] {
 function renderAdapters(): Map<string, string> {
   const expected = new Map<string, string>();
   const skillsDirectory = path.join(sourceRoot, "skills");
-  const evalsDirectory = path.join(sourceRoot, "evals");
   const agentsDirectory = path.join(sourceRoot, "agents");
 
-  const agentsConfig = JSON.parse(
-    readFileSync(path.join(agentsDirectory, "agents.json"), "utf8"),
-  ) as Record<string, AgentConfig>;
+  const agentsConfig = JSON.parse(readFileSync(subagentConfigPath, "utf8")) as Record<
+    string,
+    AgentConfig
+  >;
 
   for (const adapter of adapters) {
     const adapterRoot = path.join(adaptersRoot, adapter.directory);
@@ -219,15 +260,6 @@ function renderAdapters(): Map<string, string> {
         renderAgent(name, adapter.agentFields(agent), agent, body),
       );
     }
-
-    const evalFiles = adapter.hasEvals ? listFiles(evalsDirectory, false) : [];
-
-    for (const file of evalFiles) {
-      expected.set(
-        path.join(adapterRoot, "evals", file),
-        readFileSync(path.join(evalsDirectory, file), "utf8"),
-      );
-    }
   }
 
   return expected;
@@ -236,6 +268,11 @@ function renderAdapters(): Map<string, string> {
 const subagent: AgentConfig = {
   description: "d",
 };
+
+const versionProblem = "m.json: holds a version key";
+const testPluginKey = "p@m";
+const testMarketplaceName = "m";
+const settingsProblem = `${settingsPath}: must enable "${testPluginKey}" under enabledPlugins and name "${testMarketplaceName}" under extraKnownMarketplaces; a person commits this file`;
 
 const selfTestCases: SelfTestCase[] = [
   {
@@ -270,24 +307,71 @@ const selfTestCases: SelfTestCase[] = [
     problems: findEscapingReferences(path.join(pluginRoot, "a.md"), "[x](/etc/passwd)"),
   },
   {
-    name: "a listed name fails and an unlisted one passes",
+    name: "a listed name fails in any case and an unlisted one passes",
     expected: ['a.md: names "Vendor"'],
-    problems: findVendorNames("a.md", "Vendor and others", ["Vendor", "Other"]),
+    problems: findVendorNames("a.md", "VENDOR and others", ["Vendor", "Other"]),
+  },
+  {
+    name: "a listed name inside a longer word passes",
+    expected: [],
+    problems: findVendorNames("a.md", "vendors and unvendored", ["Vendor"]),
   },
   {
     name: "a manifest with a version fails",
-    expected: ["m.json: holds a version key"],
+    expected: [versionProblem],
     problems: findVersionKey("m.json", '{"name": "friday", "version": "1.0.0"}'),
   },
   {
     name: "a marketplace entry with a version fails",
-    expected: ["m.json: holds a version key"],
+    expected: [versionProblem],
     problems: findVersionKey("m.json", '{"plugins": [{"name": "friday", "version": "1.0.0"}]}'),
+  },
+  {
+    name: "a marketplace with a version in its metadata fails",
+    expected: [versionProblem],
+    problems: findVersionKey("m.json", '{"metadata": {"version": "1.0.0"}, "plugins": []}'),
+  },
+  {
+    name: "a marketplace with a version at its top level fails",
+    expected: [versionProblem],
+    problems: findVersionKey("m.json", '{"version": "1.0.0", "plugins": [{"name": "friday"}]}'),
   },
   {
     name: "a manifest without a version passes",
     expected: [],
     problems: findVersionKey("m.json", '{"name": "friday", "plugins": [{"name": "friday"}]}'),
+  },
+  {
+    name: "settings that enable the plugin and name the marketplace pass",
+    expected: [],
+    problems: findSettingsProblems(
+      '{"enabledPlugins": {"p@m": true}, "extraKnownMarketplaces": {"m": {}}}',
+      testPluginKey,
+      testMarketplaceName,
+    ),
+  },
+  {
+    name: "settings without the marketplace fail",
+    expected: [settingsProblem],
+    problems: findSettingsProblems(
+      '{"enabledPlugins": {"p@m": true}}',
+      testPluginKey,
+      testMarketplaceName,
+    ),
+  },
+  {
+    name: "settings with the plugin disabled fail",
+    expected: [settingsProblem],
+    problems: findSettingsProblems(
+      '{"enabledPlugins": {"p@m": false}, "extraKnownMarketplaces": {"m": {}}}',
+      testPluginKey,
+      testMarketplaceName,
+    ),
+  },
+  {
+    name: "a missing settings file fails",
+    expected: [settingsProblem],
+    problems: findSettingsProblems(undefined, testPluginKey, testMarketplaceName),
   },
   {
     name: "a subagent renders its tool's fields",
@@ -309,7 +393,7 @@ if (selfTestFailures.length > 0) {
   const isCheckOnly = process.argv.includes("--check");
   const expected = renderAdapters();
 
-  const orphans = adapters.flatMap(({directory, hasEvals}) => {
+  const orphans = adapters.flatMap(({directory, hasAuthoredEvals}) => {
     const adapterRoot = path.join(adaptersRoot, directory);
 
     return listFiles(adapterRoot, false)
@@ -317,8 +401,7 @@ if (selfTestFailures.length > 0) {
       .filter(
         file =>
           !expected.has(file) &&
-          !file.startsWith(path.join(adapterRoot, resultsDirectory)) &&
-          (hasEvals || !file.startsWith(path.join(adapterRoot, "evals"))),
+          !(hasAuthoredEvals && file.startsWith(path.join(adapterRoot, "evals"))),
       );
   });
 
@@ -331,6 +414,10 @@ if (selfTestFailures.length > 0) {
 
   if (isCheckOnly) {
     const vendorNames = JSON.parse(readFileSync(vendorNamesPath, "utf8")) as string[];
+
+    const {name: marketplaceName} = JSON.parse(readFileSync(claudeMarketplacePath, "utf8")) as {
+      name: string;
+    };
 
     const problems = [
       ...staleFiles.map(file => `${file}: is stale; run \`pnpm plugin:sync\``),
@@ -349,6 +436,11 @@ if (selfTestFailures.length > 0) {
       ]
         .filter(file => existsSync(file))
         .flatMap(file => findVersionKey(file, readFileSync(file, "utf8"))),
+      ...findSettingsProblems(
+        existsSync(settingsPath) ? readFileSync(settingsPath, "utf8") : undefined,
+        `${manifestFields.name}@${marketplaceName}`,
+        marketplaceName,
+      ),
     ];
 
     if (problems.length > 0) {

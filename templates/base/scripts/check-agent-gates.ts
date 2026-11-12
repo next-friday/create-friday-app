@@ -13,6 +13,18 @@ type GateCase = {
   releaseApproval?: string;
 };
 
+const repositoryVariables = new Set(
+  execFileSync("git", ["rev-parse", "--local-env-vars"], {
+    encoding: "utf8",
+  })
+    .split("\n")
+    .filter(name => name !== ""),
+);
+
+const childEnvironment = Object.fromEntries(
+  Object.entries(process.env).filter(([name]) => !repositoryVariables.has(name)),
+);
+
 const shellGate = ".agents/hooks/agent-shell-gate.sh";
 const constitutionGate = ".cursor/hooks/agent-constitution-gate.sh";
 const mcpGate = ".agents/hooks/agent-mcp-gate.sh";
@@ -343,6 +355,7 @@ function createRepository(branch: string, committedFiles: string[]): string {
         ...gitArguments,
       ],
       {
+        env: childEnvironment,
         stdio: "ignore",
       },
     );
@@ -546,7 +559,7 @@ const cases: GateCase[] = [
 const failures = cases.filter(gateCase => {
   const result = spawnSync(gateCase.gate, {
     env: {
-      ...process.env,
+      ...childEnvironment,
       CLAUDE_PROJECT_DIR: gateCase.projectDirectory ?? process.cwd(),
       CURSOR_PROJECT_DIR: gateCase.projectDirectory ?? process.cwd(),
       RELEASE_APPROVAL: gateCase.releaseApproval,

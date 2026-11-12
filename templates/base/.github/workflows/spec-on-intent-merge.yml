@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   find:
-    name: Find accepted intents
+    name: Find merged intents
     if: vars.CLAUDE_CI_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: List accepted intents without a spec
+      - name: List merged intents without a spec
         id: find
         env:
           BEFORE: ${{ github.event.before }}
@@ -43,7 +43,7 @@ jobs:
           : > intents.txt
           while IFS= read -r path; do
             [[ "$path" =~ ^intent/[A-Za-z0-9._-]+/intent\.md$ ]] || continue
-            grep --fixed-strings --quiet 'Status: accepted.' "$path" || continue
+            grep --extended-regexp --quiet 'Status: (draft|accepted)\.$' "$path" || continue
             [[ ! -e "$(dirname "$path")/spec.md" ]] || continue
             echo "$path" >> intents.txt
           done <<< "$changed"

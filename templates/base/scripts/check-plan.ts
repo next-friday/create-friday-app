@@ -23,6 +23,7 @@ const intentFileName = "intent.md";
 const proofHeading = "## Proof";
 const requirementsHeading = "## Requirements";
 const acceptancePlaceholder = "@<engineer>";
+const statusLineLimit = 5;
 const acceptedByPrefix = "Accepted by: ";
 const acceptedByPattern = /^Accepted by: @[\dA-Za-z][\dA-Za-z-]*\.$/;
 const requiredHeadings = ["## Files that change", "## Order of work", "## Risks", proofHeading];
@@ -391,6 +392,42 @@ function findMissingPlanProblems(specText: string, hasPlan: boolean): string[] {
     ? []
     : [
         `${specFileName} says "Status: done." and the folder has no ${planFileName}; write the plan that built the change`,
+      ];
+}
+
+/**
+ * Tell whether a document says `Status: accepted.` at the end of a line.
+ * @param text Intent or spec content.
+ * @returns True when the status line says accepted.
+ */
+function isAcceptedDocument(text: string): boolean {
+  return splitLines(text)
+    .slice(0, statusLineLimit)
+    .some(line => /Status: accepted\.$/.test(line.trimEnd()));
+}
+
+/**
+ * Find an intent or a spec that this branch marks accepted before its pull request merged.
+ * @param nextFileName The file of the next stage: `spec.md` for an intent, `plan.md` for a spec.
+ * @param defaultBranchText The file on the default branch, or undefined when it is not there.
+ * @param hasNextFile Whether the next stage's file is beside it.
+ * @returns At most one message.
+ */
+function findAcceptedStatusProblems(
+  nextFileName: string,
+  defaultBranchText: string | undefined,
+  hasNextFile: boolean,
+): string[] {
+  if (defaultBranchText === undefined) {
+    return [
+      `the file says "Status: accepted." and is not on ${defaultBranch}; merging its pull request accepts it, so write "Status: draft."`,
+    ];
+  }
+
+  return hasNextFile || isAcceptedDocument(defaultBranchText)
+    ? []
+    : [
+        `the file says "Status: accepted." and the folder has no ${nextFileName}; only the pull request that adds ${nextFileName} sets it, so write "Status: draft."`,
       ];
 }
 
@@ -784,6 +821,28 @@ const selfTestCases: SelfTestCase[] = [
       ? [acceptanceRequiredProblem]
       : [],
   },
+  {
+    name: "accepted status on a file that is not on the default branch",
+    expectedMessagePart: `is not on ${defaultBranch}`,
+    problems: findAcceptedStatusProblems(specFileName, undefined, true),
+  },
+  {
+    name: "accepted status without the next stage's file",
+    expectedMessagePart: `has no ${specFileName}`,
+    problems: findAcceptedStatusProblems(specFileName, "Author: A (B). Status: draft.", false),
+  },
+  {
+    name: "accepted status set by the pull request that adds the next stage's file",
+    problems: findAcceptedStatusProblems(specFileName, "Author: A (B). Status: draft.", true),
+  },
+  {
+    name: "accepted status already on the default branch",
+    problems: findAcceptedStatusProblems(
+      planFileName,
+      "From `intent/health/intent.md`. Status: accepted.",
+      false,
+    ),
+  },
 ];
 
 /**
@@ -888,9 +947,71 @@ function findPlanLines(planPaths: string[]): string[] {
 
   const checkedLines = planPaths
     .filter(planPath => existsSync(planPath))
+    .filter(
+      planPath =>
+        branchChanges === undefined ||
+        readDefaultBranchFile(branchChanges.mergeBase, planPath) !==
+          readFileSync(planPath, "utf8").trim(),
+    )
     .flatMap(planPath => findPlanFileLines(planPath, isAcceptanceRequired));
 
   return [...missingBranchLines, ...missingLines, ...checkedLines];
+}
+
+/**
+ * Read a file as the default branch has it.
+ * @param mergeBase The commit this branch left the default branch at.
+ * @param filePath Path from the repository root.
+ * @returns The content, or undefined when the default branch has no such file.
+ */
+function readDefaultBranchFile(mergeBase: string, filePath: string): string | undefined {
+  try {
+    return runGit(["show", `${mergeBase}:${filePath.split(path.sep).join("/")}`]);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Report each intent and spec that this branch marks accepted before its pull request merged.
+ * @param changeFolders The `intent/<change>` folders.
+ * @returns One line per problem.
+ */
+function findAcceptedStatusLines(changeFolders: string[]): string[] {
+  const stages = [
+    [intentFileName, specFileName],
+    [specFileName, planFileName],
+  ] as const;
+
+  const acceptedFiles = changeFolders.flatMap(folder =>
+    stages
+      .map(([fileName, nextFileName]) => ({
+        nextFileName,
+        filePath: path.join(folder, fileName),
+        nextFilePath: path.join(folder, nextFileName),
+      }))
+      .filter(
+        ({filePath}) => existsSync(filePath) && isAcceptedDocument(readFileSync(filePath, "utf8")),
+      ),
+  );
+
+  const branchChanges = acceptedFiles.length > 0 ? findBranchChanges() : undefined;
+
+  if (branchChanges === undefined && acceptedFiles.length > 0) {
+    return [
+      `${defaultBranch} cannot be found, so the "Status: accepted." rule cannot be applied; run "git fetch origin main" to apply it`,
+    ];
+  }
+
+  return branchChanges === undefined
+    ? []
+    : acceptedFiles.flatMap(({filePath, nextFileName, nextFilePath}) =>
+        findAcceptedStatusProblems(
+          nextFileName,
+          readDefaultBranchFile(branchChanges.mergeBase, filePath),
+          existsSync(nextFilePath),
+        ).map(message => `${filePath}: ${message}`),
+      );
 }
 
 if (selfTestFailures.length > 0) {
@@ -909,14 +1030,18 @@ if (selfTestFailures.length > 0) {
           .filter(planPath => existsSync(planPath))
       : argumentPaths;
 
-  const problemLines = [...findPlanLines(planPaths), ...findMissingPlanLines(changeFolders)];
+  const problemLines = [
+    ...findPlanLines(planPaths),
+    ...findMissingPlanLines(changeFolders),
+    ...findAcceptedStatusLines(changeFolders),
+  ];
 
   if (problemLines.length > 0) {
     process.stderr.write(`${problemLines.join("\n")}\n`);
     process.exitCode = 1;
   } else {
     process.stdout.write(
-      `Ran ${selfTestCases.length} plan self-tests and checked ${planPaths.length} plans.\n`,
+      `Ran ${selfTestCases.length} plan self-tests and found no problem in ${planPaths.length} plans.\n`,
     );
   }
 }

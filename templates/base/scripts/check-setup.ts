@@ -22,7 +22,10 @@ const securityPath = "SECURITY.md";
 const zizmorPath = ".github/zizmor.yml";
 const securityPlaceholder = "security@example.com";
 const ownerPlaceholder = "@your-org/your-team";
-const ownerPlaceholderPattern = /@(?:your-org\/your-team|the-[\da-z-]+)(?![\w/-])/;
+
+const ownerPlaceholderPattern =
+  /@(?:your-org\/your-team|the-(?:product-owner|lead-who-signs-off-the-intent-template|(?:brand|security|compliance|ux)-policy-owner))(?![\w/-])/;
+
 const ownersStep = "step 2 (Owners) of SETUP.md";
 
 /**
@@ -146,6 +149,14 @@ const selfTestCases: SelfTestCase[] = [
     files: {
       ...configuredFiles,
       codeowners: "* @acme/the-platform\n/intent/ @the-hague/owners\n",
+    },
+  },
+  {
+    name: "an owner named like a placeholder but not listed in SETUP.md",
+    expectedFiles: [],
+    files: {
+      ...configuredFiles,
+      codeowners: "* @acme/platform\n/intent/ @the-rock\n",
     },
   },
   {

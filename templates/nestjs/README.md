@@ -1,6 +1,6 @@
 # next-friday-template-nestjs
 
-Next Friday starter for NestJS services.
+NestJS HTTP API.
 
 ## Getting started
 
@@ -30,7 +30,7 @@ Follow [SETUP.md](SETUP.md) in order. It sets up the repository, the reviews, an
 | `pnpm check`       | Run the static checks, the unit tests for changed code, and the production build (the `pre-push` hook) |
 | `pnpm verify`      | Run the static checks, all unit tests with coverage, the end-to-end tests, and the production build    |
 
-CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
+CI also runs the build, the end-to-end tests, the container image scan, and the security scans, including CodeQL, dependency review, and OpenSSF Scorecard. CodeQL, dependency review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`.
 
 ## Container
 

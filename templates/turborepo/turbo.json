@@ -28,17 +28,20 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "start": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "test": {
       "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "test:changed": {
-      "cache": false
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "test:coverage": {
       "inputs": ["$TURBO_DEFAULT$", "!README.md"],
@@ -46,11 +49,13 @@
     },
     "test:e2e": {
       "cache": false,
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "test:watch": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "!README.md"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

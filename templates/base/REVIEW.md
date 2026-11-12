@@ -6,7 +6,7 @@ Run three passes and tag each finding with its pass:
 
 - Bugs: logic errors, broken edge cases, subtle regressions
 - Security: injection risks, authentication gaps, PII in logs
-- Compliance: the change matches spec.md, plan.md and our design principles; flag a plan.md that has no `Accepted by:` line
+- Compliance: the change matches spec.md, plan.md and the four policies in `.agents/skills/`; flag a plan.md that has no `Accepted by:` line and a change that makes `AGENTS.md` outdated
 
 ## What Important means here
 

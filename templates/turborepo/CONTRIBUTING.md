@@ -9,7 +9,7 @@ Use this guide to prepare changes to this repository.
 - Install pnpm once with `npm install --global pnpm`. It switches to the version declared by `package.json#packageManager` automatically.
 - Use Claude Code v2.1.295 or later. It reads `CLAUDE.md`, which imports `AGENTS.md`, and supports the `onFailure` field the agent hooks use.
 - Copy `.env.example` to `.env` unless the CLI created it. `pnpm dev`, `pnpm build`, `pnpm check`, and `pnpm verify` need `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL` from it.
-- Install gitleaks 8.19 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
+- Install gitleaks 8.21 or later, which the `pre-commit` hook runs, and jq, which the agent hooks and the `pre-push` hook (`pnpm gates:check`) need: `brew install gitleaks jq` on macOS, or install them from each project's releases on Linux.
 
 From the repository root:
 
@@ -37,7 +37,7 @@ Run the narrowest check that covers the change while you work. Git hooks run the
 | `pre-merge-commit` | blocks merge commits on `main`                                                                                                                                  |
 | `pre-push`         | blocks pushes to `main` except the push that creates it, then `pnpm check`: the static checks, the unit tests related to your changes, and the production build |
 
-- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. Dependabot and OSV-Scanner report vulnerable dependencies.
+- **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. CodeQL, dependency-review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Dependabot and OSV-Scanner report vulnerable dependencies.
 - **End-to-end tests:** run `pnpm test:e2e` when you change pages or the admin panel. It builds both apps first, then starts both development servers unless they are already running. The build and the backoffice need `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL` from `.env`. Run `pnpm --filter ./apps/app exec playwright install chromium` once before the first run. CI runs it against the production build and a PostgreSQL service on every pull request that is ready for review and changes code.
 - **Coverage:** CI requires 95% branch coverage on changed lines in `apps/app/app/` and `apps/backoffice/src/`, except layouts, the Payload config, and generated files.
 

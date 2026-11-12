@@ -2,7 +2,7 @@
   "name": "next-friday-template-nestjs",
   "version": "0.1.0",
   "private": true,
-  "description": "Next Friday NestJS template.",
+  "description": "NestJS HTTP API.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/next-friday/next-friday-template-nestjs.git"

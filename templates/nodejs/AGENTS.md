@@ -7,7 +7,7 @@ TypeScript HTTP service on `node:http`, without a framework, on pnpm and Node.js
 | Task                        | Command                                             |
 | :-------------------------- | :-------------------------------------------------- |
 | Start with reload           | `pnpm start:dev`                                    |
-| Run the build               | `pnpm build`, then `pnpm start`                     |
+| Run the build               | `pnpm start`, which builds first                    |
 | One test                    | `pnpm vitest run src/port.test.ts -t "<test name>"` |
 | Unit tests                  | `pnpm test`, or `pnpm test:coverage`                |
 | What `pre-push` runs        | `pnpm check`                                        |

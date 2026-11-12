@@ -39,7 +39,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 - Node.js 24.22.1, the version in the generated `.nvmrc`. The CLI itself runs on the range in [`package.json#engines`](package.json).
 - pnpm, through Corepack: `corepack enable`. The generated project pins its pnpm version in `package.json#packageManager`.
 - Git 2.28 or later.
-- gitleaks 8.19 or later and jq, which the generated project's Git hooks need for the first commit.
+- gitleaks 8.21 or later and jq, which the generated project's Git hooks need for the first commit.
 
 ## Options
 
@@ -85,7 +85,7 @@ Then follow **After creating a project from this template** in the project's `RE
 - **`pnpm install` fails:** the CLI keeps the project and exits with 1. Fix the printed error, such as a Node.js version outside the project's `package.json#engines`, then run `pnpm install` in the project.
 - **`--skip-git`:** run `git init --initial-branch=main` before `pnpm install`, so the install can set up the Git hooks.
 - **`--skip-install`:** the Git hooks are not set up until you run `pnpm install`.
-- **Cancelling:** Ctrl+C exits with 130. During the copy, it also removes the partly copied project.
+- **Cancelling:** Ctrl+C, SIGTERM, and SIGHUP exit with 130. During the copy, they also remove the partly copied project.
 - **Payload:** set `DATABASE_URL` in `.env` to a PostgreSQL database before you start the app.
 
 ## Contributing

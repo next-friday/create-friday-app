@@ -12,6 +12,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import {rename} from "node:fs/promises";
 import {tmpdir} from "node:os";
 
 import {create} from "../src/create.ts";
@@ -25,6 +26,15 @@ vi.mock("node:fs", async importOriginal => {
   return {
     ...actual,
     existsSync: vi.fn(actual.existsSync),
+  };
+});
+
+vi.mock("node:fs/promises", async importOriginal => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+
+  return {
+    ...actual,
+    rename: vi.fn(actual.rename),
   };
 });
 
@@ -252,6 +262,16 @@ describe("create", () => {
     expect(existsSync(path.join(cwd, "locked-api"))).toBe(false);
     expect(errors).toStrictEqual([`${renameError}\n`]);
     expect(vi.mocked(cancel)).not.toHaveBeenCalled();
+    expect(process.exitCode).toBe(1);
+  });
+
+  it("removes the project and exits with 1 when the template copy fails", async () => {
+    const errors = captureErrors();
+
+    vi.mocked(rename).mockRejectedValueOnce(new Error(renameError));
+    await create(["unwritable-api", "--stack", "nestjs"]);
+    expect(existsSync(path.join(cwd, "unwritable-api"))).toBe(false);
+    expect(errors).toStrictEqual([`${renameError}\n`]);
     expect(process.exitCode).toBe(1);
   });
 

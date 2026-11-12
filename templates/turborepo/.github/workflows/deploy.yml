@@ -124,6 +124,8 @@ jobs:
         run: |
           previous=""
           latest=""
+          deploy_runs="$(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?status=success&branch=main&per_page=50" --jq '.workflow_runs[] | [.id, .display_title] | @tsv')"
+          ci_runs="$(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?event=push&branch=main&status=success&per_page=50" --jq '.workflow_runs[] | [.id, .head_sha] | @tsv')"
           while IFS=$'\t' read -r run_id title; do
             [[ -z "$run_id" ]] && continue
             if [[ "$title" =~ ^Deploy\ ([0-9a-f]{40})\ to\ ${RAILWAY_ENVIRONMENT}$ ]]; then
@@ -137,7 +139,7 @@ jobs:
               latest="$completed"
               previous="$candidate"
             fi
-          done < <(gh api --paginate "repos/$REPOSITORY/actions/workflows/deploy.yml/runs?status=success&branch=main&per_page=50" --jq '.workflow_runs[] | [.id, .display_title] | @tsv')
+          done <<< "$deploy_runs"
           while IFS=$'\t' read -r run_id head_sha; do
             [[ -z "$run_id" || "$head_sha" == "$COMMIT_SHA" ]] && continue
             completed="$(gh api "repos/$REPOSITORY/actions/runs/$run_id/jobs" | jq -r --arg env "$RAILWAY_ENVIRONMENT" '[.jobs[] | select(.conclusion == "success" and .name == "Deploy to \($env) / Deploy to \($env)") | .completed_at] | max // empty')"
@@ -145,7 +147,7 @@ jobs:
               latest="$completed"
               previous="$head_sha"
             fi
-          done < <(gh api "repos/$REPOSITORY/actions/workflows/ci.yml/runs?event=push&branch=main&status=success&per_page=50" --jq '.workflow_runs[] | [.id, .head_sha] | @tsv')
+          done <<< "$ci_runs"
           if [[ -n "$previous" ]]; then
             git cat-file -e "$previous^{commit}" 2>/dev/null || git fetch --no-tags origin "$previous"
             apps="$(bash .github/scripts/affected-apps.sh "$previous" "$COMMIT_SHA")"

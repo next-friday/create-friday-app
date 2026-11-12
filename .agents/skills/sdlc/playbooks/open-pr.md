@@ -9,7 +9,7 @@
    - `Closes #<issue>` for each issue that already exists and that the change closes. When there is none, write what the template's own section asks for, and leave it out when the template has no such section. Never open an issue to get a number;
    - each check you ran, with its result copied from the output.
 
-   When you cannot open a pull request from this session, say so and give the pushed branch's name. When you cannot push either, say so. The review then reads the local branch's diff.
+   When you cannot open a pull request from this session, say so, give the pushed branch's name, and go on to step 5: the review reads the pushed branch's diff. When you cannot push either, say so and go on to step 5 the same way: the review reads the local branch's diff. Neither case ends the turn.
 
 5. Go on in the same turn, without asking: follow `.agents/skills/sdlc/playbooks/review.md`.
 

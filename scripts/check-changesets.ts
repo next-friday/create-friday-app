@@ -437,7 +437,7 @@ if (selfTestFailures.length > 0) {
       changes
         .filter(({paths, status}) => /^[AM]/.test(status) && changesetFile.test(paths.at(0) ?? ""))
         .map(({paths}) => paths.at(0) ?? "")
-        .map(changedPath => [changedPath, readFileSync(changedPath, "utf8")]),
+        .map(changedPath => [changedPath, runGit(["show", `HEAD:${changedPath}`])]),
     );
 
     const problems = findChangesetProblems(

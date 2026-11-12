@@ -1,0 +1,25 @@
+schema_version: "1.1"
+name: verifier-runs-on-the-chosen-model
+expected_outcome: |
+  The project's `.agents/sdlc-models.md` names `opus xhigh` after `verify:`. Asked what the verify step of the build playbook starts the verifier subagent on, the agent reads that playbook and the file, answers `opus` at the effort `xhigh`, and writes nothing.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-names-the-verify-model
+    type: regex
+    pattern: '\bopus\b'
+    flags: i
+  - name: reply-names-the-verify-effort
+    type: regex
+    pattern: '\bxhigh\b'
+    flags: i
+  - name: build-playbook-is-read
+    type: tool_used
+    tool: Read
+    input_match: 'playbooks/build\.md'
+    min: 1
+    arm: both
+  - name: no-file-created
+    type: file_exists
+    path: "**"
+    exists: false

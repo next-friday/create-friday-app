@@ -1,0 +1,34 @@
+schema_version: "1.1"
+name: second-run-changes-nothing
+expected_outcome: |
+  The project already holds exactly what a first run writes for the budget `medium`, and the request states the same budget. The agent reads `SETUP.md`, reports the project description step as done and the branch protection step as a person's, shows the five lines it holds, and leaves each of them as it was.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: models-file-keeps-its-five-lines
+    type: regex
+    pattern: '^# SDLC models\n\nbudget: medium \(high\)\nbuild: sonnet high\nreview: sonnet high\nverify: sonnet high\nevals: haiku high\n$'
+    target:
+      source: file
+      path: .agents/sdlc-models.md
+  - name: package-json-is-unchanged
+    type: regex
+    pattern: '^  "description": "Orders service for the web shop",$'
+    flags: m
+    target:
+      source: file
+      path: package.json
+  - name: setup-file-is-read
+    type: tool_used
+    tool: Read
+    input_match: 'SETUP\.md'
+    min: 1
+    arm: both
+  - name: reply-shows-the-budget-and-its-effort
+    type: regex
+    pattern: '\bmedium\b[^\n]*\bhigh\b'
+    flags: im
+  - name: reply-shows-the-evals-model
+    type: regex
+    pattern: '\bevals\b[^\n]*\bhaiku\b'
+    flags: im

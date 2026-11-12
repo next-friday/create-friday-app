@@ -33,7 +33,7 @@ Do these steps in order.
 
 ## Reply shape
 
-Write replies a person can check. Write the reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, and a draft file's own text stay as they are. Write paths from the project root, such as `README.md:12`, never from the machine's root. State as a fact only what you opened or ran in this turn, and say what you ran; mark anything else as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
+Write replies a person can check. Write the reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, and a draft file's own text stay as they are. Write paths from the project root, such as `README.md:12`, never from the machine's root. State facts as `.agents/rules/evidence-before-claims.md` says, say what you ran, and mark what you did not open or run in this turn as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
 
 Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The person often reads the reply on a phone: a URL opens the page with one tap, and a number opens nothing.
 

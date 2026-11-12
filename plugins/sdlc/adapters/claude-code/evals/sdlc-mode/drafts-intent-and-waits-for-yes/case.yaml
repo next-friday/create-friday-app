@@ -15,7 +15,7 @@ graders:
   - name: no-branch-command
     type: tool_used
     tool: Bash
-    input_match: '\bgit\s+(?:checkout\s+-[bB]|switch\s+-[cC]|branch\s+[\w-]|worktree\s+add)'
+    input_match: '\bgit\s+(?:checkout\s+-[bB]|switch\s+-[cC]|branch\s+(?!-{1,2}(?:a|r|v|vv|l|list|show-current|contains|merged|no-merged|all|remotes)\b)[\w-]|worktree\s+add)'
     min: 0
     max: 0
   - name: reply-is-in-thai

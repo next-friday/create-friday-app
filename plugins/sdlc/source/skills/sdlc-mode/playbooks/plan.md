@@ -3,7 +3,7 @@
 This playbook writes the intent. The build plan, `intent/<change>/plan.md`, comes later and is not written here.
 
 1. Let the originator describe the problem in their own words: what they cannot do today, who is affected, what better looks like, and what is out of scope.
-2. Read the code, the docs, and the existing `intent/` folders. Never ask what a file or a command can tell you: the author, for one, is `git config user.name`.
+2. Read the code, the docs, and the existing `intent/` folders. Find the rest yourself, as `.agents/rules/agent-owned-work.md` says: the author, for one, is `git config user.name`.
 3. Interview until the originator has said four things: the problem, the outcome, the constraints, and what is out of scope. The problem names who is affected, how often, and a number with its source. The outcome is what the user would see.
    - **When all four are already said, go to step 4 in the same turn.**
    - **When one is missing, ask and stop.** Write no draft in that turn. Ask in rounds. Each round holds only questions that do not depend on another question in the same round. Number the questions. Each asks one thing and carries a concrete answer you recommend, worded so "yes" accepts it. A recommended answer is a fact or a choice, such as "Recommended: only the checkout page", never an instruction to the person. When you have no answer to recommend, write "No recommendation" and ask plainly. Wait for the answers, and build the next round on them.

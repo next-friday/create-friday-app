@@ -1,6 +1,3 @@
-packages:
-  - .
-  - plugins/friday
 engineStrict: true
 savePrefix: ""
 allowBuilds:

@@ -8,20 +8,21 @@ The cause: `scripts/check-changesets.ts` passes `process.env.GITHUB_ACTOR` to `f
 
 ## Files that change
 
-| File                          | Change  | Afterwards                                                                                                                                                                 |
-| :---------------------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/check-changesets.ts` | changed | A branch is a dependency bot's when every commit on it that is not a merge has the author `dependabot[bot]`. The run's actor is not read. The self-tests cover both cases. |
+| File                          | Change  | Afterwards                                                                                                                                                                                                                                             |
+| :---------------------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/check-changesets.ts` | changed | A branch is a dependency bot's when every commit on it that is not a merge has Dependabot's name and email as its author, and, in a pull request run, Dependabot opened the pull request. The run's actor is not read. The self-tests cover each case. |
 
 ## Order of work
 
 1. Add a self-test: a branch whose only commit that is not a merge is the bot's, with a merge of `main` by a person, needs no changeset. Check: `pnpm changesets:check` fails on this test alone.
-2. Read the authors with `git log --no-merges --format=%an <merge base>..HEAD` and pass them in place of the actor. Check: `pnpm changesets:check` exits 0, and on the head of pull request #150 it exits 0 with `GITHUB_ACTOR=joetakara`.
-3. Add a self-test: the same branch with one more commit by a person still needs a changeset. Check: `pnpm verify` exits 0.
+2. Read the authors with `git log --no-merges --format="%an <%ae>" <merge base>..HEAD` and the pull request's author from the file `GITHUB_EVENT_PATH` names, and pass both in place of the actor. Check: `pnpm changesets:check` exits 0, and on the head of pull request #150 it exits 0 with `GITHUB_ACTOR=joetakara`.
+3. Add self-tests: the same branch with one more commit by a person, a person's pull request whose commits carry the bot's name, the bot's name with another email, and no commit author at all each still need a changeset. Check: `pnpm verify` exits 0.
 
 ## Risks
 
 - A person's commit on a bot's branch must still need a changeset; step 3 proves it.
-- A merge commit can carry a change of its own. The rule that every changed published path is a dependency file still applies to it.
+- An author's name and email can be set by hand. In a pull request run the check also needs Dependabot as the pull request's author, which GitHub sets. Outside a pull request run the commit authors alone decide.
+- A merge commit by a person can carry a change of its own to a dependency file, and the check passes it. A change to any other published file still needs a changeset, and a person still reads the pull request before merging it.
 - Option not taken: asking Dependabot to recreate the pull request. The next update of the branch by a person would fail again.
 
 ## Proof

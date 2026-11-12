@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Set up pnpm
       if: inputs.runtime == ''
-      uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+      uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
       with:
         cache: true
         require-lockfile: true
@@ -24,7 +24,7 @@ runs:
 
     - name: Set up pnpm with runtime override
       if: inputs.runtime != ''
-      uses: pnpm/setup@fbda4c85fc2e1e08721cd8763afea8f48d60f024 # v3.0.0
+      uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
       with:
         runtime: ${{ inputs.runtime }}
         cache: true

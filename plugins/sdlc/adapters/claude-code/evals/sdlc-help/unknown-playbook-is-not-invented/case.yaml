@@ -4,9 +4,11 @@ expected_outcome: |
   The project has no rollback playbook. The agent says so and does not describe one.
 graders:
   - name: no-file-created
-    type: file_exists
-    path: "**"
-    exists: false
+    type: regex
+    target: files
+    pattern: '^(?!\.git/config\.worktree$|\.git/objects/info/alternates$).+$'
+    flags: m
+    match: not_contains
   - name: no-file-written
     type: tool_used
     tool: Write

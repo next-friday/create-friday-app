@@ -14,9 +14,11 @@ graders:
     pattern: 'src/version/version\.controller\.ts:\d+'
     flags: mu
   - name: no-file-created
-    type: file_exists
-    path: "**"
-    exists: false
+    type: regex
+    target: files
+    pattern: '^(?!\.git/config\.worktree$|\.git/objects/info/alternates$).+$'
+    flags: m
+    match: not_contains
   - name: no-file-written
     type: tool_used
     tool: Write

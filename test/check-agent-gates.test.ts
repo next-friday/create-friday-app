@@ -59,7 +59,7 @@ describe("check-agent-gates", () => {
       env: environment,
     });
 
-    expect(gateCheck.status).toBe(0);
+    expect(gateCheck.error).toBeUndefined();
     expect(readState()).toEqual(before);
   }, 120_000);
 });

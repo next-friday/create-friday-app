@@ -28,7 +28,7 @@ cd "$dir/next-friday-template-nestjs" && git add --all && pnpm verify
 
 - Build: `pnpm build` (its last line starts with `✔ Build complete`)
 - Test: `pnpm test:coverage` (all green, then the coverage summary; never skip or delete a failing test)
-- Lint: `pnpm lint:check` (prints nothing after `$ eslint . --cache --max-warnings=0 --no-inline-config --ignore-pattern "plugins/friday/dist/**"`)
+- Lint: `pnpm lint:check` (prints nothing after `$ eslint . --cache --max-warnings=0 --no-inline-config`)
 
 Run all three before reporting any task complete, and paste the output. `pnpm verify` runs all three.
 
@@ -37,7 +37,7 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 - `src/main.ts` calls `create()` in `src/create.ts`, which copies `templates/base`, then `templates/<stack>`, renames the project, and installs.
 - A stack is an entry in `src/stacks.ts` plus `templates/<stack>/`, whose `package.json` is named `next-friday-template-<stack>`.
 - Agent rules, `review.md`, and `mcp.json`: the files under `.agents/` are the source; `pnpm rules:sync` renders them into `.claude/`, `.cursor/`, `REVIEW.md`, and the MCP configs. Never edit a rendered copy.
-- The `friday` plugin: `plugins/friday/source/` holds the skills, the subagent's text, and the scripts behind `plan:check`, `bands:check`, and `loop:measure`; `pnpm plugin:sync` renders them into `plugins/friday/adapters/`, where `agents.json` holds each tool's subagent fields and `claude-code/evals/` holds the eval cases. Never edit a rendered adapter file; the eval cases and `agents.json` are authored there. `plugins/friday/` is also the npm package `@next-friday/sdlc`. A session in this repository loads the plugin from this tree once its folder is trusted: `.claude/settings.json` registers the tree as a local `directory` marketplace, which needs no `claude plugin install` ([Claude Code: Plugins for an organization](https://code.claude.com/docs/en/plugins/org.md)).
+- The `friday` plugin: `plugins/friday/source/` holds the skills, the subagent's text, and the scripts behind `plan:check`, `bands:check`, and `loop:measure`; `pnpm plugin:sync` renders them into `plugins/friday/adapters/`, where `agents.json` holds each tool's subagent fields and `claude-code/evals/` holds the eval cases. Never edit a rendered adapter file; the eval cases and `agents.json` are authored there. A session in this repository loads the plugin from this tree once its folder is trusted: `.claude/settings.json` registers the tree as a local `directory` marketplace, which needs no `claude plugin install` ([Claude Code: Plugins for an organization](https://code.claude.com/docs/en/plugins/org.md)).
 
 ## Conventions
 
@@ -62,4 +62,6 @@ When Claude makes a mistake twice, add the correction here.
 - **Accepted is not built**: a spec with `Status: accepted.` is not built. Check each requirement against the tree before you call a change done.
 - **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
 - **CI-only jobs**: Template, Consumer Smoke, Compatibility, Dependency Audit, and Release Integrity run only in CI, as do the scorecard, secret-scan, zizmor, and dependency-review workflows. Do not report them as local results.
+- **npm is production**: a changeset, a new package, and a change to `release.yml` each put something on npm, and a published version stays there. Before you open such a pull request, tell the user what it publishes: the package's name and its version. Add no package the user did not order.
+- **Every stack**: after a change under `templates/`, run `pnpm verify` in a generated project of each stack in `src/stacks.ts`, because CI runs all of them.
 - **Playbook claims**: add a requirement to an intent, spec, or plan only when the user decided it or a source says it: an official document or a named community repository. This includes a requirement a review bot suggests. Quote the passage and say where it is. When the user did not decide it and no source says it, leave it out and answer the thread with that.

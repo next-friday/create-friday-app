@@ -1,20 +1,33 @@
-# @next-friday/sdlc
+# friday plugin
 
-The checks behind the Next Friday SDLC loop. A project that runs the loop installs this package as a development dependency, so its checks run where no agent tool is installed, such as CI.
+The `friday` plugin runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies.
+
+## What the plugin holds
+
+| Path                          | Holds                                                                                                                          |
+| :---------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| `source/`                     | The skills, the subagent's text, and the scripts behind `plan:check`, `bands:check`, and `loop:measure`.                       |
+| `adapters/`                   | The render of `source/` for each agent tool, and `agents.json` with each tool's subagent fields. `pnpm plugin:sync` writes it. |
+| `adapters/claude-code/evals/` | The eval cases, authored there.                                                                                                |
+
+## Enable it in a project
+
+This repository registers the plugin in `.claude/settings.json` as a local `directory` marketplace named `next-friday` and enables `friday@next-friday`, so a session here loads it once the folder is trusted. A project in another checkout adds the marketplace and enables the plugin the same way.
+
+## Checks
+
+Run each from the repository root. Each one runs its self-tests first and exits 1 on a problem or a self-test failure.
 
 | Command             | Checks                                                                                           |
 | :------------------ | :----------------------------------------------------------------------------------------------- |
-| `sdlc-plan-check`   | Each `intent/<change>/plan.md` against the plan template and its `spec.md`.                      |
-| `sdlc-bands-check`  | `bands.yaml` against the rules for control bands.                                                |
-| `sdlc-loop-measure` | For each `intent/<change>` folder, the days from intent to spec and the commits after each step. |
-
-Run a command from the project root. Each one runs its self-tests first and exits 1 on a problem or a self-test failure.
-
-The `friday` plugin lives in the same directory as this package: `source/` holds the skills, the subagent's text, and these scripts, and `adapters/` holds the render for each agent tool, `agents.json` with each tool's subagent fields, and the eval cases.
+| `pnpm plan:check`   | Each `intent/<change>/plan.md` against the plan template and its `spec.md`.                      |
+| `pnpm bands:check`  | `bands.yaml` against the rules for control bands.                                                |
+| `pnpm loop:measure` | For each `intent/<change>` folder, the days from intent to spec and the commits after each step. |
+| `pnpm plugin:check` | The adapters against `source/`.                                                                  |
 
 ## Eval cases
 
-The cases are authored in `adapters/claude-code/evals/` and run with `claude plugin eval`. A case's tag says which command runs it:
+The cases run with `claude plugin eval`. A case's tag says which command runs it:
 
 | Command                | Cases                | Tools granted                                                                                                                          |
 | :--------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |

@@ -47,7 +47,7 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 4. **Do not link the root and `templates/` trees.** The root copies govern this repository; `templates/` ships to every generated project.
 5. **Store `.gitignore` as `_gitignore` and commit no `pnpm-lock.yaml` under `templates/`.**
 6. **After changing a template, generate a project and run its `pnpm verify`.**
-7. **Work runs through `/sdlc:sdlc`.** The `sdlc` plugin in `plugins/sdlc/` holds the skills, playbooks, and checks that say when work starts, where it stops for a person, and how a reply is written.
+7. **Work runs through `/sdlc:sdlc-mode`.** The `sdlc` plugin in `plugins/sdlc/` holds the skills, playbooks, and checks that say when work starts, where it stops for a person, and how a reply is written.
 8. **This repository's skills and playbooks decide how branches, commits, and pull requests are made,** over a skill from another checkout.
 9. **Run parallel sessions in separate worktrees, on tasks that touch different files.** Start each with `claude --worktree <name>`: a worktree is its own checkout on its own branch. Tasks that share files run in one session, one after another. Start with two or three sessions, and add one only while you can review every stream properly.
 
@@ -58,7 +58,7 @@ When Claude makes a mistake twice, add the correction here.
 - **Template rule copies**: root `pnpm rules:sync` renders only the root. A template's rendered copy lives in `templates/base` when every stack renders it the same, and in each stack otherwise (for example `deterministic-testing`, whose globs differ by stack). Run `pnpm rules:sync` in a generated project and copy the output back with your file-editing tool, because the shell gate blocks `cp` and `rsync` into `.agents`, `.claude/rules`, and `.cursor` paths.
 - **Commit messages**: commitlint accepts only `Co-Authored-By` trailers.
 - **Issues**: open an issue only to hand work to another person, never to give a pull request a number to close. A pull request closes an issue that already exists with `Closes #<issue>`.
-- **Testing a skill**: test a skill with Claude Code itself, in a scratch project: `claude --plugin-dir plugins/sdlc/adapters/claude-code -p "/sdlc:sdlc <request>" --model <small model> --strict-mcp-config`. After you change `AGENTS.md`, a skill, or a hook, run `pnpm evals:run` and `pnpm evals:run:write` (they use your own Claude login; `plugins/sdlc/README.md` says which cases each runs) and report their scores.
+- **Testing a skill**: test a skill with Claude Code itself, in a scratch project: `claude --plugin-dir plugins/sdlc/adapters/claude-code -p "/sdlc:sdlc-mode <request>" --model <small model> --strict-mcp-config`. After you change `AGENTS.md`, a skill, or a hook, run `pnpm evals:run` and `pnpm evals:run:write` (they use your own Claude login; `plugins/sdlc/README.md` says which cases each runs) and report their scores.
 - **Accepted is not built**: a spec with `Status: accepted.` is not built. Check each requirement against the tree before you call a change done.
 - **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
 - **CI-only jobs**: Template, Consumer Smoke, Compatibility, Dependency Audit, and Release Integrity run only in CI, as do the scorecard, secret-scan, zizmor, and dependency-review workflows. Do not report them as local results.

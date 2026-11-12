@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-The reply says that work starts by sending the request with `/sdlc:sdlc`
+The reply says that work starts by sending the request with `/sdlc:sdlc-mode`

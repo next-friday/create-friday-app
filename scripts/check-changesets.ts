@@ -322,7 +322,10 @@ const templateOnlyChanges = [
 const selfTestCases: SelfTestCase[] = [
   {
     name: "no changeset and nothing published changed",
-    changes: [modifiedFile("plugins/sdlc/source/skills/sdlc/SKILL.md"), modifiedFile("AGENTS.md")],
+    changes: [
+      modifiedFile("plugins/sdlc/source/skills/sdlc-mode/SKILL.md"),
+      modifiedFile("AGENTS.md"),
+    ],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
@@ -426,7 +429,7 @@ const selfTestCases: SelfTestCase[] = [
     expectedMessagePart: "would release a version",
     changes: [
       addedFile(minorChangesetPath),
-      modifiedFile("plugins/sdlc/source/skills/sdlc/SKILL.md"),
+      modifiedFile("plugins/sdlc/source/skills/sdlc-mode/SKILL.md"),
       modifiedFile("AGENTS.md"),
       modifiedFile("scripts/sync-plugin.ts"),
     ],

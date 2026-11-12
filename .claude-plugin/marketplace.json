@@ -1,5 +1,5 @@
 {
-  "name": "next-friday",
+  "name": "next-friday-plugins",
   "owner": {
     "name": "Next Friday"
   },
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "friday",
+      "name": "sdlc",
       "source": "./plugins/sdlc/adapters/claude-code",
       "description": "Runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies."
     }

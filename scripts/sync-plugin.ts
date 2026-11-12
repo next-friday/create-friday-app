@@ -33,7 +33,7 @@ const textExtensions = new Set([".json", ".md", ".sh", ".ts", ".yaml", ".yml"]);
 const ignoredDirectories = new Set(["results"]);
 
 const manifestFields = {
-  name: "friday",
+  name: "sdlc",
   description:
     "Runs the software development loop: a skill that matches a request to a playbook and takes it to the next human gate, a help skill, a verifier subagent, and the default policies.",
   license: "MIT",

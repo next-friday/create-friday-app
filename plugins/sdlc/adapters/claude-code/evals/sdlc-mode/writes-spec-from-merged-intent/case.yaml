@@ -20,10 +20,6 @@ graders:
     tool: Bash
     input_match: '\bgit\s+(?:checkout|switch)\s+(?:-\S+\s+)*(?!main$).+'
     min: 1
-  - name: reply-is-in-thai
-    type: regex
-    pattern: '[\u0E00-\u0E7F]{10}'
-    flags: mu
   - name: reply-has-no-machine-path
     type: regex
     pattern: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

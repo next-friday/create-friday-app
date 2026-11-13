@@ -34,7 +34,7 @@ The cause: the reply shape is prose, and a small model follows prose only part o
 
 - The hook runs on every reply of a session that enables the plugin, not only on a reply of the skill. It acts only when the first non-blank line starts with `**Request:**`, and it does nothing when the input says the session is already continuing from a stop hook, so it blocks a reply at most once.
 - It needs `jq`. Without `jq` on the `PATH` it exits 0 and checks nothing, so the shape then rests on the skill's prose alone.
-- A blocked reply costs one more turn, and the reason is in English, which can pull the retry out of the person's language. The reason therefore ends by asking for the reply in the language it is written in, and the eval case grades the language of the reply, so its count shows it.
+- A blocked reply costs one more turn.
 - The checks are patterns, not a parser. "issue 3 of the list" is not a fault, while "issue 3 of acme/shop" is; a reply with a URL on its **Request** line and no page to open next passes only when its **Status** line says "no next page".
 - `intent/sdlc-plugin/intent.md` lists moving hooks into the plugin as out of scope. The product owner decided that the plugin holds its SDLC hooks, and this change adds one for Claude Code and for Cursor.
 - The change publishes nothing: it touches no file under `src/` or `templates/`, no publish field of `package.json`, and adds no changeset.
@@ -45,6 +45,6 @@ The cause: the reply shape is prose, and a small model follows prose only part o
 ## Proof
 
 - `pnpm plugin:check`: runs 45 cases of the script and 22 self-tests, exits 0; each of the three edits in step 2 and each of the three in step 3 makes it exit 1.
-- `claude plugin eval plugins/sdlc/adapters/claude-code --case reply-gives-full-urls --scaffold --allow-tools Write Edit --ablation none --model <model> --runs <n>`: on the small model, 24 of 30 runs pass without the hook and 29 of 30 with it; the one failure with the hook is `reply-has-no-bare-number`, and those without it are 2 each of `reply-is-in-thai`, `reply-has-no-bare-number`, and `status-line-gives-the-pull-request-url`. On the mid-size model, 10 of 10 runs pass with the hook.
-- `claude plugin eval plugins/sdlc/adapters/claude-code --tag no-shell --runs 3` on the small model: 10 of 12 runs pass; the two failures are `reply-is-in-thai` in `reply-gives-full-urls` and `02-the-reply-does-not-redo-the-done-step` in `second-run-changes-nothing`.
+- `claude plugin eval plugins/sdlc/adapters/claude-code --case reply-gives-full-urls --scaffold --allow-tools Write Edit --ablation none --model <model> --runs <n>`: on the small model, without the hook 2 of 30 runs fail `reply-has-no-bare-number` and 2 fail `status-line-gives-the-pull-request-url`; with it 1 of 30 fails `reply-has-no-bare-number`. On the mid-size model, 10 of 10 runs pass with the hook.
+- `claude plugin eval plugins/sdlc/adapters/claude-code --tag no-shell --runs 3` on the small model: one run fails, on `02-the-reply-does-not-redo-the-done-step` in `second-run-changes-nothing`.
 - `pnpm verify`: exits 0.

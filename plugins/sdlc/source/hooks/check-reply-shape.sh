@@ -54,5 +54,5 @@ case $last in
 esac
 
 [ -z "$problems" ] && exit 0
-jq -n --arg mode "$mode" --arg reason "${problems}Send the whole reply again, in the language it is written in." \
+jq -n --arg mode "$mode" --arg reason "${problems}Send the whole reply again." \
   'if $mode == "followup" then {followup_message:$reason} else {decision:"block",reason:$reason} end'

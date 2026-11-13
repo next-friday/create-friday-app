@@ -7,7 +7,7 @@ This playbook turns a merged intent into the requirements and design spec.
    - The file exists only on another branch: say that the intent is not merged yet, and name that branch.
    - `spec.md` already exists: say so and name the file.
 2. Read the four policies, every time, before you write: for each of `brand`, `security`, `compliance`, and `ux`, read the project's `.agents/skills/<area>-policy/SKILL.md` when it exists, and the plugin's default at `../../<area>-policy/SKILL.md`, relative to this playbook, otherwise. Then read the code and the docs the change touches.
-3. Write `intent/<change>/spec.md` from the template below, in the language of the files already in `intent/`. Use exactly the template's headings.
+3. Write `intent/<change>/spec.md` from the template below. Use exactly the template's headings.
    - **Request:** under the status line, quote the words of the request that started this spec. End the line with the template's "Skills at" sentence; its commit is the output of `git log -1 --format=%h -- .agents/skills`. When that prints nothing, the project has no policy file of its own: write "Policies: the plugin's defaults." in place of that sentence.
    - **Requirements:** numbered. Each one states a result a test or a reader can check.
    - **Design:** how the change fits the existing code: the files that change, and what each one does afterwards.

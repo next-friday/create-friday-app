@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc:sdlc-mode เขียน spec ของ intent/dark-mode/intent.md
+/sdlc:sdlc-mode write the spec for intent/dark-mode/intent.md

@@ -13,6 +13,11 @@ graders:
     type: regex
     pattern: '\bxhigh\b'
     flags: i
+  - name: reply-does-not-take-the-advise-line
+    type: regex
+    pattern: '\bhaiku\b'
+    flags: i
+    match: not_contains
   - name: build-playbook-is-read
     type: tool_used
     tool: Read

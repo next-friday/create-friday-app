@@ -27,7 +27,7 @@ Do these steps in order. Run again with the same answers, the skill writes the s
    | `medium`    | `high`   |
    | `small`     | `medium` |
 
-5. **Write {{rules-file}}** as the whole file, overwriting it, with a newline after the last line, and never in the project: each person's sessions offer different models. {{rules-header}} Then write these lines and no others. For the budget `medium` in a session that offers `sonnet`, `haiku`, and `opus`:
+5. **Write {{rules-file}}** as the whole file, overwriting it, with a newline after the last line, and never in the project: each person's sessions offer different models. {{rules-header}} Then write these lines and no others. {{role-format}} For the budget `medium` in a session that offers `sonnet`, `haiku`, and `opus`:
 
    ```markdown
    # SDLC models
@@ -38,7 +38,7 @@ Do these steps in order. Run again with the same answers, the skill writes the s
    advise: opus high
    ```
 
-   A session cannot change its own model, so say how to choose the `main` model for the next session: {{model-switch}}. {{advisor}}
+   A session cannot change its own model, so say how to choose the `main` model for the next session: {{model-switch}}.{{advisor}}
 
 6. **Read `SETUP.md`** at the project root. When there is none, say "This project has no `SETUP.md`" and go to step 9. Otherwise decide for each step whether it is done by checking the repository: run the step's **Check** when it only reads files or local git state, and read the files the step names. Report each step as `done`, `not done`, or `a person checks this` when the repository cannot show it, such as a setting on a website, an account, or someone's decision. For example:
 

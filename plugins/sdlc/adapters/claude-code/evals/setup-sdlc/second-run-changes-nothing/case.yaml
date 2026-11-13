@@ -8,7 +8,7 @@ graders:
   - name: rule-keeps-its-lines
     type: tool_used
     tool: Write
-    input_match: 'rules/sdlc-models\.md(?![\s\S]*budget: medium \(high\)[\s\S]*main: sonnet high[\s\S]*explore: haiku high[\s\S]*advise: opus high)'
+    input_match: '^(?=[\s\S]*rules/sdlc-models\.md)(?![\s\S]*budget: medium \(high\)[\s\S]*main: (?:claude-)?sonnet\S* high[\s\S]*explore: (?:claude-)?haiku\S* high[\s\S]*advise: (?:claude-)?opus\S* high)'
     max: 0
   - name: package-json-is-unchanged
     type: regex

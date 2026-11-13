@@ -27,7 +27,7 @@ Do these steps in order. Run again with the same answers, the skill writes the s
    | `medium`    | `high`   |
    | `small`     | `medium` |
 
-5. **Write `~/.claude/rules/sdlc-models.md`** as the whole file, overwriting it, with a newline after the last line, and never in the project: each person's sessions offer different models. Write no front matter: the agent tool loads every Markdown file of that folder into each new session. Then write these lines and no others. For the budget `medium` in a session that offers `sonnet`, `haiku`, and `opus`:
+5. **Write `~/.claude/rules/sdlc-models.md`** as the whole file, overwriting it, with a newline after the last line, and never in the project: each person's sessions offer different models. Write no front matter: the agent tool loads every Markdown file of that folder into each new session. Then write these lines and no others. Write each role's model as `opus`, `sonnet`, `haiku`, or `fable`, then its effort. For the budget `medium` in a session that offers `sonnet`, `haiku`, and `opus`:
 
    ```markdown
    # SDLC models

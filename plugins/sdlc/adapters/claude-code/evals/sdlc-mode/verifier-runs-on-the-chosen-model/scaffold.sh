@@ -17,7 +17,7 @@ cat > "$HOME/.claude/rules/sdlc-models.md" << 'MODELS'
 budget: large (xhigh)
 main: sonnet xhigh
 explore: opus xhigh
-advise: opus xhigh
+advise: haiku low
 MODELS
 git add -A
 git commit -q -m "chore: add project"

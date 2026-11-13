@@ -635,6 +635,19 @@ function renderToolWords(text: string, words: Record<string, string>): string {
 }
 
 /**
+ * Find tool words a render left in place, because the tool's map in `tool-words.json` lacks them.
+ * @param filePath Path of the rendered file.
+ * @param text Rendered text.
+ * @returns One problem for each tool word left in the text.
+ */
+function findToolWords(filePath: string, text: string): string[] {
+  return Array.from(
+    text.matchAll(/\{\{[a-z]+(?:-[a-z]+)*\}\}/gu),
+    ([word]) => `${filePath}: holds the tool word ${word}; add it to ${toolWordsPath}`,
+  );
+}
+
+/**
  * Render every adapter from the source.
  * @returns The expected content of each adapter file, by path from the repository root.
  */
@@ -805,6 +818,20 @@ const selfTestCases: SelfTestCase[] = [
     name: "an absolute link fails",
     expected: [`${path.join(pluginRoot, "a.md")}: /etc/passwd leaves ${pluginRoot}/`],
     problems: findEscapingReferences(path.join(pluginRoot, "a.md"), "[x](/etc/passwd)"),
+  },
+  {
+    name: "a tool word is replaced with its text for the tool",
+    expected: ["see ~/rules"],
+    problems: [
+      renderToolWords("see {{rules-file}}", {
+        "{{rules-file}}": "~/rules",
+      }),
+    ],
+  },
+  {
+    name: "a tool word that the tool's map lacks fails",
+    expected: [`a.md: holds the tool word {{model-switch}}; add it to ${toolWordsPath}`],
+    problems: findToolWords("a.md", renderToolWords("use {{model-switch}}", {})),
   },
   {
     name: "a listed name fails in any case and an unlisted one passes",
@@ -1017,6 +1044,9 @@ if (selfTestFailures.length > 0) {
 
     const problems = [
       ...staleFiles.map(file => `${file}: is stale; run \`pnpm plugin:sync\``),
+      ...[...expected]
+        .filter(([file]) => file.includes(`${path.sep}skills${path.sep}`))
+        .flatMap(([file, content]) => findToolWords(file, content)),
       ...listFiles(pluginRoot, true)
         .filter(file => textExtensions.has(path.extname(file)))
         .map(file => path.join(pluginRoot, file))

@@ -27,7 +27,7 @@ Do these steps in order. Run again with the same answers, the skill writes the s
    | `medium`    | `high`   |
    | `small`     | `medium` |
 
-5. **Write `~/.cursor/rules/sdlc-models.mdc`** as the whole file, overwriting it, with a newline after the last line, and never in the project: each person's sessions offer different models. Start it with front matter that holds `description: SDLC models per role` and `alwaysApply: true`, so that the agent tool applies it in every session. Then write these lines and no others. For the budget `medium` in a session that offers `sonnet`, `haiku`, and `opus`:
+5. **Write `~/.cursor/rules/sdlc-models.mdc`** as the whole file, overwriting it, with a newline after the last line, and never in the project: each person's sessions offer different models. Start it with front matter that holds `description: SDLC models per role` and `alwaysApply: true`, so that the agent tool applies it in every session. Then write these lines and no others. Write each role's model as the model slug the session lists, with the effort the budget gives inside the slug where the model has slugs for each effort; the lines below show the shape with short names. For the budget `medium` in a session that offers `sonnet`, `haiku`, and `opus`:
 
    ```markdown
    # SDLC models

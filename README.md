@@ -24,7 +24,7 @@ Without a terminal, as in CI or an agent, the name and `--stack` are required. P
 | `payload`   | Payload CMS on Next.js with PostgreSQL                            |
 | `turborepo` | A Turborepo workspace with a Next.js app and a Payload backoffice |
 
-Every stack is built from [`templates/base`](templates/base), which holds the shared company setup, plus its own directory under [`templates/`](templates), which holds the stack-specific files.
+Every stack is built from [`templates/base`](templates/base), which holds the shared company setup, plus its own directory under [`templates/`](templates), which holds the stack-specific files. With `--deploy railway`, the files of [`templates/deploy-railway`](templates/deploy-railway) are copied last.
 
 ## What every project includes
 

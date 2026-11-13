@@ -1,3 +1,4 @@
+import {deployTargets, isDeployTarget} from "./deploy-targets.ts";
 import type {DeployTarget} from "./deploy-targets.ts";
 
 const marker = /^\s*(?:#|\/\/|<!--)\s*deploy:(?<name>[a-z]+)\s*(?:-->\s*)?$/u;
@@ -53,6 +54,12 @@ function sectionAfterMarker(name: string, section: string | undefined): string |
     }
 
     return undefined;
+  }
+
+  if (!isDeployTarget(name)) {
+    throw new Error(
+      `A deploy:${name} marker names no deploy target. Use one of: ${deployTargets.join(", ")}.`,
+    );
   }
 
   if (section !== undefined) {

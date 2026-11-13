@@ -2,7 +2,7 @@
 
 From `intent/deploy-target-choice/intent.md`. Status: draft.
 
-Request: the product owner merged the intent's pull request, https://github.com/next-friday/next-friday-create-app/pull/184.
+Request: "docs(repo): add the deploy target intent (#184)", the merge of the intent's pull request by the product owner.
 
 Choices the product owner has not made are marked **Proposal**. The product owner corrects them in review.
 
@@ -11,7 +11,7 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 1. The CLI takes the argument `--deploy <target>`. The targets are `railway` and `none`. **Proposal:** these are the argument's name and values.
 2. A run without `--deploy` generates the project with the target `none`, with or without a terminal. The CLI shows no prompt for the deploy target.
 3. `--deploy` with any other value stops the run before a file is written. The message names the value and lists the targets, as the message for an unknown `--stack` does (`src/arguments.ts:69`).
-4. `--help` lists `--deploy` with its targets and says that `none` is the default.
+4. `--help` lists `--deploy` with its targets and says that `none` is the default, as it lists every argument today (`src/arguments.ts:15`).
 5. The arguments `name`, `--stack`, `--skip-git`, `--skip-install`, `--version`, and `--help`, the name prompt, and the stack prompt behave as they do today.
 6. A project generated with `--deploy railway` holds, for each of the five stacks, what a project of that stack holds today:
    1. `.github/workflows/deploy.yml`, `railway.json`, and `runbooks/rollback-deploy.md`;
@@ -41,8 +41,9 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 - `src/create.ts`, `copyTemplate`: copies `base`, then the stack, then, for a target other than `none`, `deploy-<target>/base` and `deploy-<target>/<stack>` when it exists. It then resolves the marked sections.
 - `src/deploy-sections.ts` (new): in each copied text file, keeps the lines between a marker for the chosen target and its end marker, removes the lines between a marker for another target and its end marker, and removes every marker line. **Proposal:** a marker is a comment line in the file's own syntax that holds `deploy:<target>` and its end `deploy:end`.
 - Files that gain marked sections: each stack's `README.md` (the deploy section for `railway`, the section of requirement 8 for `none`, and the sentences that name Railway), each stack's `AGENTS.md` (the production gate sentence), each stack's `.github/workflows/ci.yml` (the `deploy-dev` job), `templates/base/SETUP.md`, `templates/base/.agents/hooks/agent-production-gate.sh` (the Railway pattern and its check), and `templates/base/scripts/check-agent-gates.ts` (the Railway cases).
-- Each `Dockerfile` comment that lists platforms names no host, so the file is the same for both targets.
-- Each stack's `ci.yml`: the `image` job's condition gains `vars.CONTAINER_IMAGE != 'false'`.
+- The comment that lists platforms in each of the six `Dockerfile` files (`nodejs`, `nestjs`, `nextjs`, `payload`, and the two apps of `turborepo`) names no host, so the file is the same for both targets and gains no marked section.
+- Each stack's `ci.yml`: the `image` job's condition, which differs in `turborepo`, is joined with `vars.CONTAINER_IMAGE != 'false'` by `&&`.
+- The plugin's `deploy` playbook is unchanged: it already says to stop when the project has no deploy workflow.
 - `test/arguments.test.ts` and `test/create.test.ts`: the argument's default, its rejection, and the files of each target.
 - The root `.github/workflows/ci.yml`, Template job: generates and verifies each stack with each target.
 - The hook, the workflows, and `check-agent-gates.ts` are in the constitution: a person commits them from a patch.

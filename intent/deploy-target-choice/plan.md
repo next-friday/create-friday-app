@@ -52,7 +52,7 @@ Committed by a person from a patch in an issue, because the files are in the con
 
 ## Proof
 
-- 1 to 5, 14, `v5.0.0-2.2.1`, and `v5.0.0-5.3.2`: `test/arguments.test.ts` for the default, the accepted values, the rejection message, the usage text, and the unchanged arguments; `test/create.test.ts` for a value outside the list, which writes no file.
+- 1–5, 14: with the security policy's `v5.0.0-2.2.1` and `v5.0.0-5.3.2`, `test/arguments.test.ts` for the default, the accepted values, the rejection message, the usage text, and the unchanged arguments; `test/create.test.ts` for a value outside the list, which writes no file.
 - 6, 7, 9: `test/create.test.ts` for the files of each target, and step 8.
 - 8, 12, 15: the review reads the `README.md`, `AGENTS.md`, and `SETUP.md` of a project of each target, and searches for "deploy target".
 - 10: actionlint in a generated project, and the review reads the conditions of the `image` job and the `ci` job.

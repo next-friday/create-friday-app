@@ -1,29 +1,101 @@
+import {execFileSync} from "node:child_process";
 import {existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import path from "node:path";
 import {tmpdir} from "node:os";
 
-import {
-  acceptedByPrefix,
-  defaultBranch,
-  findSectionBounds,
-  intentDirectory,
-  maskFencedBlocks,
-  readSection,
-  runGit,
-  splitLines,
-  statusLineLimit,
-} from "./plan-text.ts";
-import {
-  alsoAcceptedByPrefix,
-  concernsHeading,
-  decisionPrefix,
-  findAuthorProblems,
-  findDecisionProblems,
-  findHostAcceptanceProblems,
-  findUnmergedPlanProblems,
-  hostTokenVariable,
-  readPlanMerge,
-} from "./plan-approval-records.ts";
+const defaultBranch = "origin/main";
+const intentDirectory = "intent";
+const statusLineLimit = 5;
+const acceptedByPrefix = "Accepted by: ";
+
+type PlanMerge = {
+  approvers: string[];
+  mergedBy: string;
+};
+
+/**
+ * Run git in the current directory.
+ * @param gitArguments Arguments after `git`.
+ * @returns Trimmed standard output.
+ */
+function runGit(gitArguments: string[]): string {
+  return execFileSync("git", gitArguments, {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+}
+
+/**
+ * Blank every line of a fenced code block, keeping line numbers.
+ * @param lines Document lines.
+ * @returns The lines with fenced ones emptied.
+ */
+function maskFencedBlocks(lines: string[]): string[] {
+  let isFenced = false;
+
+  return lines.map(line => {
+    const isFence = /^\s*(?:```|~~~)/.test(line);
+    const isMasked = isFenced || isFence;
+
+    isFenced = isFence ? !isFenced : isFenced;
+
+    return isMasked ? "" : line;
+  });
+}
+
+/**
+ * Split a document into LF-terminated lines without a byte order mark.
+ * @param text Document content.
+ * @returns The lines.
+ */
+function splitLines(text: string): string[] {
+  return text
+    .replace(/^\u{FEFF}/u, "")
+    .replaceAll("\r\n", "\n")
+    .split("\n");
+}
+
+/**
+ * Find the lines of a level-2 section.
+ * @param maskedLines Document lines with fenced code blocks emptied.
+ * @param heading The section heading.
+ * @returns The first line after the heading and the line of the next level-2 heading, or undefined when the heading is absent.
+ */
+function findSectionBounds(maskedLines: string[], heading: string): [number, number] | undefined {
+  const start = maskedLines.findIndex(line => line.trimEnd() === heading);
+
+  if (start === -1) {
+    return undefined;
+  }
+
+  const nextHeading = maskedLines.findIndex(
+    (line, index) => index > start && line.startsWith("## "),
+  );
+
+  return [start + 1, nextHeading === -1 ? maskedLines.length : nextHeading];
+}
+
+/**
+ * Collect the text of a level-2 section.
+ * @param maskedLines Document lines with fenced code blocks emptied.
+ * @param heading The section heading.
+ * @returns The lines under the heading up to the next level-2 heading, or undefined when the heading is absent.
+ */
+function readSection(maskedLines: string[], heading: string): string[] | undefined {
+  const bounds = findSectionBounds(maskedLines, heading);
+
+  return bounds === undefined ? undefined : maskedLines.slice(...bounds);
+}
+
+const concernsHeading = "## Areas of concern";
+const decisionPrefix = "Decision: ";
+const decisionPattern = /^ *Decision: \S/mu;
+const alsoAcceptedByPrefix = "Also accepted by: ";
+const hostTokenVariable = "GH_TOKEN";
+const hostRepositoryPath = "repos/{owner}/{repo}";
+const authorPrefix = "Author: ";
+const authorPattern = /^Author: @[\dA-Za-z][\dA-Za-z-]*[ .]/;
+const alsoAcceptedByPattern = /^Also accepted by: @([\dA-Za-z][\dA-Za-z-]*)\.$/;
 
 type BranchChanges = {
   changedPaths: string[];
@@ -37,6 +109,140 @@ type SelfTestCase = {
   problems: string[];
 };
 
+/**
+ * Find a plan that this branch adds together with a change outside `intent/`.
+ * @param isMerged Whether the default branch already holds the plan.
+ * @param isAcceptanceRequired Whether the branch changes a file outside `intent/`.
+ * @returns At most one message.
+ */
+function findUnmergedPlanProblems(isMerged: boolean, isAcceptanceRequired: boolean): string[] {
+  return isMerged || !isAcceptanceRequired
+    ? []
+    : [
+        `the plan is not on ${defaultBranch} and this branch changes a file outside ${intentDirectory}/; an engineer accepts a plan by merging the pull request that holds only it, so open that pull request and build on a new branch after it is merged`,
+      ];
+}
+
+/**
+ * Compare the plan's accepting handles with the host's record of its pull request.
+ * @param maskedLines Plan lines with fenced code blocks emptied.
+ * @param planMerge Who merged the pull request that last changed the plan, and who approved it.
+ * @returns One message per handle the host does not confirm.
+ */
+function findHostAcceptanceProblems(maskedLines: string[], planMerge: PlanMerge): string[] {
+  const acceptedLine = maskedLines.slice(1).find(line => line.trim() !== "") ?? "";
+  const accepter = acceptedLine.trimEnd().slice(acceptedByPrefix.length + 1, -1);
+  const secondAccepter = readSecondAccepter(maskedLines)?.toLowerCase();
+  const merger = planMerge.mergedBy.toLowerCase();
+  const approvers = planMerge.approvers.map(approver => approver.toLowerCase());
+
+  const mergerProblems =
+    accepter.toLowerCase() === merger
+      ? []
+      : [
+          `the "${acceptedByPrefix}" line names @${accepter}, and the host shows that @${planMerge.mergedBy} merged the plan's pull request; write the account that merged it`,
+        ];
+
+  const isSecondConfirmed =
+    secondAccepter === undefined ||
+    (secondAccepter !== merger && approvers.includes(secondAccepter));
+
+  return isSecondConfirmed
+    ? mergerProblems
+    : [
+        ...mergerProblems,
+        `the "${alsoAcceptedByPrefix}" line names a second person, and the host shows no approving review from that account on the plan's pull request; write "${alsoAcceptedByPrefix}@<handle>." with the account that approved it`,
+      ];
+}
+
+/**
+ * Find each numbered area of concern in a spec that carries no decision.
+ * @param specText Spec content.
+ * @returns At most one message, which names the numbers.
+ */
+function findDecisionProblems(specText: string): string[] {
+  const undecidedNumbers = (
+    readSection(maskFencedBlocks(splitLines(specText)), concernsHeading) ?? []
+  )
+    .join("\n")
+    .split(/^(?=\d+\. )/mu)
+    .filter(concern => /^\d+\. /u.test(concern) && !decisionPattern.test(concern))
+    .map(concern => /^\d+/u.exec(concern)?.[0]);
+
+  return undecidedNumbers.length === 0
+    ? []
+    : [
+        `area of concern ${undecidedNumbers.join(", ")} has no "${decisionPrefix}<the decision>." line under it; write the proposed decision there, and the product owner corrects it before merging the spec`,
+      ];
+}
+
+/**
+ * Find an intent whose author is not a handle on the host.
+ * @param intentText Intent content.
+ * @returns At most one message.
+ */
+function findAuthorProblems(intentText: string): string[] {
+  const authorLine = splitLines(intentText).find(line => line.startsWith(authorPrefix));
+
+  return authorLine !== undefined && authorPattern.test(authorLine)
+    ? []
+    : [
+        `the "${authorPrefix}" line holds no handle; write "${authorPrefix}@<handle> (<team>)." with the originator's account on the host`,
+      ];
+}
+
+/**
+ * Ask the host who merged the pull request that last changed a plan on the default branch, and who approved it.
+ * @param mergeBase The commit this branch left the default branch at.
+ * @param planPath Path of the plan.
+ * @returns The merging account and the approving accounts, or undefined when the host cannot be read.
+ */
+function readPlanMerge(mergeBase: string, planPath: string): PlanMerge | undefined {
+  if (process.env[hostTokenVariable] === undefined || process.env[hostTokenVariable] === "") {
+    return undefined;
+  }
+
+  try {
+    const commit = runGit(["log", "-1", "--format=%H", mergeBase, "--", planPath]);
+    const pullRequest = runHost(`${hostRepositoryPath}/commits/${commit}/pulls`, ".[0].number");
+    const pullRequestPath = `${hostRepositoryPath}/pulls/${pullRequest}`;
+    const mergedBy = runHost(pullRequestPath, ".merged_by.login");
+    const approvedFilter = '.[] | select(.state == "APPROVED") | .user.login';
+    const approvers = runHost(`${pullRequestPath}/reviews`, approvedFilter);
+
+    return {
+      mergedBy,
+      approvers: approvers.split("\n").filter(approver => approver !== ""),
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Call the host's API through its command-line tool.
+ * @param apiPath Path after `gh api`.
+ * @param filter The jq filter applied to the answer.
+ * @returns Trimmed standard output.
+ */
+function runHost(apiPath: string, filter: string): string {
+  return execFileSync("gh", ["api", apiPath, "--jq", filter], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
+}
+
+/**
+ * Read the handle on the plan's `Also accepted by:` line.
+ * @param maskedLines Plan lines with fenced code blocks emptied.
+ * @returns The handle, an empty string when the line is malformed, or undefined when there is no such line.
+ */
+function readSecondAccepter(maskedLines: string[]): string | undefined {
+  const line = maskedLines.find(planLine => planLine.startsWith(alsoAcceptedByPrefix));
+
+  return line === undefined ? undefined : (alsoAcceptedByPattern.exec(line.trimEnd())?.[1] ?? "");
+}
+
 const planFileName = "plan.md";
 const specFileName = "spec.md";
 const intentFileName = "intent.md";
@@ -45,7 +251,6 @@ const requirementsHeading = "## Requirements";
 const acceptancePlaceholder = "@<engineer>";
 const acceptedByPattern = /^Accepted by: @[\dA-Za-z][\dA-Za-z-]*\.$/;
 const requiredHeadings = ["## Files that change", "## Order of work", "## Risks", proofHeading];
-const unverifiedPlanPaths: string[] = [];
 
 /**
  * Find what this branch changed since it left the default branch.
@@ -465,6 +670,26 @@ function createChangeFolder(fileNames: string[]): string {
 const fixPlanFolder = createChangeFolder([planFileName]);
 const intentOnlyFolder = createChangeFolder([intentFileName, planFileName]);
 const specOnlyFolder = createChangeFolder([specFileName, planFileName]);
+const onePlanLines = splitLines(buildPlan({}));
+
+const twoPlanLines = splitLines(
+  buildPlan({
+    accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@lead.`,
+  }),
+);
+
+/**
+ * Build the host's record of a plan's pull request, for a self-test.
+ * @param mergedByLogin The account that merged it.
+ * @param approvers The accounts that approved it.
+ * @returns The record.
+ */
+function hostRecord(mergedByLogin: string, approvers: string[]): PlanMerge {
+  return {
+    approvers,
+    mergedBy: mergedByLogin,
+  };
+}
 
 const selfTestCases: SelfTestCase[] = [
   {
@@ -803,47 +1028,21 @@ const selfTestCases: SelfTestCase[] = [
   },
   {
     name: "the accepting handle is the account that merged, in another letter case",
-    problems: findHostAcceptanceProblems(splitLines(buildPlan({})), {
-      mergedBy: "Engineer",
-      approvers: [],
-    }),
+    problems: findHostAcceptanceProblems(onePlanLines, hostRecord("Engineer", [])),
   },
   {
     name: "the accepting handle is not the account that merged",
     expectedMessagePart: "@someone-else merged",
-    problems: findHostAcceptanceProblems(splitLines(buildPlan({})), {
-      mergedBy: "someone-else",
-      approvers: [],
-    }),
+    problems: findHostAcceptanceProblems(onePlanLines, hostRecord("someone-else", [])),
   },
   {
     name: "the second accepter approved the plan's pull request",
-    problems: findHostAcceptanceProblems(
-      splitLines(
-        buildPlan({
-          accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@lead.`,
-        }),
-      ),
-      {
-        mergedBy: "engineer",
-        approvers: ["lead"],
-      },
-    ),
+    problems: findHostAcceptanceProblems(twoPlanLines, hostRecord("engineer", ["lead"])),
   },
   {
     name: "the second accepter gave no approving review",
     expectedMessagePart: "no approving review",
-    problems: findHostAcceptanceProblems(
-      splitLines(
-        buildPlan({
-          accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@lead.`,
-        }),
-      ),
-      {
-        mergedBy: "engineer",
-        approvers: [],
-      },
-    ),
+    problems: findHostAcceptanceProblems(twoPlanLines, hostRecord("engineer", [])),
   },
   {
     name: "the second accepter is the account that merged",
@@ -854,10 +1053,7 @@ const selfTestCases: SelfTestCase[] = [
           accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@engineer.`,
         }),
       ),
-      {
-        mergedBy: "engineer",
-        approvers: ["engineer"],
-      },
+      hostRecord("engineer", ["engineer"]),
     ),
   },
   {
@@ -1052,7 +1248,9 @@ function findPlanAcceptanceLines(
   const planMerge = readPlanMerge(mergeBase, planPath);
 
   if (planMerge === undefined) {
-    unverifiedPlanPaths.push(planPath);
+    process.stdout.write(
+      `${planPath}: the "${acceptedByPrefix}" handle was not checked against the host; set ${hostTokenVariable} and install gh to check who merged the plan's pull request\n`,
+    );
 
     return [];
   }
@@ -1164,12 +1362,6 @@ if (selfTestFailures.length > 0) {
     ...findAcceptedStatusLines(changeFolders),
     ...findRecordLines(changeFolders),
   ];
-
-  for (const planPath of unverifiedPlanPaths) {
-    process.stdout.write(
-      `${planPath}: the "${acceptedByPrefix}" handle was not checked against the host; set ${hostTokenVariable} and install gh to check who merged the plan's pull request\n`,
-    );
-  }
 
   if (problemLines.length > 0) {
     process.stderr.write(`${problemLines.join("\n")}\n`);

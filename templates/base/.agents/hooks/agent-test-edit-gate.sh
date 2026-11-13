@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+# shellcheck source=.agents/hooks/record-gate-decision.sh
+if ! source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/record-gate-decision.sh"; then
+  printf '%s\n' '{"permission":"deny","user_message":"agent-test-edit-gate: .agents/hooks/record-gate-decision.sh could not be loaded, so the gate cannot record its decision. Stop and report this error to the user; agents may not edit the gate."}'
+  exit 2
+fi
+
 allow() {
+  record_gate_decision agent-test-edit-gate allow "" "${input:-}" "${lifted_approval:-}"
   printf '%s\n' '{"permission":"allow"}'
   exit 0
 }
 
 block() {
+  record_gate_decision agent-test-edit-gate block "${2:-$1}" "${input:-}"
   jq -n --arg message "$1" '{permission:"deny",user_message:$message,agent_message:$message}'
   printf 'agent-test-edit-gate: %s\n' "$1" >&2
   exit 2
@@ -20,7 +28,7 @@ project=${CLAUDE_PROJECT_DIR:-${CURSOR_PROJECT_DIR:-$PWD}}
 path=$(jq -r '.tool_input.file_path // .tool_input.path // .tool_input.notebook_path // .file_path // empty' <<< "$input")
 [[ -n $path && $path =~ $test_path_pattern ]] || allow
 if [[ -e "$project/.git/bug-fix-in-progress" ]]; then
-  block "A bug fix is in progress (.git/bug-fix-in-progress), so $path cannot change. Fix the code, not the test."
+  block "A bug fix is in progress (.git/bug-fix-in-progress), so $path cannot change. Fix the code, not the test." "A bug fix is in progress (.git/bug-fix-in-progress), so a test file cannot change."
 fi
 branch=$(git -C "$project" symbolic-ref --quiet --short HEAD 2> /dev/null) || branch=
 [[ $branch == fix/* ]] || allow
@@ -29,6 +37,6 @@ git -C "$project" rev-parse --verify --quiet "$default_branch" > /dev/null 2>&1 
 merge_base=$(git -C "$project" merge-base HEAD "$default_branch" 2> /dev/null) || allow
 committed_files=$(git -C "$project" log --format= --name-only "$merge_base..HEAD" 2> /dev/null) || allow
 if grep -Eq "$test_path_pattern" <<< "$committed_files"; then
-  block "A bug fix is in progress on branch $branch and the test that reproduces it is committed, so $path cannot change. Fix the code, not the test."
+  block "A bug fix is in progress on branch $branch and the test that reproduces it is committed, so $path cannot change. Fix the code, not the test." "A bug fix is in progress on a fix branch whose test is committed, so a test file cannot change."
 fi
 allow

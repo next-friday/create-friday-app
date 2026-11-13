@@ -37,7 +37,6 @@ Run the narrowest check that covers the change while you work. Git hooks run the
 
 - **Scans:** CI also runs coverage, the build, the container image, and the secret, SAST, OSV, CodeQL, dependency-review, and OpenSSF Scorecard scans. CodeQL, dependency-review, and Scorecard run on public repositories, and on private ones when the `CODE_SCANNING` repository variable is `true`. Dependabot and OSV-Scanner report vulnerable dependencies.
 - **Coverage:** CI requires 95% line coverage on changed lines in `src/`, except `main.ts`, which starts the server and handles the shutdown signals. Keep other logic out of it, as `src/port.ts` and `src/server.ts` do.
-- **Agent evals:** run `pnpm evals:run` after you change `AGENTS.md`, a skill under `.agents/skills/`, or a hook under `.agents/hooks/`, and add a case name to run one case. It runs the cases in `.agents/skill-evals/` with Claude Code on your own Claude login, so it spends your Claude usage, and it is not part of `pnpm verify`.
 
 Run `pnpm verify` for repository changes.
 

@@ -16,7 +16,6 @@
     "check": "pnpm verify:static && pnpm test:changed && pnpm build",
     "clean": "rm -rf dist coverage .eslintcache node_modules/.cache",
     "depcruise": "depcruise --config .dependency-cruiser.json src eslint.config.ts vitest.config.ts",
-    "evals:run": "node scripts/run-agent-evals.ts",
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",

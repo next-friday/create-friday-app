@@ -319,13 +319,13 @@ const templateOnlyChanges = [
   modifiedFile("templates/nestjs/src/main.ts"),
 ];
 
+const unpublishedFile =
+  "plugins/sdlc/adapters/claude-code/evals/sdlc-mode/answers-question-without-writing/prompt.md";
+
 const selfTestCases: SelfTestCase[] = [
   {
     name: "no changeset and nothing published changed",
-    changes: [
-      modifiedFile("plugins/sdlc/source/skills/sdlc-mode/SKILL.md"),
-      modifiedFile("AGENTS.md"),
-    ],
+    changes: [modifiedFile(unpublishedFile), modifiedFile("AGENTS.md")],
   },
   {
     expectedMessagePart: missingChangesetMessagePart,
@@ -429,7 +429,7 @@ const selfTestCases: SelfTestCase[] = [
     expectedMessagePart: "would release a version",
     changes: [
       addedFile(minorChangesetPath),
-      modifiedFile("plugins/sdlc/source/skills/sdlc-mode/SKILL.md"),
+      modifiedFile(unpublishedFile),
       modifiedFile("AGENTS.md"),
       modifiedFile("scripts/sync-plugin.ts"),
     ],

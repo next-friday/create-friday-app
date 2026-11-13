@@ -345,7 +345,7 @@ function findSpecProblems(maskedLines: string[], specText: string | undefined): 
 }
 
 /**
- * Check one plan against the template in `.agents/skills/sdlc/playbooks/build.md` and the spec beside it.
+ * Check one plan against the template in `playbooks/build.md` of the `sdlc-mode` skill and the spec beside it.
  * @param planText Plan content.
  * @param specText Content of the `spec.md` beside the plan, or undefined when there is none.
  * @param isAcceptanceRequired Whether the branch changes a file outside `intent/`.

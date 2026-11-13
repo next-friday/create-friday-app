@@ -38,6 +38,12 @@
       {
         "command": ".agents/hooks/agent-format-after-edit.sh"
       }
+    ],
+    "workspaceOpen": [
+      {
+        "command": ".cursor/hooks/load-project-plugins.sh",
+        "timeout": 10
+      }
     ]
   }
 }

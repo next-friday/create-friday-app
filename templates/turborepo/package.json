@@ -17,7 +17,6 @@
     "clean": "rm -rf apps/app/.next apps/app/coverage apps/backoffice/.next apps/backoffice/coverage .turbo coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "depcruise": "turbo run depcruise $TURBO_FILTER",
     "dev": "turbo run dev --filter=./apps/*",
-    "evals:run": "node scripts/run-agent-evals.ts",
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",

@@ -1,1 +1,0 @@
-`src/version.ts` exports `parseVersion`, which returns `"1.NaN.0"` for the input `"1.2"` and the right result for `"1.2.3"`. `test/version.test.ts` holds passing cases for three-part versions. No `intent/` folder exists for this defect, and no branch holds a plan for it.

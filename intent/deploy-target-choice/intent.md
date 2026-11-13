@@ -1,6 +1,6 @@
 # Intent: Choose where the project deploys
 
-Author: Joe Takara (Developer Productivity). Status: draft.
+Author: Joe Takara (Developer Productivity). Status: accepted.
 
 ## Problem
 

@@ -28,6 +28,14 @@ Report at most five nits per review; summarize the rest as a count.
 | A reported eval result                                         | It counts every run of the final text.                                                                                                                                                                                                                                          |
 | Every change                                                   | No file of the constitution is touched (`.agents/rules/constitution-changes.md` defines it; the `deny` list in `.claude/settings.json` names its files), files hold no history, date, or limitation, and the pull request closes each issue it resolves with `Closes #<issue>`. |
 
+## This repository
+
+- Require root-cause fixes. Flag new suppression directives, skipped tests, `as any`, and lint rules turned off in `eslint.config.ts`.
+- Preserve CLI arguments, prompts, and stack ids. Flag a breaking change, as defined in `.changeset/README.md`, that has no major changeset, and a major changeset for a change that is not breaking by that definition.
+- Require tests in `test/` to exercise observable CLI behavior. Flag tests that assert implementation shape alone.
+- Keep runtime dependencies to what the shipped CLI needs; repository tooling belongs in `devDependencies`.
+- Each stack is `templates/base` plus `templates/<stack>`. Keep a file in `base` only when every stack uses it with the same content. A stack may replace that file when its content must differ. Flag a `.gitignore` not stored as `_gitignore` and a committed `pnpm-lock.yaml` under `templates/`.
+
 ## Do not report
 
 Generated files and anything CI already enforces: `templates/payload/src/app/(payload)/**`, `templates/payload/src/migrations/**`, `templates/payload/src/payload-types.ts`, `templates/turborepo/apps/backoffice/src/app/(payload)/**`, `templates/turborepo/apps/backoffice/src/migrations/**`, and `templates/turborepo/apps/backoffice/src/payload-types.ts`.

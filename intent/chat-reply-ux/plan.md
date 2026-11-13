@@ -49,7 +49,7 @@ Delivery 2:
 - The riskiest step is 5: a hook that blocks a right reply stops every session that uses the plugin. It blocks once for a turn, only a reply whose first line has one of the three labels, and only for the five things a script reads.
 - Step 7 can lower an eval score for a reason that is not the new shape: one run of a case on the small model varies. A case under its threshold runs once more before its grader is read again, and no grader is loosened.
 - A project created before delivery 2 keeps the old shape. The changeset says how to copy the plugin.
-- Delivery 2. Departure from the first plan: the line `**Next:**` that ends each playbook stays. It names the playbook that follows and who starts it; it is not a line of a reply. The eval cases held one grader that read the `**Status:**` line, in `reply-gives-full-urls`; that case gains the graders for the first line, the `**Now:**` line, and a state that was not read, and no case grades a `**Not yet:**` line, which the hook's cases cover.
+- Delivery 2. Departures from the first plan. The line that ends each playbook was labelled `**Next:**`; it names the playbook that follows and who starts it, and is not a line of a reply, so it is renamed `**Hands off to:**` and requirement 15 holds as written. The eval cases held one grader that read the `**Status:**` line, in `reply-gives-full-urls`; that case gains the graders for the first line, the `**Now:**` line, and a state that was not read, and no case grades a `**Not yet:**` line, which the hook's cases cover. An action the person takes in the chat, such as answering a round of questions or sending a message, has no page: the `**Now:**` line then holds the action and no URL, a third form beside the two of requirement 8.
 - The two deliveries are two releases. Delivery 1 is merged and versioned before delivery 2 opens its pull request, so that neither changeset rides the other's version.
 - Options not taken: one pull request for both deliveries, because a `patch` and a `minor` would ship as one version; keeping `**Status:**` as the last line with new rules, because the link after it is what the person acts on; a check on the words of the `**Now:**` line, because a script cannot tell an action from a sentence.
 
@@ -61,7 +61,7 @@ Delivery 2:
 - 6–8, 10–12: the template in `SKILL.md`, the hook's cases for the three first-line labels, the `**Not yet:**` line, and the `**Now:**` line, and the graders of the eval case `reply-gives-full-urls` for the first line and the `**Now:**` line.
 - 9, 14: the cases of `check-reply-shape.cases.json`, run by `pnpm plugin:check`.
 - 13: the eval case `reply-gives-full-urls`, with a grader for a state that was not read.
-- 15: `git grep` for `**Status` under `plugins/sdlc/` finds nothing, and `git grep` for `Next:` finds only the line that ends each playbook.
+- 15: `git grep` for `**Status` and for `Next:` under `plugins/sdlc/source/` finds nothing.
 - 16: `pnpm plugin:check`, which compares both rendered copies with the source.
 - 17: `pnpm plugin:check`.
 - 18: steps 4 and 8, and the Template job in CI.

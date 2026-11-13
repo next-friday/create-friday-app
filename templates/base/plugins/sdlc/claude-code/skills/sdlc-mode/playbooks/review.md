@@ -13,4 +13,4 @@
 
 6. **Gate: a code owner approves the pull request, and a person merges it.** You never approve it and never merge it. Report the pull request's URL, or the branch's name when there is none, and say it waits only on the code owner. When a new comment or a failing check arrives, go back to step 5. Subscribe to the pull request's events where your tool can. Otherwise say that a person sends `/sdlc:sdlc-mode review` with the pull request when something changes.
 
-**Next:** `playbooks/deploy.md`; the project's deploy workflow, or an agent when a person asks; when the pull request is merged.
+**Hands off to:** `playbooks/deploy.md`; the project's deploy workflow, or an agent when a person asks; when the pull request is merged.

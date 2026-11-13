@@ -6,4 +6,4 @@
 4. Promote the commit to an environment before production only when the request asks for that environment. Do it the way `README.md` says, one environment at a time. When a deployment fails, stop: report the failing step and its log, and promote no further. When the request names production, by any name such as `prod`, go to step 5. When it names an environment the project does not have, say so and list the ones it has.
 5. **Gate: the release manager authorizes production.** Never start a production deployment, run a command that names the production environment, or push a release tag. Report the commit's SHA, the environments it has passed, the checks' results, and the exact action the release manager takes to promote it. Then wait.
 
-**Next:** `playbooks/maintain.md`; a job or a person; when monitoring or a ticket reports a finding in production.
+**Hands off to:** `playbooks/maintain.md`; a job or a person; when monitoring or a ticket reports a finding in production.

@@ -78,18 +78,23 @@ number=$(printf '%s\n' "$outside_code" \
 problems=
 [ -n "$number" ] && problems="Replace \"$number\" with the full URL of that pull request or issue, or with \"this pull request\". "
 only_line=$(printf '%s\n' "$reply" | awk 'NF{n++} END{print n+0}')
-not_yet=$(printf '%s\n' "$outside_fences" | grep '^\*\*Not yet:\*\*')
+not_yet=$(printf '%s\n' "$outside_fences" | grep -E '^[[:space:]]*([-*+][[:space:]]+)?\*\*Not yet:\*\*')
+page_urls() {
+  grep -Eo 'https?://[^][:space:]()<>]+' \
+    | sed -E 's#[`*_"'"'"'!?.,;:]+$##; s#[?\#].*$##; s#/+$##' \
+    | tr 'A-Z' 'a-z' | sort -u
+}
 case $last in
   '**Now:**'*)
-    now_urls=$(printf '%s\n' "$last" | grep -Eo 'https?://[^][:space:])>]+' | sed -E 's#[.,;:]+$##')
+    now_urls=$(printf '%s\n' "$last" | page_urls)
     now_url=$(printf '%s\n' "$now_urls" | head -1)
     if [ "$(printf '%s\n' "$now_urls" | grep -c .)" -gt 1 ]; then
       problems="${problems}The **Now:** line holds more than one URL. Name one thing for the person to do, with one URL. "
     fi
-    if printf '%s' "$now_url" | grep -Eq '/(pulls|issues)/?$'; then
+    if printf '%s' "$now_url" | grep -Eq '^https?://[^/]+/[^/]+/[^/]+/(.*/)?(pulls|issues)$'; then
       problems="${problems}The **Now:** line links a list page. Link the one page where the person acts, or write no URL when the person has nothing to do. "
     fi
-    if [ -n "$now_url" ] && printf '%s\n' "$not_yet" | grep -Fq "$now_url"; then
+    if [ -n "$now_url" ] && printf '%s\n' "$not_yet" | page_urls | grep -Fxq "$now_url"; then
       problems="${problems}The **Now:** line links the page the **Not yet:** line names. Write no URL there until the person may act on that page. "
     fi
     ;;

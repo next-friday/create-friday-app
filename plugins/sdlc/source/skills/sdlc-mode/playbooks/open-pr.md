@@ -14,4 +14,4 @@ Branch from the latest `origin/main`, and open the pull request ready for review
 
 5. Go on in the same turn, without asking: follow `playbooks/review.md`.
 
-**Next:** `playbooks/review.md`; an agent; in the same turn, as soon as step 4 is done.
+**Hands off to:** `playbooks/review.md`; an agent; in the same turn, as soon as step 4 is done.

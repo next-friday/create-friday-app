@@ -575,5 +575,86 @@
       "last_assistant_message": "**Result:** The shape is documented.\n\n```markdown\n**Not yet:** one\n**Not yet:** two\n```\n\n**Now:** Nothing for you to do."
     },
     "expected": "pass"
+  },
+  {
+    "name": "now: a list page in bold",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open **https://github.com/acme/shop/pulls**"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list page in a code span followed by a mark",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open `https://github.com/acme/shop/issues`!"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list page with a query",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open https://github.com/acme/shop/pulls?q=is%3Aopen"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: one issue",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The patch is in an issue.\n\n**Now:** Commit the patch of this issue: https://github.com/acme/shop/issues/12"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "now: a repository named issues",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The repository is created.\n\n**Now:** Open the repository: https://github.com/acme/issues"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "now: one URL as a link whose text is the URL",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the plan's pull request: [https://github.com/acme/shop/pull/7](https://github.com/acme/shop/pull/7)"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: the Now line links a page whose URL starts like the named one",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/70; the guarded files are missing.\n\n**Now:** Merge the plan's pull request: https://github.com/acme/shop/pull/7"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: the Now line links the named page with a trailing slash",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/70; the guarded files are missing.\n\n**Now:** See https://github.com/acme/shop/pull/70/"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "not yet: a Not yet line in a list item counts",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n- **Not yet:** Do not merge https://github.com/acme/shop/pull/9.\n- **Not yet:** Do not approve the release.\n\n**Now:** Nothing for you to do."
+    },
+    "expected": "block"
   }
 ]

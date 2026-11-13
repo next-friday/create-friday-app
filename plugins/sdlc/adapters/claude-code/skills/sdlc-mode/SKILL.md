@@ -27,8 +27,8 @@ Do these steps in order.
 
    Do not start work a person did not ask for. When a message reports a problem without asking for work, answer in a few lines and give, on the **Now** line, the message that would start it: `/sdlc:sdlc-mode` followed by their own words.
 
-2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Next** line chains another playbook, add that playbook's steps when you start it.
-3. **Do the playbook's steps yourself,** stopping only at a step marked **Gate**, or before an action that cannot be undone. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
+2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Hands off to** line chains another playbook, add that playbook's steps when you start it.
+3. **Do the playbook's steps yourself,** stopping only at a step marked **Gate**, or before an action that cannot be undone. At a step marked **Gate**, wait for the person it names. When a playbook's **Hands off to** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
 4. **Write the reply in the shape below.**
 
 ## Reply shape
@@ -47,7 +47,7 @@ For example, the person writes "who must approve pull request #7 of https://host
 The person reads the top of a reply and its last line first, so the answer and the one thing to do are there:
 
 ```markdown
-**Answer:** | **Result:** | **No change:** <one of the three, in one or two sentences. `**Answer:**` answers a question. `**Result:**` says what the work produced, or what is known so far. `**No change:**` is for a message that no person typed, such as a finished check or a notice from the host, when it changes nothing for the person: say what happened and what the work still waits for, and send that one line as the whole reply.>
+**Answer:** | **Result:** | **No change:** <one of the three, in one or two sentences. `**Answer:**` answers a question. `**Result:**` says what the work produced, or what is known so far; a reply that only asks a round of questions or stops at a gate starts with it too. `**No change:**` is for a message that no person typed, such as a finished check or a notice from the host, when it changes nothing for the person: say what happened and what the work still waits for, and send that one line as the whole reply.>
 
 **Not yet:** <only when there is something the person must not do yet, such as merging a pull request that is not whole. What, and why, in one line. At most one such line.>
 
@@ -61,7 +61,7 @@ The person reads the top of a reply and its last line first, so the answer and t
 
 <What the current step produces: the round of questions, or the whole draft, and the reasons and the evidence behind the first line.>
 
-**Now:** <the one thing the person does now, in words that say the action, then the full URL of the page where it is done, and nothing after that URL. When the person has nothing to do, say so and write no URL. Say here which gate the work waits on and for whom.>
+**Now:** <which gate the work waits on and for whom, then the one thing the person does now, in words that say the action, then the full URL of the page where it is done, and nothing after that URL. An action done in the chat, such as answering the questions above or sending a message, has no URL: write the action, and the message to send when there is one. When the person has nothing to do, say so and write no URL.>
 ```
 
 The **Now** line is the last line of the reply. It holds at most one URL. That URL is never a list page, such as a repository's pull requests or issues, and never a page the **Not yet** line names: a link at the end of a reply is where the person taps.

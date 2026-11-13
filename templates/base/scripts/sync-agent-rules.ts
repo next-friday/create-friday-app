@@ -6,12 +6,6 @@ type RuleConfig = {
   globs?: string[];
 };
 
-type SubagentConfig = {
-  description: string;
-  readonly?: boolean;
-  tools?: string[];
-};
-
 const sourceDirectory = ".agents/rules";
 const configPath = ".agents/rules.json";
 
@@ -85,10 +79,6 @@ for (const name of configNames) {
 
 const skillSourceDirectory = ".agents/skills";
 const skillDirectories = [".claude/skills", ".cursor/skills"];
-const subagentSourceDirectory = ".agents/agents";
-const subagentConfigPath = ".agents/agents.json";
-const claudeSubagentDirectory = ".claude/agents";
-const cursorSubagentDirectory = ".cursor/agents";
 
 /**
  * List every file under a directory, as paths relative to it.
@@ -106,57 +96,12 @@ function listFiles(directory: string): string[] {
     : [];
 }
 
-/**
- * Render a subagent with the frontmatter fields its tool reads.
- * @param name Subagent name.
- * @param fields Frontmatter fields after `name` and `description`.
- * @param subagent Subagent configuration.
- * @param body Shared subagent body.
- * @returns The subagent file content.
- */
-function renderSubagent(
-  name: string,
-  fields: string[],
-  subagent: SubagentConfig,
-  body: string,
-): string {
-  return [
-    `---`,
-    `name: ${name}`,
-    `description: ${subagent.description}`,
-    ...fields,
-    `---`,
-    ``,
-    body,
-  ].join("\n");
-}
-
 for (const file of listFiles(skillSourceDirectory)) {
   const content = readFileSync(path.join(skillSourceDirectory, file), "utf8");
 
   for (const directory of skillDirectories) {
     expected.set(path.join(directory, file), content);
   }
-}
-
-const subagents = existsSync(subagentConfigPath)
-  ? (JSON.parse(readFileSync(subagentConfigPath, "utf8")) as Record<string, SubagentConfig>)
-  : {};
-
-for (const [name, subagent] of Object.entries(subagents)) {
-  const body = readFileSync(path.join(subagentSourceDirectory, `${name}.md`), "utf8");
-  const claudeFields = subagent.tools === undefined ? [] : [`tools: ${subagent.tools.join(", ")}`];
-  const cursorFields = subagent.readonly === undefined ? [] : [`readonly: ${subagent.readonly}`];
-
-  expected.set(
-    path.join(claudeSubagentDirectory, `${name}.md`),
-    renderSubagent(name, claudeFields, subagent, body),
-  );
-
-  expected.set(
-    path.join(cursorSubagentDirectory, `${name}.md`),
-    renderSubagent(name, cursorFields, subagent, body),
-  );
 }
 
 const sharedFiles: Record<string, string[]> = {
@@ -178,9 +123,6 @@ const orphans = [
   ...listNames(claudeDirectory, ".md").map(name => path.join(claudeDirectory, `${name}.md`)),
   ...listNames(cursorDirectory, ".mdc").map(name => path.join(cursorDirectory, `${name}.mdc`)),
   ...skillDirectories.flatMap(directory =>
-    listFiles(directory).map(file => path.join(directory, file)),
-  ),
-  ...[claudeSubagentDirectory, cursorSubagentDirectory].flatMap(directory =>
     listFiles(directory).map(file => path.join(directory, file)),
   ),
   ...Object.values(sharedFiles)

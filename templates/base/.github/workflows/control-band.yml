@@ -88,11 +88,12 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            /sdlc A scheduled job found a control band deviation in production. No one can answer questions.
+            /sdlc:sdlc-mode A scheduled job found a control band deviation in production. No one can answer questions.
             Detection report: ${{ needs.detect.outputs.report }}
             Metric values, oldest first: ${{ needs.detect.outputs.values }}
             The values come from the command in the CONTROL_BAND_METRIC_COMMAND repository variable. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           claude_args: |
+            --plugin-dir plugins/sdlc/claude-code
             --model claude-haiku-5-5
             --max-turns 15
             --allowedTools "${{ needs.detect.outputs.tools || 'Read,Grep,Glob' }}"
@@ -103,12 +104,13 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            /sdlc A scheduled job found a control band deviation in production. No one can answer questions.
+            /sdlc:sdlc-mode A scheduled job found a control band deviation in production. No one can answer questions.
             Detection report: ${{ needs.detect.outputs.report }}
             Metric values, oldest first: ${{ needs.detect.outputs.values }}
             The values come from the command in the CONTROL_BAND_METRIC_COMMAND repository variable. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             The branch docs/band-finding-${{ github.run_id }} exists and is checked out. Commit intent.md on it, push it with git push --set-upstream origin docs/band-finding-${{ github.run_id }}, open the pull request, and stop at the service owner's gate. A route other than pull_request is a runbook: name its command in the intent and do not run it.
           claude_args: |
+            --plugin-dir plugins/sdlc/claude-code
             --model claude-haiku-5-5
             --max-turns 25
             --permission-mode acceptEdits

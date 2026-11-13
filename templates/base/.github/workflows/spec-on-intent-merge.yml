@@ -91,9 +91,10 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            /sdlc ${{ matrix.intent }}
+            /sdlc:sdlc-mode ${{ matrix.intent }}
             The branch ${{ steps.branch.outputs.name }} exists and is checked out. Commit spec.md on it, push it with git push --set-upstream origin ${{ steps.branch.outputs.name }}, open the pull request, and stop at the product owner's gate.
           claude_args: |
+            --plugin-dir plugins/sdlc/claude-code
             --model claude-haiku-5-5
             --max-turns 30
             --permission-mode acceptEdits

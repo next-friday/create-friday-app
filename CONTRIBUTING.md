@@ -37,13 +37,13 @@ pnpm install
 
 ## Templates
 
-Each stack is `templates/base` plus `templates/<stack>`. The CLI copies `base`, then the stack directory, into the new project.
+Each stack is `templates/base` plus `templates/<stack>`. The CLI copies `base`, then the stack directory, into the new project. For a deploy target other than `none`, it then copies `templates/deploy-<target>/base` and `templates/deploy-<target>/<stack>`, and it keeps the `deploy:<target>` sections of the chosen deploy target in every copied file.
 
 - `base` holds the files every stack uses with the same content, such as the Git hooks, gitleaks, and agent rules. It is not a template on its own.
 - A stack directory holds the files whose content differs by stack, such as `package.json` or `eslint.config.ts`. `AGENTS.md` says when a stack replaces a `base` file.
 - Each stack stores its `.gitignore` as `_gitignore`, because npm leaves `.gitignore` out of published packages. The CLI renames it.
 
-The root lint, format, Knip, and test configs skip `templates/`. To change or check a template, generate a project and run its `pnpm verify`, as `AGENTS.md` shows. Copy edited files back to `base` or the stack directory, and `.gitignore` back as `_gitignore`. Leave out `.env`, which the CLI writes from `.env.example`. Leave out `pnpm-lock.yaml`: `pnpm pack` drops nested lockfiles, so the generated project creates its own on the first `pnpm install`.
+The root lint, format, Knip, and test configs skip `templates/`. To change or check a template, generate a project and run its `pnpm verify`, as `AGENTS.md` shows. Copy edited files back to `base`, the stack directory, or the deploy layer they came from, and `.gitignore` back as `_gitignore`. A file with a `deploy:<target>` section is the exception: the CLI removes its markers, so edit it under `templates/` and do not copy it back. Leave out `.env`, which the CLI writes from `.env.example`. Leave out `pnpm-lock.yaml`: `pnpm pack` drops nested lockfiles, so the generated project creates its own on the first `pnpm install`.
 
 ## Verification
 

@@ -69,6 +69,11 @@ describe("resolveDeploySections", () => {
       "A deploy:end marker has no deploy target section to close.",
     ],
     [
+      "a marker that names no deploy target",
+      "a\n# deploy:railwya\nb\n# deploy:end\n",
+      "A deploy:railwya marker names no deploy target. Use one of: none, railway.",
+    ],
+    [
       "a section that starts inside another",
       "# deploy:railway\n# deploy:none\n# deploy:end\n",
       "A deploy:none marker starts inside the deploy:railway section.",

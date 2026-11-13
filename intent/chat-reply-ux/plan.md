@@ -1,6 +1,6 @@
 # Plan: Make a reply easy to act on, and finish the deploy target documents
 
-Accepted by: @<engineer>.
+Accepted by: @joetakara.
 
 This plan covers every requirement of `intent/chat-reply-ux/spec.md` in two deliveries: requirements 1 to 5, then 6 to 16. It is accepted by merging the pull request that adds it, and the code of each delivery follows in its own pull request.
 

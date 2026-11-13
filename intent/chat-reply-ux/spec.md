@@ -1,6 +1,6 @@
 # Spec: Make a reply easy to act on, and finish the deploy target documents
 
-From `intent/chat-reply-ux/intent.md`. Status: draft.
+From `intent/chat-reply-ux/intent.md`. Status: accepted.
 
 Request: "docs(repo): add the chat reply intent (#211)", the merge of the intent's pull request by the product owner. Skills at `e477661`.
 

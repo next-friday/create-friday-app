@@ -49,7 +49,7 @@ For example, the person writes "who must approve pull request #7 of https://host
 
 **Steps:** <only when the session has no task-list tool, and never for the `question` playbook. One line for each numbered step of the playbook: `1. <the step, copied word for word>: done | open | skip: <reason>`. When the turn ran more than one playbook, one list for each, under its file name on a line of its own, such as `playbooks/build.md`.>
 
-**Checks:** <only when a step ran checks, and never for the `question` playbook. Each command, then the lines of its output that show the result, copied from the output.>
+**Checks:** <when a step ran checks, and always when the turn changed a file outside `intent/`, whichever playbook ran. Otherwise never for the `question` playbook. Each command, then the lines of its output that show the result, copied from the output. For a check that could not run, the check and why.>
 
 <What the current step produces: the round of questions, or the whole draft. For a question or a request no row fits, the answer.>
 

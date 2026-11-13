@@ -41,8 +41,9 @@ Committed by a person from a patch in one issue:
 
 **Delivery 3.** Edited by the agent; no file of this delivery is in the constitution:
 
-- `plugins/sdlc/source/hooks/check-done-report.sh` (new) and `check-done-report.cases.json` (new): a hook that runs when the agent stops. It blocks a reply in the `sdlc-mode` shape that has no **Checks** section when, since the person's last message, the session edited a file outside `intent/`. It reads the edits from the session's transcript for one tool, and from a state file that a file-edit hook writes for the other. It passes when it cannot read either.
-- `plugins/sdlc/adapters/hooks.json` (changed): registers that hook for each tool, and the file-edit hook that feeds it.
+- `plugins/sdlc/source/hooks/check-reply-shape.sh` and `check-reply-shape.cases.json` (changed): the hook that runs when the agent stops also blocks a reply in the `sdlc-mode` shape that has no **Checks** section when, since the person's last message, the content of a file outside `intent/` changed. A new `snapshot` argument, run when the person sends a message, stores a checksum of that content, read through a copy of the Git index; the stop compares it. The rule does not apply outside a Git repository or with no stored checksum.
+- `plugins/sdlc/adapters/hooks.json` (changed): registers the `snapshot` argument for each tool at the event that fires when the person sends a message.
+- `scripts/sync-plugin.ts` (changed): a hook case can name changed files; it then runs in a new Git repository, between a snapshot and the stop.
 - `plugins/sdlc/source/skills/sdlc-mode/SKILL.md` (changed): the reply shape says that a turn which edited a file outside `intent/` has a **Checks** section, which names each check that ran and each check that could not run and why.
 - `plugins/sdlc/source/skills/sdlc-mode/playbooks/review.md` (changed): when a pull request exists and the session cannot post on it, the **Status** line says that the findings are not on the pull request and that a person posts them, and the step stays open.
 - `plugins/sdlc/source/skills/sdlc-mode/playbooks/maintain.md` (changed): the service owner schedules a finding with a comment on its pull request that says when; an open pull request with no such comment is undecided.
@@ -76,7 +77,7 @@ Delivery 2:
 
 Delivery 3:
 
-14. `check-done-report.sh` and its cases, cases first: a turn with an edit outside `intent/` and no **Checks**, the same with **Checks**, a turn that edited only `intent/`, a turn with no edit, a reply not in the `sdlc-mode` shape, a transcript that cannot be read, and the second stop of a blocked turn. Check: the cases fail before the hook exists and pass after; `pnpm plugin:check` runs them.
+14. The rule in `check-reply-shape.sh` and its cases, cases first: a turn with a change outside `intent/` and no **Checks**, the same with **Checks**, a turn that changed only `intent/`, a turn with no change, a reply not in the `sdlc-mode` shape, a project that is not a Git repository, and the second stop of a blocked turn. Check: the cases fail before the hook exists and pass after; `pnpm plugin:check` runs them.
 15. `hooks.json`, `SKILL.md`, the two playbooks, the `setup-sdlc` skill, `SETUP.md`, and the README. Check: `pnpm plugin:sync`, then `pnpm plugin:check`.
 16. Lint and format each changed file, then generate a project of each of the five stacks and run `pnpm verify` in each. Check: five passes.
 17. The eval cases of `review` and `maintain`, once, on the small model. Check: the scores, reported.
@@ -100,8 +101,9 @@ Delivery 3:
 - Delivery 2. Options not taken: a record in the repository, because the repository holds no log file; the command text in the record, because a command can hold a secret; one record function copied into each hook, because the five would drift.
 
 - Delivery 3. The riskiest step is 14: a hook that blocks a right reply stops every session that uses the plugin. It fires only on a reply in the `sdlc-mode` shape, only after an edit outside `intent/` in that turn, and never twice for one turn; a reply that names, under **Checks**, the check it could not run and why, passes.
-- Delivery 3. The transcript's format belongs to the agent tool and can change. The hook passes when it cannot read an edit from it, so a format change turns the rule off and does not block.
-- Delivery 3. Options not taken: reading the words of the **Status** line for "done", because every **Status** line says what is done; `git status` as the sign of an edit, because a question asked in a dirty tree would be blocked; failing `pnpm verify` on a setting that is not made, because the spec keeps a new project green.
+- Delivery 3. Departure from the first plan: the hook does not read the session's transcript. A transcript shows an edit made by the edit tool and misses one made by a shell command, and its format and its tool names belong to the agent tool. The content of the working tree shows both, and the rule joins `check-reply-shape.sh`, which already reads the reply and already blocks a turn only once.
+- Delivery 3. A file that a person or another process changes while the agent's turn runs counts as changed in that turn. A file Git ignores and does not track never counts.
+- Delivery 3. Options not taken: reading the words of the **Status** line for "done", because every **Status** line says what is done; `git status` alone as the sign of an edit, because a question asked in a dirty tree would be blocked; failing `pnpm verify` on a setting that is not made, because the spec keeps a new project green.
 
 ## Proof
 
@@ -116,8 +118,8 @@ Delivery 3:
 - 16: `pnpm gates:check` in a generated project of each stack.
 - 17: the review reads each of the three steps of `SETUP.md` against the documentation it cites.
 - 18: the eval case `setup-sdlc` reports the three steps, and `pnpm verify` in a new project of each stack.
-- 19: the cases of `check-done-report.cases.json`, run by `pnpm plugin:check`.
-- 20: the eval case `review-reports-findings-and-never-merges`, with a session that cannot post.
+- 19: the `checks:` cases of `check-reply-shape.cases.json`, run by `pnpm plugin:check`.
+- 20: the review reads `review.md` step 1, and the eval case `review-reports-findings-and-never-merges` still passes. Its scaffold has no host, so no case holds a pull request that the session cannot post on.
 - 21: the review reads `maintain.md` step 6, and the eval case `maintain-writes-intent-from-a-finding` still passes.
 - 22: `pnpm plugin:check`.
 - 23: step 7.

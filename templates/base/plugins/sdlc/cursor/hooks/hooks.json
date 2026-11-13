@@ -1,6 +1,11 @@
 {
   "version": 1,
   "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "sh \"${CURSOR_PLUGIN_ROOT}/hooks/check-reply-shape.sh\" snapshot"
+      }
+    ],
     "afterAgentResponse": [
       {
         "command": "sh \"${CURSOR_PLUGIN_ROOT}/hooks/check-reply-shape.sh\" save"

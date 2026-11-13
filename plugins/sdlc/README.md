@@ -12,14 +12,18 @@ The `sdlc` plugin runs the software development loop: a skill that matches a req
 
 ## Hook
 
-The plugin ships `check-reply-shape.sh`, a POSIX `sh` script that reads the hook input with `jq`, as a `Stop` hook for Claude Code and as a pair of hooks for Cursor. It checks only a reply whose first line starts with `**Request:**`, and it blocks that reply once, with a reason that asks for the whole reply again, when the reply:
+The plugin ships `check-reply-shape.sh`, a POSIX `sh` script that reads the hook input with `jq`, as a `UserPromptSubmit` and a `Stop` hook for Claude Code and as three hooks for Cursor. It checks only a reply whose first line starts with `**Request:**`, and it blocks that reply once, with a reason that asks for the whole reply again, when the reply:
 
 - names a pull request or an issue by number outside a URL, a fenced block, and a code span that holds more than the bare number;
 - does not end with a line that starts with `**Status:**`;
-- has a URL on its **Request** line, and a **Status** line that neither ends with `Next: <URL>` nor says "no next page".
+- has a URL on its **Request** line, and a **Status** line that neither ends with `Next: <URL>` nor says "no next page";
+- has no line that starts with `**Checks:**` outside a fenced block, when a file outside `intent/` changed during the turn.
 
-Cursor's `stop` hook gets no reply text, so the Cursor adapter runs the script twice, from `hooks/hooks.json`:
+To know what changed during the turn, `check-reply-shape.sh snapshot` runs when the person sends a message. It stores a checksum of the content of every file Git tracks or does not ignore, outside `intent/`, in a file named after the conversation under `${TMPDIR:-/tmp}/sdlc-reply-shape/`. When the agent stops, the script takes the checksum again and compares. It reads the content through a copy of the Git index and a scratch object store, both under that directory and deleted after each run, so staging and committing change nothing, and the project's index and objects are not written. It reads every file that changed since the copy of the index, and every untracked file each time, so a large untracked file that Git does not ignore can take the hook past its ten seconds; the rule then does not apply to that turn. Outside a Git repository, on the first stop with no stored checksum, and when the session's folder moved to another repository, the rule does not apply. Only `intent/` at the repository's root is left out, and the content of a submodule is not read.
 
+Cursor's `stop` hook gets no reply text, so the Cursor adapter runs the script from three hooks in `hooks/hooks.json`:
+
+- `beforeSubmitPrompt` runs `check-reply-shape.sh snapshot`;
 - `afterAgentResponse` runs `check-reply-shape.sh save`, which writes the reply text to a file named after the conversation under `${TMPDIR:-/tmp}/sdlc-reply-shape/` and prints nothing;
 - `stop` runs `check-reply-shape.sh followup` with `loop_limit` 1. It reads that file and deletes it, and after a completed run with `loop_count` 0 it runs the same checks, and prints a `followup_message` with the same reason, which Cursor sends as the next message. Cursor therefore sends at most one follow-up.
 

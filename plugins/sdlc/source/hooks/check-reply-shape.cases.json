@@ -293,5 +293,185 @@
       "loop_count": 0
     },
     "expected": "pass"
+  },
+  {
+    "name": "checks: a file outside intent/ changed and no Checks section",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "block"
+  },
+  {
+    "name": "checks: a new file outside intent/ and no Checks section",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/health.ts"],
+    "expected": "block"
+  },
+  {
+    "name": "checks: a file outside intent/ changed and a Checks section",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\n**Checks:**\n\n- `pnpm test`: `Tests 3 passed (3)`\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "pass"
+  },
+  {
+    "name": "checks: a file outside intent/ changed and a check that could not run",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\n**Checks:** `pnpm test` could not run: the session has no network to install the dependencies.\n\n**Status:** The endpoint is written and not checked; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "pass"
+  },
+  {
+    "name": "checks: a Checks line only inside a fenced block",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\n```markdown\n**Checks:** none\n```\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "block"
+  },
+  {
+    "name": "checks: only a file under intent/ changed",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["intent/app-version/plan.md"],
+    "expected": "pass"
+  },
+  {
+    "name": "checks: no file changed",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": [],
+    "expected": "pass"
+  },
+  {
+    "name": "checks: a reply that is not in the shape",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": false,
+      "last_assistant_message": "The endpoint is written."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "pass"
+  },
+  {
+    "name": "checks: the second stop of a blocked turn",
+    "input": {
+      "session_id": "s-35",
+      "stop_hook_active": true,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "pass"
+  },
+  {
+    "name": "checks: outside a Git repository",
+    "input": {
+      "session_id": "s-none",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+      "cwd": "/nonexistent/project"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "checks: the other tool, a file outside intent/ changed and no Checks section",
+    "argument": "followup",
+    "savedReply": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+    "changedFiles": ["src/version.ts"],
+    "input": {
+      "conversation_id": "c-one",
+      "status": "completed",
+      "loop_count": 0
+    },
+    "expected": "block"
+  },
+  {
+    "name": "checks: the other tool, a file outside intent/ changed and a Checks section",
+    "argument": "followup",
+    "savedReply": "**Request:** Add the version endpoint.\n\n**Checks:**\n\n- `pnpm test`: `Tests 3 passed (3)`\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+    "changedFiles": ["src/version.ts"],
+    "input": {
+      "conversation_id": "c-two",
+      "status": "completed",
+      "loop_count": 0
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "checks: the other tool, only a file under intent/ changed",
+    "argument": "followup",
+    "savedReply": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+    "changedFiles": ["intent/app-version/plan.md"],
+    "input": {
+      "conversation_id": "c-three",
+      "status": "completed",
+      "loop_count": 0
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "checks: a file changed before the turn and none during it",
+    "input": {
+      "session_id": "s-48",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": [],
+    "expected": "pass",
+    "filesBeforeTurn": ["src/version.ts"]
+  },
+  {
+    "name": "checks: a change made before the turn is committed during it",
+    "input": {
+      "session_id": "s-49",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": [],
+    "expected": "pass",
+    "filesBeforeTurn": ["src/version.ts"],
+    "committed": true
+  },
+  {
+    "name": "checks: a file changed and committed during the turn",
+    "input": {
+      "session_id": "s-50",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "block",
+    "committed": true
+  },
+  {
+    "name": "checks: only a file Git ignores changed",
+    "input": {
+      "session_id": "s-51",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["coverage/report.txt"],
+    "expected": "pass"
   }
 ]

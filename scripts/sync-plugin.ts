@@ -26,7 +26,10 @@ type HookConfig = {
 
 type HookCase = {
   argument?: string;
+  changedFiles?: string[];
+  committed?: boolean;
   expected: "block" | "pass";
+  filesBeforeTurn?: string[];
   input: Record<string, unknown>;
   name: string;
   savedReply?: string;
@@ -360,9 +363,74 @@ function runHookScript(
 }
 
 /**
+ * Write the same content to each file of a hook case's repository.
+ * @param repository The repository's path.
+ * @param files Paths relative to the repository.
+ * @param content The content of each file.
+ */
+function writeCaseFiles(repository: string, files: string[], content: string): void {
+  for (const file of files) {
+    mkdirSync(path.join(repository, path.dirname(file)), {
+      recursive: true,
+    });
+
+    writeFileSync(path.join(repository, file), content);
+  }
+}
+
+/**
+ * Commit every file of a hook case's repository that Git does not ignore.
+ * @param repository The repository's path.
+ */
+function commitCaseFiles(repository: string): void {
+  for (const gitArguments of [
+    ["add", "--all"],
+    [
+      "-c",
+      "user.name=case",
+      "-c",
+      "user.email=case@example.invalid",
+      "-c",
+      "commit.gpgsign=false",
+      "commit",
+      "--quiet",
+      "--message",
+      "case",
+    ],
+  ]) {
+    execFileSync("git", gitArguments, {
+      cwd: repository,
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+  }
+}
+
+/**
+ * Create a Git repository with one commit that holds a source file, a plan, and an ignore rule for `coverage/`, for a hook case.
+ * @param parentDirectory The directory to create the repository in.
+ * @returns The repository's path.
+ */
+function createCaseRepository(parentDirectory: string): string {
+  const repository = path.join(parentDirectory, "repository");
+
+  mkdirSync(repository);
+
+  execFileSync("git", ["init", "--quiet"], {
+    cwd: repository,
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+
+  writeCaseFiles(repository, ["src/version.ts", "intent/app-version/plan.md"], "first\n");
+  writeCaseFiles(repository, [".gitignore"], "coverage/\n");
+  commitCaseFiles(repository);
+
+  return repository;
+}
+
+/**
  * Run a hook script on one case in a private state directory.
  * @param script Path of the script from the repository root.
- * @param hookCase The case; a saved reply is stored first by the script's `save` argument.
+ * @param hookCase The case. A saved reply is stored first by the script's `save` argument. Changed files make the case run in a new Git repository: the script takes its `snapshot`, the files are written, and the case input gains the repository as `cwd` and `workspace_roots`.
  * @returns The standard output of the script on the case input.
  */
 function runHookCase(script: string, hookCase: HookCase): string {
@@ -381,7 +449,29 @@ function runHookCase(script: string, hookCase: HookCase): string {
       );
     }
 
-    return runHookScript(script, hookCase.argument, hookCase.input, stateDirectory);
+    if (hookCase.changedFiles === undefined) {
+      return runHookScript(script, hookCase.argument, hookCase.input, stateDirectory);
+    }
+
+    const input = {
+      ...hookCase.input,
+      cwd: createCaseRepository(stateDirectory),
+    };
+
+    const caseInput = {
+      ...input,
+      workspace_roots: [input.cwd],
+    };
+
+    writeCaseFiles(input.cwd, hookCase.filesBeforeTurn ?? [], "before\n");
+    runHookScript(script, "snapshot", caseInput, stateDirectory);
+    writeCaseFiles(input.cwd, hookCase.changedFiles, "changed\n");
+
+    if (hookCase.committed === true) {
+      commitCaseFiles(input.cwd);
+    }
+
+    return runHookScript(script, hookCase.argument, caseInput, stateDirectory);
   } finally {
     rmSync(stateDirectory, {
       force: true,

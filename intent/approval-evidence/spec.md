@@ -2,7 +2,7 @@
 
 From `intent/approval-evidence/intent.md`. Status: draft.
 
-Request: "docs(repo): add the approval evidence intent (#186)", the merge of the intent's pull request by the product owner. Skills at `9b1dd15`.
+Request: "docs(repo): add the approval evidence intent (#186)", the merge of the intent's pull request by the product owner. Skills at `ebe18df`.
 
 Choices the product owner has not made are marked **Proposal**. The product owner corrects them in review. Item numbers are those of the intent's **Problem** section. Playbook paths are under `plugins/sdlc/source/skills/sdlc-mode/playbooks/`.
 
@@ -25,7 +25,7 @@ Delivery 2, items 8 and 9:
 
 11. Each hook that allows or blocks an action writes one record for each decision: the time in UTC, the hook's name, the decision, the reason when it blocks, and the session's identifier when the hook's input gives one. The five are `agent-test-edit-gate.sh`, `agent-shell-gate.sh`, `agent-production-gate.sh`, and `agent-mcp-gate.sh` under `templates/base/.agents/hooks/`, and `templates/base/.cursor/hooks/agent-constitution-gate.sh`. `agent-format-after-edit.sh` decides nothing and writes none.
 12. A record holds no command text, file content, or environment value, so that no secret reaches it.
-13. **Proposal:** the records are lines of JSON in `.agents/logs/gate-decisions.jsonl`, which `_gitignore` lists. A hook that cannot write the file still gives its decision and says so on standard error.
+13. **Proposal:** the records are lines of JSON in `.agents/logs/gate-decisions.jsonl`, which each stack's `_gitignore` lists. A hook that cannot write the file still gives its decision and says so on standard error.
 14. `agent-production-gate.sh` lifts the gate only when `RELEASE_APPROVAL` matches the form the organization sets. **Proposal:** the form is one extended regular expression in `.agents/release-approval-form`, shipped as `^[A-Z]+-[0-9]+$`, which matches the example `CHG-123` of `templates/base/SETUP.md:95`. A value that does not match blocks, and the message names the file.
 15. When the production gate is lifted, its record also holds the value of `RELEASE_APPROVAL` and `git config user.name`.
 16. `scripts/check-agent-gates.ts` in a generated project covers requirements 11 to 15: a record for an allow and for a block, no command text in it, and a lifted and a refused `RELEASE_APPROVAL`.
@@ -40,9 +40,9 @@ Delivery 3, items 10 to 15:
 
 Every delivery:
 
-22. `pnpm plugin:sync` renders each changed playbook and script into `plugins/sdlc/adapters/` and `templates/base/`, and `pnpm plugin:check` passes.
-23. `pnpm verify` passes in a generated project of each of the five stacks.
-24. Each delivery is one pull request with its own changeset for `@next-friday/create-app`.
+22. `pnpm plugin:sync` renders each changed playbook and script into `plugins/sdlc/adapters/` and `templates/base/`, and `pnpm plugin:check` passes (`AGENTS.md`, Architecture).
+23. `pnpm verify` passes in a generated project of each of the five stacks (`AGENTS.md`, "Every stack").
+24. Each delivery is one pull request with its own changeset for `@next-friday/create-app`, because each changes a file under `templates/` (`.changeset/README.md`).
 
 ## Design
 
@@ -52,7 +52,7 @@ Every delivery:
 - `review.md`, step 1, and `maintain.md`, step 6: the sentences of requirements 20 and 21.
 - `plugins/sdlc/source/scripts/check-plan.ts`: reads the pull request's reviews and comments through the host's command-line tool when a token is present; checks requirements 4, 6, 8, and 9; gains self-test cases for each.
 - Each stack's `templates/<stack>/.github/workflows/ci.yml`: the step that runs `plan:check` passes the workflow's token and the pull request's number. The root's `.github/workflows/ci.yml` runs `plan:check` in no job today; its Agent Gates job gains that step.
-- The five hooks of requirement 11: one shared function writes the record. `templates/base/_gitignore` lists `.agents/logs/`.
+- The five hooks of requirement 11: one shared function writes the record. Each of the five `templates/<stack>/_gitignore` files lists `.agents/logs/`.
 - `templates/base/.agents/release-approval-form` (new), and `agent-production-gate.sh` reads it.
 - `templates/base/scripts/check-agent-gates.ts`: the cases of requirement 16.
 - `plugins/sdlc/source/hooks/`: the stop hook of requirement 19 and its cases, registered where `check-reply-shape.sh` is.
@@ -70,7 +70,7 @@ Every delivery:
 ## Areas of concern
 
 1. No policy. Item 16 of the intent, eval cases that run as a merge check in a generated project, is not in this spec. The intent proposes its own spec, and a change folder holds one `spec.md`. It needs its own intent folder, or a second spec file that the playbooks do not know.
-2. No policy. No file says how a spec classes a change as higher risk: the spec template has no field for it. Requirement 6 can be checked only once it has one.
+2. No policy. No file says how a spec classes a change as higher risk: the spec template has no field for it. Requirement 6 can be checked only once it has one. A repository with one person also has no second person to give that review.
 3. No policy. The intent's open question 5 has no answer: where a tech lead's rating of a finding is kept. This spec adds no requirement for it.
 4. Compliance, rule 3. The records name a person: a handle in `plan.md`, `spec.md`, and `intent.md`, and `git config user.name` in the gate's record. The files do not say on what basis the organization keeps them or for how long. The compliance policy owner decides.
 5. No policy. Requirement 8 keeps the spec's pull request red until each concern has a decision, so a product owner can no longer merge a spec and decide its concerns later.

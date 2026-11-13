@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc-help เริ่มงานใหม่ยังไง
+/sdlc-help how do I start new work

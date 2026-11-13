@@ -5,4 +5,4 @@ timeout_seconds: 900
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc เขียน spec ของ intent/csv-export/intent.md
+/sdlc write the spec for intent/csv-export/intent.md

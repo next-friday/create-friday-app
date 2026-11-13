@@ -1,6 +1,6 @@
 # Intent: Make a reply easy to act on, and finish the deploy target documents
 
-Author: @joetakara (Developer Productivity). Status: draft.
+Author: @joetakara (Developer Productivity). Status: accepted.
 
 ## Problem
 

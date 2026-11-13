@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 9.7.1
+
+### Patch Changes
+
+- 547e309: A project created with `--deploy railway` keeps the README sentences that name Railway, and a project created without `--deploy` no longer holds the deploy workflow, the `deploy-dev` job, or the Railway check of the production gate.
+
 ## 9.7.0
 
 ### Minor Changes

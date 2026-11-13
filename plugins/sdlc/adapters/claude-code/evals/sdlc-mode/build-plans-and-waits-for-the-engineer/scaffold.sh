@@ -92,3 +92,7 @@ None
 EOF
 git add -A
 git commit -q -m "docs: add app-version intent and spec"
+remote="$(mktemp -d)/origin.git"
+git init -q --bare "$remote"
+git remote add origin "$remote"
+git push -q origin --all

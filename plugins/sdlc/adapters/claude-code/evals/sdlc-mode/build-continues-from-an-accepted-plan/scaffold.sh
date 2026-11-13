@@ -92,13 +92,11 @@ None
 EOF
 git add -A
 git commit -q -m "docs: add app-version intent and spec"
-remote="$(mktemp -d)/origin.git"
-git init -q --bare "$remote"
-git remote add origin "$remote"
-git checkout -q -b feat/app-version
 mkdir -p intent/app-version
 cat > intent/app-version/plan.md << 'PLAN'
 # Plan: app version endpoint
+
+Accepted by: @<engineer>.
 
 ## Files that change
 
@@ -121,5 +119,7 @@ The route could shadow an existing one. The riskiest step is 2. Option not taken
 PLAN
 git add -A
 git commit -q -m "docs: add app-version plan"
-git checkout -q main
+remote="$(mktemp -d)/origin.git"
+git init -q --bare "$remote"
+git remote add origin "$remote"
 git push -q origin --all

@@ -55,3 +55,7 @@ it("keeps a three-part version", () => {
 EOF
 git add -A
 git commit -q -m "fix: add parseVersion"
+remote="$(mktemp -d)/origin.git"
+git init -q --bare "$remote"
+git remote add origin "$remote"
+git push -q origin --all

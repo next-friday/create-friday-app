@@ -20,3 +20,10 @@ graders:
     tool: Bash
     input_match: '\bgit\s+(?:checkout|switch)\s+(?:-\S+\s+)*(?!main$).+'
     min: 1
+  - name: spec-records-the-skills-commit
+    type: regex
+    pattern: '^Request: .*Skills at (?:[0-9a-f]{7,40}|unknown)\.$'
+    flags: mu
+    target:
+      source: file
+      path: intent/csv-export/spec.md

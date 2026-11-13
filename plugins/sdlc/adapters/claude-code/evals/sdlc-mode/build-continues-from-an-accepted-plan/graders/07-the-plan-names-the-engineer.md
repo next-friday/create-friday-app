@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-The plan's `Accepted by:` line names `@joe-dev`, and `plan.md` with that line is committed before any other change on the branch
+The plan's `Accepted by:` line names `@joe-dev`, and that change is the first commit on the new branch, before any other change

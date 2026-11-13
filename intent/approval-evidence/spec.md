@@ -1,6 +1,6 @@
 # Spec: Record who approved at every gate
 
-From `intent/approval-evidence/intent.md`. Status: draft.
+From `intent/approval-evidence/intent.md`. Status: accepted.
 
 Request: "docs(repo): add the approval evidence intent (#186)", the merge of the intent's pull request by the product owner. Skills at `ebe18df`.
 
@@ -71,12 +71,19 @@ Every delivery:
 ## Areas of concern
 
 1. No policy. Item 16 of the intent, eval cases that run as a merge check in a generated project, is not in this spec. The intent proposes its own spec, and a change folder holds one `spec.md`. It needs its own intent folder, or a second spec file that the playbooks do not know.
+   Decision: item 16 gets its own intent folder.
 2. No policy. No file says how a spec classes a change as higher risk: the spec template has no field for it. Requirement 6 can be checked only once it has one. A repository with one person also has no second person to give that review.
+   Decision: deferred. Requirement 6 is checked only when a plan carries an `Also accepted by:` line.
 3. No policy. The intent's open question 5 has no answer: where a tech lead's rating of a finding is kept. This spec adds no requirement for it.
+   Decision: no place for ratings is built now.
 4. Compliance, rule 3. The records name a person: a handle in `plan.md`, `spec.md`, and `intent.md`, and `git config user.name` in the gate's record. The files do not say on what basis the organization keeps them or for how long. The compliance policy owner decides.
+   Decision: the handles in `plan.md`, `spec.md`, and `intent.md` are kept as the host already shows them. The name in the gate's record is decided when delivery 2 is planned.
 5. No policy. Requirement 8 keeps the spec's pull request red until each concern has a `Decision:` line, so a product owner can no longer merge a spec and decide its concerns later. Requirements 1 to 6 add one merge for each plan, and a bug fix now takes two pull requests.
+   Decision: accepted.
 6. No policy. The stop hook of requirement 19 can block a reply that is right, such as one that reports a documentation change as done. Its proposal needs the product owner's yes before it ships to every project.
+   Decision: decided when delivery 3 is planned.
 7. No policy. `AGENTS.md` says to run `pnpm evals:run` and `pnpm evals:run:write` after a skill or a hook changes. Each delivery changes one, so each runs them.
+   Decision: each delivery runs the eval cases once, on the small model.
 
 ## Open questions
 

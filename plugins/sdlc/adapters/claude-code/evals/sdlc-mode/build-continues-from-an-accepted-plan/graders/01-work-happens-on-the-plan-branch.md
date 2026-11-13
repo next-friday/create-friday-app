@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-The work happens on the branch `feat/app-version`
+The work happens on a new branch that the session creates, not on `main`

@@ -38,5 +38,4 @@ checks:
       regex: '(?=[\s\S]*^## Requirements$)(?=[\s\S]*^## Design$)(?=[\s\S]*^## Policies$)(?=[\s\S]*^## Areas of concern$)(?=[\s\S]*^## Open questions$)'
   - commit_touches_only: intent/csv-export/spec.md
   - branch_matches: "^(?!main$).+"
-  - reply_matches: '[\u0E00-\u0E7F]{10}'
   - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

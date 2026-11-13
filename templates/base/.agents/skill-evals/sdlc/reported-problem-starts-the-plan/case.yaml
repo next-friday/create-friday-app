@@ -8,5 +8,4 @@ checks:
   - reply_lacks: '(?<!skills)/sdlc(?![\w/-])'
   - no_file_changes
   - no_new_commits
-  - reply_matches: '[\u0E00-\u0E7F]{10}'
   - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

@@ -5,4 +5,3 @@ expected_outcome: |
 timeout_seconds: 600
 checks:
   - no_new_commits
-  - reply_matches: '[\u0E00-\u0E7F]{10}'

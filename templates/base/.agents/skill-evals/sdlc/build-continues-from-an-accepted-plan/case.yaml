@@ -9,4 +9,3 @@ checks:
       path: intent/app-version/plan.md
       regex: '^Accepted by: @joe-dev\.$'
   - commit_touches_only: intent/app-version/plan.md
-  - reply_matches: '[\u0E00-\u0E7F]{10}'

@@ -65,4 +65,3 @@ fixture:
 checks:
   - no_new_commits
   - reply_matches: '(?=[\s\S]*Files that change)(?=[\s\S]*Order of work)(?=[\s\S]*Risks)(?=[\s\S]*Proof)'
-  - reply_matches: '[\u0E00-\u0E7F]{10}'

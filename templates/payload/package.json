@@ -17,7 +17,6 @@
     "clean": "rm -rf .next coverage *.tsbuildinfo .eslintcache node_modules/.cache",
     "depcruise": "depcruise --config .dependency-cruiser.json src test eslint.config.ts next.config.ts playwright.config.ts vitest.config.ts",
     "dev": "next dev",
-    "evals:run": "node scripts/run-agent-evals.ts",
     "format": "prettier --write --cache .",
     "format:check": "prettier --check --cache . && editorconfig-checker",
     "gates:check": "node scripts/check-agent-gates.ts",

@@ -3,7 +3,7 @@
 This folder is the intent home. Every change starts here as an `intent.md`, and its record stays here. Git history keeps the author, the time, and every revision of each file.
 
 - Each change has its own folder, `intent/<change>/`, where `<change>` is a short kebab-case name. The folder holds `intent.md` (Plan), then `spec.md` (Design), then `plan.md` (Build).
-- The playbooks in `.agents/skills/sdlc/playbooks/` say who writes and who accepts each file.
+- The playbooks in `plugins/sdlc/claude-code/skills/sdlc-mode/playbooks/` say who writes and who accepts each file.
 - A change is `done` when the tree meets every numbered requirement of its `spec.md`. The agent sets `Status: done.` in `intent.md` and `spec.md` in the pull request that meets the last requirement, and the code owner's approval of that pull request accepts it.
 
 ## Which file holds what

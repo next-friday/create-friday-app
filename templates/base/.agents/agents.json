@@ -1,7 +1,0 @@
-{
-  "verifier": {
-    "description": "Runs the app and checks the change works before the session reports done",
-    "readonly": true,
-    "tools": ["Bash", "Read"]
-  }
-}

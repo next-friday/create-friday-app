@@ -57,6 +57,10 @@ const hooksDirectory = path.join(sourceRoot, "hooks");
 const hookCasesSuffix = ".cases.json";
 const hookTimeoutSeconds = 10;
 const claudeMarketplacePath = ".claude-plugin/marketplace.json";
+const templateRoot = path.join("templates", "base");
+const templatePluginRoot = path.join(templateRoot, pluginRoot);
+const sourceScriptsDirectory = path.join(sourceRoot, "scripts");
+const templateScriptsDirectory = path.join(templateRoot, "scripts");
 const settingsPath = ".claude/settings.json";
 const marketplacePaths = [claudeMarketplacePath, ".cursor-plugin/marketplace.json"];
 const textExtensions = new Set([".json", ".md", ".sh", ".ts", ".yaml", ".yml"]);
@@ -472,6 +476,58 @@ function findHookProblems(): string[] {
 }
 
 /**
+ * Find where a generated project holds a rendered adapter file.
+ * @param adapterFile Path of the file in an adapter, from the repository root.
+ * @returns The path of its copy under the template, which has no `adapters` directory.
+ */
+function findTemplateCopyPath(adapterFile: string): string {
+  return path.join(templatePluginRoot, path.relative(adaptersRoot, adapterFile));
+}
+
+/**
+ * Render the marketplace file of a generated project from the repository's own.
+ * @param marketplaceText Content of the repository's `.claude-plugin/marketplace.json`.
+ * @returns The content with each plugin's source pointing at the adapter copy a generated project holds.
+ */
+function renderTemplateMarketplace(marketplaceText: string): string {
+  const marketplace = JSON.parse(marketplaceText) as {plugins: {source: string}[]};
+
+  return `${JSON.stringify(
+    {
+      ...marketplace,
+      plugins: marketplace.plugins.map(entry => ({
+        ...entry,
+        source: `./${path.join(pluginRoot, path.basename(entry.source))}`,
+      })),
+    },
+    undefined,
+    2,
+  )}\n`;
+}
+
+/**
+ * Render what a generated project holds of the plugin: the adapters without their eval cases, the marketplace file, and the three scripts.
+ * @param adapterFiles The expected content of each adapter file, from `renderAdapters`.
+ * @returns The expected content of each file under `templates/base/`, by path from the repository root.
+ */
+function renderTemplateCopy(adapterFiles: Map<string, string>): Map<string, string> {
+  return new Map([
+    ...[...adapterFiles].map(([file, content]): [string, string] => [
+      findTemplateCopyPath(file),
+      content,
+    ]),
+    [
+      path.join(templateRoot, claudeMarketplacePath),
+      renderTemplateMarketplace(readFileSync(claudeMarketplacePath, "utf8")),
+    ],
+    ...listFiles(sourceScriptsDirectory, false).map((file): [string, string] => [
+      path.join(templateScriptsDirectory, file),
+      readFileSync(path.join(sourceScriptsDirectory, file), "utf8"),
+    ]),
+  ]);
+}
+
+/**
  * Render every adapter from the source.
  * @returns The expected content of each adapter file, by path from the repository root.
  */
@@ -588,6 +644,24 @@ function runArgumentStub(hookCase: HookCase): string {
 }
 
 const selfTestCases: SelfTestCase[] = [
+  {
+    name: "an adapter file is copied under the template without the adapters directory",
+    expected: [path.join(templatePluginRoot, "claude-code/skills/a/SKILL.md")],
+    problems: [findTemplateCopyPath(path.join(adaptersRoot, "claude-code/skills/a/SKILL.md"))],
+  },
+  {
+    name: "the template marketplace points at the copy a generated project holds",
+    expected: ['{"name":"m","plugins":[{"name":"p","source":"./plugins/sdlc/claude-code"}]}'],
+    problems: [
+      JSON.stringify(
+        JSON.parse(
+          renderTemplateMarketplace(
+            '{"name":"m","plugins":[{"name":"p","source":"./plugins/sdlc/adapters/claude-code"}]}',
+          ),
+        ),
+      ),
+    ],
+  },
   {
     name: "a link into the plugin passes",
     expected: [],
@@ -791,19 +865,28 @@ if (selfTestFailures.length > 0) {
   process.exitCode = 1;
 } else {
   const isCheckOnly = process.argv.includes("--check");
-  const expected = renderAdapters();
+  const adapterFiles = renderAdapters();
+  const expected = new Map([...adapterFiles, ...renderTemplateCopy(adapterFiles)]);
 
-  const orphans = adapters.flatMap(({directory, hasAuthoredEvals}) => {
-    const adapterRoot = path.join(adaptersRoot, directory);
+  const orphans = [
+    ...adapters.flatMap(({directory, hasAuthoredEvals}) => {
+      const adapterRoot = path.join(adaptersRoot, directory);
 
-    return listFiles(adapterRoot, false)
-      .map(file => path.join(adapterRoot, file))
-      .filter(
-        file =>
-          !expected.has(file) &&
-          !(hasAuthoredEvals && file.startsWith(path.join(adapterRoot, "evals"))),
-      );
-  });
+      return listFiles(adapterRoot, false)
+        .map(file => path.join(adapterRoot, file))
+        .filter(
+          file =>
+            !expected.has(file) &&
+            !(hasAuthoredEvals && file.startsWith(path.join(adapterRoot, "evals"))),
+        );
+    }),
+    ...[templatePluginRoot, path.join(templateRoot, path.dirname(claudeMarketplacePath))].flatMap(
+      directory =>
+        listFiles(directory, false)
+          .map(file => path.join(directory, file))
+          .filter(file => !expected.has(file)),
+    ),
+  ];
 
   const staleFiles = [
     ...[...expected]
@@ -849,7 +932,7 @@ if (selfTestFailures.length > 0) {
       process.exitCode = 1;
     } else {
       process.stdout.write(
-        `Checked ${expected.size} plugin adapter files and ${selfTestCases.length} self-tests; none stale.\n`,
+        `Checked ${expected.size} plugin files and ${selfTestCases.length} self-tests; none stale.\n`,
       );
     }
   } else {
@@ -867,8 +950,6 @@ if (selfTestFailures.length > 0) {
       writeFileSync(file, expected.get(file) ?? "");
     }
 
-    process.stdout.write(
-      `Synced ${expected.size} plugin adapter files; ${staleFiles.length} updated.\n`,
-    );
+    process.stdout.write(`Synced ${expected.size} plugin files; ${staleFiles.length} updated.\n`);
   }
 }

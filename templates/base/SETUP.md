@@ -4,7 +4,9 @@ This project runs an AI-native software development loop in Claude Code and Curs
 
 ## How a change flows
 
-Send a request with `/sdlc`. Only a person starts it; nothing routes work into it by itself. `.agents/skills/sdlc-help/SKILL.md` says how to keep `/sdlc` on for a session in Claude Code and Cursor. `intent/README.md` and the playbooks in `.agents/skills/sdlc/playbooks/` say who acts and who decides at each stage.
+Send a request with `/sdlc:sdlc-mode`. Only a person starts it; nothing routes work into it by itself. `/sdlc:sdlc-help` says how to keep `/sdlc:sdlc-mode` on for a session in Claude Code and Cursor, and `/sdlc:setup-sdlc` chooses the models and reports which steps below are done. `intent/README.md` and the playbooks in `plugins/sdlc/claude-code/skills/sdlc-mode/playbooks/` say who acts and who decides at each stage.
+
+The project holds the `sdlc` plugin itself, in `plugins/sdlc/claude-code/` and `plugins/sdlc/cursor/`, so there is nothing to install. In Claude Code, `.claude/settings.json` registers the project folder as the marketplace `next-friday-plugins` (`.claude-plugin/marketplace.json`) and enables `sdlc@next-friday-plugins`; it applies once a person has trusted the folder. In Cursor, the `workspaceOpen` hook in `.cursor/hooks.json` hands `plugins/sdlc/cursor` to Cursor when it opens the workspace. The copy is the plugin's version: to take a later one, change the `source` entry of `.claude-plugin/marketplace.json`.
 
 ## 1. First commit and push
 
@@ -32,7 +34,7 @@ In `.github/CODEOWNERS`, add these lines in this order. GitHub uses the last mat
 ```text
 * @your-org/your-team
 /intent/ @the-product-owner
-/.agents/skills/sdlc/ @the-lead-who-signs-off-the-intent-template
+/plugins/sdlc/ @the-lead-who-signs-off-the-intent-template
 /.agents/skills/brand-policy/ @the-brand-policy-owner
 /.agents/skills/security-policy/ @the-security-policy-owner
 /.agents/skills/compliance-policy/ @the-compliance-policy-owner
@@ -70,7 +72,7 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 **Who:** an Owner of the Claude organization, with an owner of the GitHub organization.
 
 - **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow. Anyone with write access can also comment `@claude review` on a pull request to start a review ([comment commands](https://code.claude.com/docs/en/code-review-pull-requests#comment-commands)).
-- **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the example in `.claude/managed-settings.example.json`. Engineers cannot override them.
+- **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the example in `.claude/managed-settings.example.json`. Engineers cannot override them. When `strictKnownMarketplaces` is set, as in the example, add the marketplace `next-friday-plugins` of this project to it, or Claude Code does not register the project's plugin.
 - **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage).
 
 **Check:** the test pull request gets a **Claude Code Review** check run within a few minutes.
@@ -90,14 +92,14 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 
 - **Sources of truth (engineering lead):** for each artifact, name one system as the source of truth: this repository, an existing tool such as Jira, or, as the minimum, a link both ways (the record id in the file and the commit SHA in the record).
 - **Higher risk (engineering lead):** decide which changes count as higher risk. A tech lead or architect approves their specs and plans.
-- **Policies (each policy owner, with an engineer):** each `.agents/skills/<area>-policy/SKILL.md` ships a default (security: OWASP ASVS 5.0.0 Level 1; UX: WCAG 2.2 Level AA; compliance: the OECD privacy principles; brand: one declared source for every brand value). Review it, replace or add the organization's own rules, then run `pnpm rules:sync`. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time. The policy owner approves every later change as its code owner.
+- **Policies (each policy owner, with an engineer):** the plugin ships a default for each area, `plugins/sdlc/claude-code/skills/<area>-policy/SKILL.md` (security: OWASP ASVS 5.0.0 Level 1; UX: WCAG 2.2 Level AA; compliance: the OECD privacy principles; brand: one declared source for every brand value). Review it. To replace a default, add the organization's own rules in `.agents/skills/<area>-policy/SKILL.md` in the project: that file wins over the plugin's default, and the `CODEOWNERS` line of step 2 for that area makes the policy owner its code owner. Do not edit the plugin's copy. Then run `pnpm rules:sync`, which renders the project's own policy skill for Claude Code and Cursor. Test that the skill triggers: ask for the relevant task in different ways and confirm the skill loads each time.
 - **Production gate (engineering leadership, with change management and compliance):** name the release managers and add them as required reviewers on the `prod` environment, as the README's deploy section describes. `.agents/hooks/agent-production-gate.sh` blocks an agent's shell commands that dispatch a `prod` deploy, run a Railway command with `prod` as its environment, or push a release tag. It does not read MCP tools. A release manager whose own agent session must do one of these starts the agent with `RELEASE_APPROVAL` set to the approval record, for example `RELEASE_APPROVAL=CHG-123 claude`. Any value lifts the gate except an empty value, `0`, `false`, and `no`, in any letter case.
 - **Review (tech lead):** `.agents/review.md` names this stack's generated files to skip; add a path when the project gains a generated file, then run `pnpm rules:sync`, which renders it to `REVIEW.md` for Claude Code Review. Once a month, rate the review findings and tune `.agents/review.md`.
 - **People without Git experience:** connect GitHub to Claude (claude.ai or Cowork), so Claude commits `intent.md` for them.
 
 ## 7. Later, as the guardrails mature
 
-- Send the intent's path with `/sdlc` by hand first. Then turn on `Spec on intent merge` (step 8).
+- Send the intent's path with `/sdlc:sdlc-mode` by hand first. Then turn on `Spec on intent merge` (step 8).
 - Make auto mode the default for routine work: a tight `spec.md`, a small blast radius, and code the tests already cover.
 - Set the metric in `bands.yaml`, then turn on `Control band` (step 8).
 
@@ -107,13 +109,14 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 
 Each workflow below stays off until the repository variable `CLAUDE_CI_ENABLED` is `true`; until then nothing runs, on a schedule or otherwise, and nothing calls a model. When it is on, each needs one secret: `CLAUDE_CODE_OAUTH_TOKEN`, a Claude subscription token from `claude setup-token`, or `ANTHROPIC_API_KEY`, an API key. Either works; with neither set the job fails and says so. The jobs run the small model with a turn cap. Jobs that write install the Claude GitHub App from step 4 on the repository, and every change they make arrives as a pull request.
 
-- **`Agent evals`:** runs `pnpm evals:run` when a pull request changes `AGENTS.md`, `CLAUDE.md`, `.agents`, `.claude`, or `.cursor`, and every night. The job fails below the pass threshold, and it needs `claude` on the `PATH` of the job.
-- **`Spec on intent merge`:** when an `intent.md` reaches `main` with `Status: draft.` or `Status: accepted.` and no `spec.md` beside it, which is how the product owner accepts it, runs `/sdlc intent/<change>/intent.md`, so that `spec.md` arrives as a pull request for the product owner.
+The jobs that send `/sdlc:sdlc-mode` load the plugin from `plugins/sdlc/claude-code` with `--plugin-dir`, because the folder of a CI job is not a trusted folder and `.claude/settings.json` applies only in a trusted one.
+
+- **`Spec on intent merge`:** when an `intent.md` reaches `main` with `Status: draft.` or `Status: accepted.` and no `spec.md` beside it, which is how the product owner accepts it, runs `/sdlc:sdlc-mode intent/<change>/intent.md`, so that `spec.md` arrives as a pull request for the product owner.
 - **`Claude fix loop`:** when a person with write access comments `@claude` on a line of a pull request from this repository, Claude addresses the comment and pushes to that branch. It cannot approve or merge.
 - **`triage` job of `Verify`:** when a pull request from this repository fails a check, reads the failed logs with the `Read` tool only and posts a three-line summary.
-- **`Control band`:** every day, runs the command in the repository variable `CONTROL_BAND_METRIC_COMMAND`, which writes `metric-values.json` as `{"baseline": [...], "recent": [...]}`, then `pnpm bands:check metric-values.json`. A tier whose action is `diagnose` or `propose` runs `/sdlc` with the finding, and the `pull_request` route opens an intent pull request. It never acts on production.
+- **`Control band`:** every day, runs the command in the repository variable `CONTROL_BAND_METRIC_COMMAND`, which writes `metric-values.json` as `{"baseline": [...], "recent": [...]}`, then `pnpm bands:check metric-values.json`. A tier whose action is `diagnose` or `propose` runs `/sdlc:sdlc-mode` with the finding, and the `pull_request` route opens an intent pull request. It never acts on production.
 
-On a machine, `pnpm evals:run` runs the evals with the developer's own Claude login, and `pnpm loop:measure` reports the loop's measures. Neither is part of `pnpm verify`.
+On a machine, `pnpm loop:measure` reports the loop's measures. It is not part of `pnpm verify`.
 
 **Check:** with `CLAUDE_CI_ENABLED` unset, **Actions** shows these jobs as skipped.
 

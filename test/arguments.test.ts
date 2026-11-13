@@ -1,11 +1,17 @@
 import {describe, expect, it} from "vitest";
 
+import {deployTargets} from "../src/deploy-targets.ts";
 import {parseCliArguments, usage} from "../src/arguments.ts";
 import {stacks} from "../src/stacks.ts";
 
 describe("usage", () => {
   it("lists every supported stack id", () => {
     expect(usage).toContain(`[--stack ${stacks.map(stack => stack.id).join("|")}]`);
+  });
+
+  it("lists every deploy target and names the default", () => {
+    expect(usage).toContain(`[--deploy ${deployTargets.join("|")}]`);
+    expect(usage).toContain("Deploy target: none or railway. The default is none.");
   });
 });
 
@@ -21,6 +27,7 @@ describe("parseCliArguments", () => {
     expect(parseCliArguments(["my-api", "--stack", "nestjs"])).toStrictEqual({
       name: "my-api",
       stack: "nestjs",
+      deploy: "none",
       help: false,
       skipGit: false,
       skipInstall: false,
@@ -51,6 +58,20 @@ describe("parseCliArguments", () => {
 
   it.each(["--help", "--version"])("reads %s despite other bad arguments", flag => {
     expect(parseCliArguments([flag, "--stack", "rails", "first", "second"]).stack).toBeUndefined();
+  });
+
+  it("reads the deploy target", () => {
+    expect(parseCliArguments(["--deploy", "railway"]).deploy).toBe("railway");
+  });
+
+  it("rejects an unknown deploy target", () => {
+    expect(() => parseCliArguments(["--deploy", "../base"])).toThrow(
+      'Unknown deploy target "../base". Use one of: none, railway.',
+    );
+  });
+
+  it("reads --help despite an unknown deploy target", () => {
+    expect(parseCliArguments(["--help", "--deploy", "heroku"]).deploy).toBe("none");
   });
 
   it("rejects an unknown stack", () => {

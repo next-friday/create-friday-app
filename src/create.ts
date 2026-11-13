@@ -1,5 +1,5 @@
 import {cancel, intro, isCancel, log, outro, select, text} from "@clack/prompts";
-import {chmod, cp, readFile, rename} from "node:fs/promises";
+import {chmod, cp, readFile, rename, writeFile} from "node:fs/promises";
 import {existsSync, readdirSync, readFileSync, realpathSync, rmSync} from "node:fs";
 import {fileURLToPath} from "node:url";
 import path from "node:path";
@@ -9,8 +9,10 @@ import {listProjectFiles} from "./project-files.ts";
 import {packageName, validateProjectName} from "./project-name.ts";
 import {parseCliArguments, usage} from "./arguments.ts";
 import {renameProject} from "./rename.ts";
+import {resolveDeploySections} from "./deploy-sections.ts";
 import {stackById, stacks, templateName} from "./stacks.ts";
 import type {CliOptions} from "./arguments.ts";
+import type {DeployTarget} from "./deploy-targets.ts";
 import type {GitResult} from "./setup.ts";
 import type {StackId} from "./stacks.ts";
 
@@ -48,7 +50,7 @@ export async function create(cliArguments: string[]): Promise<void> {
     const directory = existsSync(target) ? realpathSync(target) : target;
 
     log.step(`Copying the ${stack} template.`);
-    await writeProject(stack, directory, manifestName);
+    await writeProject(stack, options.deploy, directory, manifestName);
     log.success(`Created ${manifestName} from the ${stack} template.`);
 
     const {git, isInstalled} = setUpProject(directory, options);
@@ -69,11 +71,13 @@ export async function create(cliArguments: string[]): Promise<void> {
  * Copy, rename, and write `.env`, removing what was written when a step fails or Ctrl+C, SIGTERM, or SIGHUP arrives.
  * An interrupt waits for the running step, so the removal does not race the copy.
  * @param stack - Supported stack id.
+ * @param deploy - Supported deploy target.
  * @param directory - Project directory.
  * @param manifestName - Package name for `package.json`.
  */
 async function writeProject(
   stack: StackId,
+  deploy: DeployTarget,
   directory: string,
   manifestName: string,
 ): Promise<void> {
@@ -89,7 +93,7 @@ async function writeProject(
   }
 
   try {
-    await copyTemplate(stack, directory);
+    await copyTemplate(stack, deploy, directory);
     await renameProject(directory, templateName(stack), manifestName);
     await writeEnvironmentFile(directory);
 
@@ -211,13 +215,21 @@ function existingGit(directory: string): GitResult | undefined {
 }
 
 /**
- * Copy the shared template files, then the stack's files, into the project directory.
+ * Copy the shared template files, the stack's files, and the deploy target's files into the project directory.
  * npm leaves `.gitignore` out of published packages, so the template keeps it as `_gitignore`.
  * @param stack - Supported stack id.
+ * @param deploy - Supported deploy target.
  * @param directory - Project directory.
  */
-async function copyTemplate(stack: StackId, directory: string): Promise<void> {
-  for (const template of ["base", stack]) {
+async function copyTemplate(
+  stack: StackId,
+  deploy: DeployTarget,
+  directory: string,
+): Promise<void> {
+  const deployLayer = deploy === "none" ? undefined : `deploy-${deploy}`;
+  const required = ["base", stack, ...(deployLayer === undefined ? [] : [`${deployLayer}/base`])];
+
+  for (const template of required) {
     if (!existsSync(path.join(templatesDirectory, template))) {
       throw new Error(
         `The ${template} template is missing from ${templatesDirectory}. Reinstall @next-friday/create-app.`,
@@ -225,16 +237,52 @@ async function copyTemplate(stack: StackId, directory: string): Promise<void> {
     }
   }
 
-  await cp(path.join(templatesDirectory, "base"), directory, {
-    recursive: true,
-  });
+  const copyLayer = async (layer: string): Promise<void> => {
+    await cp(path.join(templatesDirectory, layer), directory, {
+      recursive: true,
+    });
+  };
 
-  await cp(path.join(templatesDirectory, stack), directory, {
-    recursive: true,
-  });
+  await copyLayer("base");
+  await copyLayer(stack);
+
+  if (deployLayer !== undefined) {
+    await copyLayer(`${deployLayer}/base`);
+
+    if (existsSync(path.join(templatesDirectory, deployLayer, stack))) {
+      await copyLayer(`${deployLayer}/${stack}`);
+    }
+  }
 
   await rename(path.join(directory, "_gitignore"), path.join(directory, ".gitignore"));
+  await resolveDeployTarget(directory, deploy);
   await markScriptsExecutable(directory);
+}
+
+/**
+ * Resolve the deploy target sections of every copied file that holds a marker.
+ * @param directory - Project directory.
+ * @param deploy - Supported deploy target.
+ */
+async function resolveDeployTarget(directory: string, deploy: DeployTarget): Promise<void> {
+  const files = await listProjectFiles(directory);
+
+  await Promise.all(
+    files.map(async file => {
+      const content = await readFile(file);
+
+      if (!content.includes("deploy:")) {
+        return;
+      }
+
+      const template = content.toString();
+      const resolved = resolveDeploySections(template, deploy);
+
+      if (resolved !== template) {
+        await writeFile(file, resolved);
+      }
+    }),
+  );
 }
 
 /**

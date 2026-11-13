@@ -46,7 +46,12 @@ The `verifier` subagent starts the app with `pnpm dev`. It exercises the changed
 When Claude makes a mistake twice, add the correction here.
 
 - **First end-to-end run**: run `pnpm exec playwright install chromium` once. `pnpm test:e2e` starts the development server unless one is already running.
+<!-- deploy:railway -->
 - **Production gate**: `.agents/hooks/agent-production-gate.sh` blocks a shell command that deploys to `prod`, runs a Railway CLI command that names `prod`, or pushes a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set. Any value lifts the gate except an empty value, `0`, `false`, and `no`, in any letter case. Report what is ready to promote instead. When a gated command appears only inside a message, write the text to a file with your file-editing tool, not a shell heredoc, and pass it with `git commit -F <file>` or `gh pr create --body-file <file>`. The gate reads only shell commands, so an MCP tool or a Railway command without `-e` or `--environment` passes it.
+<!-- deploy:end -->
+<!-- deploy:none -->
+- **Production gate**: `.agents/hooks/agent-production-gate.sh` blocks a shell command that deploys to `prod` or pushes a release tag, unless a release manager started the session with `RELEASE_APPROVAL` set. Any value lifts the gate except an empty value, `0`, `false`, and `no`, in any letter case. Report what is ready to promote instead. When a gated command appears only inside a message, write the text to a file with your file-editing tool, not a shell heredoc, and pass it with `git commit -F <file>` or `gh pr create --body-file <file>`. The gate reads only shell commands, so an MCP tool passes it.
+<!-- deploy:end -->
 - **Issues**: open an issue only to hand work to another person, never to give a pull request a number to close. A pull request closes an issue that already exists with `Closes #<issue>`.
 - **What belongs in the repository**: files, commit messages, and pull requests hold the change, its reason, and the checks. Write no date, log, history, mistake count, token figure, or session note into a file.
 - **Sourced requirements**: add a requirement to an intent, spec, or plan only when a person decided it or a named source says it. This includes a requirement a review bot suggests. When no person decided it and no source says it, leave it out and answer the thread with that.

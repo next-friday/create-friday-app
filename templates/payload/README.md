@@ -48,7 +48,7 @@ CI also runs the build, the end-to-end tests, the container image scan, and the 
 
 ## Container
 
-The `Dockerfile` builds a standalone production image that runs as the `node` user, for platforms such as Railway. The server listens on `PORT`, or 3000 when it is unset, and needs `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL`, the public URL that Payload accepts cookie-authenticated and cross-origin requests from.
+The `Dockerfile` builds a standalone production image that runs as the `node` user for a container platform. The server listens on `PORT`, or 3000 when it is unset, and needs `DATABASE_URL`, `PAYLOAD_SECRET`, and `APP_URL`, the public URL that Payload accepts cookie-authenticated and cross-origin requests from.
 
 ```sh
 docker build -t app .
@@ -60,6 +60,8 @@ Uploaded images, up to 10 MB each, are written to the container filesystem, whic
 The config sets no `email` adapter, so Payload writes every email, including password-reset links, to the server log. Set `email` in `src/payload.config.ts` before production.
 
 On Vercel, deploy without the image; the Next.js preset takes precedence over the `Dockerfile`.
+
+<!-- deploy:railway -->
 
 ## Deploy
 
@@ -82,6 +84,18 @@ On Vercel, deploy without the image; the Next.js preset takes precedence over th
 3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health`.
 
-Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
+<!-- deploy:end -->
+
+<!-- deploy:none -->
+
+## Deploy
+
+The project has no deploy step yet. A deploy step needs:
+
+- a workflow under `.github/workflows/` that deploys;
+- the `prod` environment under **Settings → Environments**, with the release managers as its required reviewers;
+- the image the `Dockerfile` builds.
+
+<!-- deploy:end -->
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.

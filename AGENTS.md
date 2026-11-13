@@ -15,7 +15,7 @@
 | Render the plugin adapters     | `pnpm plugin:sync`; `pnpm plugin:check` fails on stale ones |
 | Release note, when one is due  | `pnpm changeset` (see `.changeset/README.md`)               |
 
-Check a template by generating a project under the template's own package name, so the rename changes nothing and edited files copy back as they are:
+Check a template by generating a project under the template's own package name, so the rename changes nothing and edited files copy back as they are. A file with a `deploy:<target>` section is the exception: the CLI removes the markers, so edit it under `templates/` and do not copy it back. Add `--deploy railway` to check the files of that deploy target:
 
 ```sh
 pnpm build
@@ -34,7 +34,7 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 ## Architecture
 
-- `src/main.ts` calls `create()` in `src/create.ts`, which copies `templates/base`, then `templates/<stack>`, renames the project, and installs.
+- `src/main.ts` calls `create()` in `src/create.ts`, which copies `templates/base`, then `templates/<stack>`, then, for `--deploy <target>` other than `none`, `templates/deploy-<target>/base` and `templates/deploy-<target>/<stack>`. It then keeps the `deploy:<target>` sections of the chosen deploy target (`src/deploy-sections.ts`), renames the project, and installs.
 - A stack is an entry in `src/stacks.ts` plus `templates/<stack>/`, whose `package.json` is named `next-friday-template-<stack>`.
 - Agent rules, `review.md`, and `mcp.json`: the files under `.agents/` are the source; `pnpm rules:sync` renders them into `.claude/`, `.cursor/`, `REVIEW.md`, and the MCP configs. Never edit a rendered copy.
 - The `sdlc` plugin: `plugins/sdlc/source/` holds the skills, the subagent's text, and the scripts behind `plan:check`, `bands:check`, and `loop:measure`; `pnpm plugin:sync` renders them into `plugins/sdlc/adapters/`, where `agents.json` holds each tool's subagent fields and `claude-code/evals/` holds the eval cases. For generated projects it also renders the adapters without `claude-code/evals/` into `templates/base/plugins/sdlc/`, with `templates/base/.claude-plugin/marketplace.json` and the three scripts in `templates/base/scripts/`. Never edit a rendered adapter file; the eval cases and `agents.json` are authored there. A session in this repository loads the plugin from this tree once its folder is trusted: `.claude/settings.json` registers the tree as a local `directory` marketplace, which needs no `claude plugin install` ([Claude Code: Plugins for an organization](https://code.claude.com/docs/en/plugins/org.md)).

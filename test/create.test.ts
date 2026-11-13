@@ -283,6 +283,79 @@ describe("create", () => {
   });
 });
 
+describe("create with a deploy target", () => {
+  const railwayFiles = ["railway.json", path.join("runbooks", "rollback-deploy.md")];
+
+  it("copies the files of the railway deploy target", async () => {
+    await create(["railway-api", "--stack", "nestjs", "--deploy", "railway"]);
+
+    const directory = path.join(cwd, "railway-api");
+
+    for (const file of railwayFiles) {
+      expect(existsSync(path.join(directory, file))).toBe(true);
+    }
+
+    expect(process.exitCode).toBe(0);
+  });
+
+  it("copies no file of a deploy target without --deploy", async () => {
+    await create(["plain-api", "--stack", "nestjs"]);
+
+    const directory = path.join(cwd, "plain-api");
+
+    for (const file of railwayFiles) {
+      expect(existsSync(path.join(directory, file))).toBe(false);
+    }
+  });
+
+  it.each(["none", "railway"])("leaves no deploy target marker with --deploy %s", async target => {
+    const name = `markers-${target}`;
+
+    await create([name, "--stack", "turborepo", "--deploy", target]);
+
+    const directory = path.join(cwd, name);
+
+    const files = readdirSync(directory, {
+      recursive: true,
+      withFileTypes: true,
+    }).filter(entry => entry.isFile());
+
+    const marked = files
+      .map(entry => path.join(entry.parentPath, entry.name))
+      .filter(file =>
+        readFileSync(file, "utf8")
+          .split("\n")
+          .some(line => /^(?:#|\/\/|<!--) ?deploy:/u.test(line.trim())),
+      );
+
+    expect(marked).toStrictEqual([]);
+  });
+
+  it.each([
+    ["railway", true],
+    ["none", false],
+  ])("lists railway.json as a turborepo input only with --deploy %s", async (target, isListed) => {
+    const name = `turbo-${target}`;
+
+    await create([name, "--stack", "turborepo", "--deploy", target]);
+
+    const turbo = JSON.parse(readFileSync(path.join(cwd, name, "turbo.json"), "utf8")) as {
+      globalDependencies: string[];
+    };
+
+    expect(turbo.globalDependencies.includes("railway.json")).toBe(isListed);
+  });
+
+  it("writes no file for an unknown deploy target", async () => {
+    const errors = captureErrors();
+
+    await create(["heroku-api", "--stack", "nestjs", "--deploy", "heroku"]);
+    expect(existsSync(path.join(cwd, "heroku-api"))).toBe(false);
+    expect(errors.join("")).toContain('Unknown deploy target "heroku". Use one of: none, railway.');
+    expect(process.exitCode).toBe(1);
+  });
+});
+
 describe("create interruptions and edge cases", () => {
   it.each(["SIGINT", "SIGTERM", "SIGHUP"] as const)(
     "removes the partial project and exits with 130 on %s during the copy",

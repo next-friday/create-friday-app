@@ -36,7 +36,7 @@ A part that is missing:
 
 ## Proposed outcome
 
-- Items 1 to 4: `plan.md` is pushed and has a pull request before any code is written, so each revision is a commit. The engineer's acceptance, and the tech lead's or architect's for a higher-risk change, is an action on that pull request that the host records with a name and a time. The agent cannot write it for them. No merge is added.
+- Items 1 to 4: `plan.md` is pushed and has its own pull request before any code is written, so each revision is a commit. The engineer accepts the plan by merging that pull request, which the host records with a name and a time and which the agent is denied. For a higher-risk change, the tech lead or architect approves that pull request before it is merged.
 - Item 5: the spec records the commit of the plugin that wrote it.
 - Item 6: each area of concern has a decision and the name of who made it, on the spec's pull request, before the spec is accepted.
 - Item 7: the intent names the originator as a person, not as the session, and the originator's acceptance of the draft is recorded on the intent's pull request.
@@ -63,7 +63,7 @@ A part that is missing:
 
 ## Constraints
 
-- No merge gate is added: the playbook has the engineer "Accept the plan and let Claude implement" in one sitting (page 20).
+- The only gate added is the merge of the plan's pull request. The playbook's "Accept the plan and let Claude implement" (page 20) then runs in the pull request that holds the code.
 - It works in a repository with one person, and in a session that cannot reach the host.
 - The hooks and the workflows are in the constitution: a person commits them.
 - What depends on the customer's environment, such as the host's plan or the monitoring stack, is not built in; the project says what the customer needs.
@@ -72,7 +72,7 @@ A part that is missing:
 
 ## Open questions
 
-1. What the engineer's acceptance on the pull request is. The host does not let a pull request's author approve it. **Proposal:** an approving review when another identity opened the pull request, and a comment with a fixed phrase from the engineer when the engineer is its author; a CI job reads it from the host.
+1. What the engineer's acceptance is. Decided: the merge of the plan's pull request. A comment or a review can be written by an agent that acts with the engineer's account, and a merge cannot.
 2. Where a hook writes its record. **Proposal:** a file on the machine that git does not track, and the session trace when the OpenTelemetry export is on.
 3. The form of a production approval record. **Proposal:** the organization sets the form in one settings file, such as `CHG-<number>`.
 4. Whether a missing setting of items 10 to 12 fails a check or is only reported. **Proposal:** the `setup-sdlc` skill reports it, and `pnpm verify` in a new project does not fail on it.

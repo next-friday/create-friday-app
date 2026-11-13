@@ -1,8 +1,8 @@
-# Plan: Record who approved at every gate, deliveries 1 and 2
+# Plan: Record who approved at every gate
 
 Accepted by: @joetakara.
 
-This plan covers requirements 1 to 16 and 22 to 24 of `intent/approval-evidence/spec.md`, in two deliveries: requirements 1 to 10, which are built, and requirements 11 to 16. Requirements 17 to 21 get their plan in this file when their delivery starts. A delivery's plan is accepted by merging the pull request that adds it, and its code follows in a second pull request.
+This plan covers every requirement of `intent/approval-evidence/spec.md`, in three deliveries: requirements 1 to 10 and 11 to 16, which are built, and requirements 17 to 21. A delivery's plan is accepted by merging the pull request that adds it, and its code follows in a second pull request.
 
 ## Files that change
 
@@ -39,6 +39,20 @@ Committed by a person from a patch in one issue:
 - `templates/base/.agents/hooks/agent-production-gate.sh` (changed): lifts the gate only when `RELEASE_APPROVAL` matches the expression in `.agents/release-approval-form`; blocks any other value with a message that names the file; when it lifts, its record also holds the value and `git config user.name`.
 - `templates/base/scripts/check-agent-gates.ts` (changed): every case also checks its record: one line, the decision, the hook, a time within ten minutes of now, the session, only the seven known keys, and no word of the input that looks like a path or an assignment. New cases cover a command and a path that hold a secret, a hook that cannot write its record, a project with no form file, and a value that does and does not match the form. The values `1`, `off`, `00`, and a space move from the list that lifts the gate to the list that keeps it.
 
+**Delivery 3.** Edited by the agent; no file of this delivery is in the constitution:
+
+- `plugins/sdlc/source/hooks/check-done-report.sh` (new) and `check-done-report.cases.json` (new): a hook that runs when the agent stops. It blocks a reply in the `sdlc-mode` shape that has no **Checks** section when, since the person's last message, the session edited a file outside `intent/`. It reads the edits from the session's transcript for one tool, and from a state file that a file-edit hook writes for the other. It passes when it cannot read either.
+- `plugins/sdlc/adapters/hooks.json` (changed): registers that hook for each tool, and the file-edit hook that feeds it.
+- `plugins/sdlc/source/skills/sdlc-mode/SKILL.md` (changed): the reply shape says that a turn which edited a file outside `intent/` has a **Checks** section, which names each check that ran and each check that could not run and why.
+- `plugins/sdlc/source/skills/sdlc-mode/playbooks/review.md` (changed): when a pull request exists and the session cannot post on it, the **Status** line says that the findings are not on the pull request and that a person posts them, and the step stays open.
+- `plugins/sdlc/source/skills/sdlc-mode/playbooks/maintain.md` (changed): the service owner schedules a finding with a comment on its pull request that says when; an open pull request with no such comment is undecided.
+- `plugins/sdlc/source/skills/setup-sdlc/SKILL.md` (changed): step 6 reports the code owners, the ruleset of `main`, and the OpenTelemetry export each with its state and what the customer needs for it.
+- `templates/base/SETUP.md` (changed): those three steps each say what the customer needs, as line 63 does for rulesets in a private repository, with the host's or the tool's documentation as the source.
+- `plugins/sdlc/adapters/claude-code/`, `plugins/sdlc/adapters/cursor/`, and `templates/base/plugins/sdlc/` (changed): rendered by `pnpm plugin:sync`.
+- `plugins/sdlc/README.md` (changed): the hook table gains the new hook.
+- `.changeset/<name>.md` (new): `minor` for `@next-friday/create-app`.
+- `intent/approval-evidence/spec.md` (changed): the decision under area of concern 6. `intent.md` and `spec.md`: `Status: done.` in the pull request that meets requirement 21.
+
 ## Order of work
 
 Delivery 1 is built: steps 1 to 8 below.
@@ -60,6 +74,14 @@ Delivery 2:
 12. Generate a project of each of the five stacks and run `pnpm verify` in each. Check: five passes, and `git status` in a project shows no `.agents/logs/` file after `pnpm gates:check`.
 13. `pnpm verify` in the root, the review as a draft pull request until its findings are fixed, and the pull request.
 
+Delivery 3:
+
+14. `check-done-report.sh` and its cases, cases first: a turn with an edit outside `intent/` and no **Checks**, the same with **Checks**, a turn that edited only `intent/`, a turn with no edit, a reply not in the `sdlc-mode` shape, a transcript that cannot be read, and the second stop of a blocked turn. Check: the cases fail before the hook exists and pass after; `pnpm plugin:check` runs them.
+15. `hooks.json`, `SKILL.md`, the two playbooks, the `setup-sdlc` skill, `SETUP.md`, and the README. Check: `pnpm plugin:sync`, then `pnpm plugin:check`.
+16. Lint and format each changed file, then generate a project of each of the five stacks and run `pnpm verify` in each. Check: five passes.
+17. The eval cases of `review` and `maintain`, once, on the small model. Check: the scores, reported.
+18. The changeset, `Status: done.`, `pnpm verify` in the root, and a draft pull request that stays a draft until its review's findings are fixed.
+
 ## Risks
 
 - The riskiest step is 2: a wrong rule fails pull requests that are right. The rules run only on a plan, a spec, or an intent that the branch adds or changes, as the plan rules do today, so a pull request that touches none of them is not checked.
@@ -77,6 +99,10 @@ Delivery 2:
 - Delivery 2. The hooks of this repository's root are not changed: the spec names the template's hooks.
 - Delivery 2. Options not taken: a record in the repository, because the repository holds no log file; the command text in the record, because a command can hold a secret; one record function copied into each hook, because the five would drift.
 
+- Delivery 3. The riskiest step is 14: a hook that blocks a right reply stops every session that uses the plugin. It fires only on a reply in the `sdlc-mode` shape, only after an edit outside `intent/` in that turn, and never twice for one turn; a reply that names, under **Checks**, the check it could not run and why, passes.
+- Delivery 3. The transcript's format belongs to the agent tool and can change. The hook passes when it cannot read an edit from it, so a format change turns the rule off and does not block.
+- Delivery 3. Options not taken: reading the words of the **Status** line for "done", because every **Status** line says what is done; `git status` as the sign of an edit, because a question asked in a dirty tree would be blocked; failing `pnpm verify` on a setting that is not made, because the spec keeps a new project green.
+
 ## Proof
 
 - 1, 2, 5: the eval cases `build-plans-and-waits-for-the-engineer` and `build-continues-from-an-accepted-plan`, and `fix-reproduces-finds-the-cause-and-waits-for-the-engineer` for `fix.md`.
@@ -88,7 +114,11 @@ Delivery 2:
 - 12: a case that blocks a command holding a marker string and checks that the record does not hold it.
 - 14, 15: cases for `RELEASE_APPROVAL=CHG-123`, which lifts the gate and records the value and the name, and for `1`, which blocks with a message that names `.agents/release-approval-form`.
 - 16: `pnpm gates:check` in a generated project of each stack.
-- 17–21: not built by these deliveries. Each gets its proof here when the plan of its delivery is added.
+- 17: the review reads each of the three steps of `SETUP.md` against the documentation it cites.
+- 18: the eval case `setup-sdlc` reports the three steps, and `pnpm verify` in a new project of each stack.
+- 19: the cases of `check-done-report.cases.json`, run by `pnpm plugin:check`.
+- 20: the eval case `review-reports-findings-and-never-merges`, with a session that cannot post.
+- 21: the review reads `maintain.md` step 6, and the eval case `maintain-writes-intent-from-a-finding` still passes.
 - 22: `pnpm plugin:check`.
 - 23: step 7.
 - 24: `pnpm changesets:check`.

@@ -81,7 +81,7 @@ Every delivery:
 5. No policy. Requirement 8 keeps the spec's pull request red until each concern has a `Decision:` line, so a product owner can no longer merge a spec and decide its concerns later. Requirements 1 to 6 add one merge for each plan, and a bug fix now takes two pull requests.
    Decision: accepted.
 6. No policy. The stop hook of requirement 19 can block a reply that is right, such as one that reports a documentation change as done. Its proposal needs the product owner's yes before it ships to every project.
-   Decision: decided when delivery 3 is planned.
+   Decision: the hook is built, limited to a turn in which the session edited a file outside `intent/` and to a reply in the `sdlc-mode` shape. A reply that names, under **Checks**, the check it could not run and why, passes.
 7. No policy. `AGENTS.md` says to run `pnpm evals:run` and `pnpm evals:run:write` after a skill or a hook changes. Each delivery changes one, so each runs them.
    Decision: each delivery runs the eval cases once, on the small model.
 

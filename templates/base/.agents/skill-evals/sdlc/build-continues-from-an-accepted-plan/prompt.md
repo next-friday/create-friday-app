@@ -5,4 +5,4 @@ timeout_seconds: 1800
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc ผม @joe-dev ยอมรับแผนใน intent/app-version/plan.md แล้ว ลงมือทำต่อได้เลย
+/sdlc I am @joe-dev and I accept the plan in intent/app-version/plan.md. Go ahead and build it.

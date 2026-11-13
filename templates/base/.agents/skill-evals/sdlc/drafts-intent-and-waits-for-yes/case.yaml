@@ -9,5 +9,4 @@ checks:
       regex: '(?=[\s\S]*^## Problem$)(?=[\s\S]*^## Proposed outcome$)(?=[\s\S]*^## Affected users and systems$)(?=[\s\S]*^## Constraints$)(?=[\s\S]*^## Open questions$)'
   - no_new_commits
   - no_new_branch
-  - reply_matches: '[\u0E00-\u0E7F]{10}'
   - reply_lacks: '(?:^|[\s`("''])/(?:home|tmp|root|Users|var|private)/'

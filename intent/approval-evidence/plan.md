@@ -1,8 +1,8 @@
-# Plan: Record who approved at every gate, delivery 1
+# Plan: Record who approved at every gate, deliveries 1 and 2
 
 Accepted by: @joetakara.
 
-This plan covers requirements 1 to 10 and 22 to 24 of `intent/approval-evidence/spec.md`. Requirements 11 to 21 get their own plan in this file when their delivery starts. The plan is accepted by merging the pull request that holds it, and the code follows in a second pull request.
+This plan covers requirements 1 to 16 and 22 to 24 of `intent/approval-evidence/spec.md`, in two deliveries: requirements 1 to 10, which are built, and requirements 11 to 16. Requirements 17 to 21 get their plan in this file when their delivery starts. A delivery's plan is accepted by merging the pull request that adds it, and its code follows in a second pull request.
 
 ## Files that change
 
@@ -25,7 +25,23 @@ Committed by a person from a patch in one issue:
 - `templates/<stack>/.github/workflows/ci.yml`, five files (changed): the step that runs `pnpm plan:check` gains `GH_TOKEN`, and its job gains `pull-requests: read`.
 - `.github/workflows/ci.yml` (changed): the Agent Gates job gains a `pnpm plan:check` step with the same two.
 
+**Delivery 2.** Edited by the agent:
+
+- `templates/base/.agents/release-approval-form` (new): one extended regular expression, shipped as `^[A-Z]+-[0-9]+$`.
+- `templates/base/SETUP.md` (changed): the production gate step names that file and says that a value which does not match it does not lift the gate.
+- `.changeset/<name>.md` (new): `minor` for `@next-friday/create-app`.
+- `intent/approval-evidence/spec.md` (changed): the decision under area of concern 4.
+
+**Delivery 2.** Committed by a person from a patch in one issue:
+
+- `templates/base/.agents/hooks/record-gate-decision.sh` (new): one function that appends a line of JSON to `.agents/logs/gate-decisions.jsonl` in the project: the time in UTC, the hook's name, the decision, the reason when it blocks, and the session's identifier when the input gives one. It writes no command text, file content, or environment value. When it cannot write, it says so on standard error and returns.
+- `templates/base/.agents/hooks/agent-test-edit-gate.sh`, `agent-shell-gate.sh`, `agent-mcp-gate.sh`, `agent-production-gate.sh`, and `templates/base/.cursor/hooks/agent-constitution-gate.sh` (changed): `allow` and `block` call that function before they answer.
+- `templates/base/.agents/hooks/agent-production-gate.sh` (changed): lifts the gate only when `RELEASE_APPROVAL` matches the expression in `.agents/release-approval-form`; blocks any other value with a message that names the file; when it lifts, its record also holds the value and `git config user.name`.
+- `templates/base/scripts/check-agent-gates.ts` (changed): cases for a record on an allow and on a block, for a record that holds no command text, for a hook that cannot write its record, and for a value that does and does not match the form. The values `1`, `off`, `00`, and a space move from the list that lifts the gate to the list that keeps it.
+
 ## Order of work
+
+Delivery 1 is built: steps 1 to 8 below.
 
 1. On a new branch, set `Accepted by:` to the account that merged this plan's pull request, set the spec to `Status: accepted.`, and add its seven `Decision:` lines as proposals. Check: `pnpm plan:check`.
 2. `check-plan.ts`: the three rules that need only git and the files, then the host reader, each with self-test cases that fail before the rule exists. Check: `pnpm plan:check` prints the new count of self-tests.
@@ -35,6 +51,14 @@ Committed by a person from a patch in one issue:
 6. The changeset. Check: `pnpm changesets:check`.
 7. Generate a project of each of the five stacks, one at a time, and run `pnpm verify` in each. Check: five passes.
 8. `pnpm verify` in the root, the `verifier` subagent, the pull request, and the review.
+
+Delivery 2:
+
+9. Write the patch for the six hook files and `check-agent-gates.ts` in a copy of a generated project, with the new cases first. Check: `pnpm gates:check` fails on the unpatched hooks and passes on the patched ones.
+10. Add `.agents/release-approval-form`, the `SETUP.md` text, and the changeset on a new branch. Check: `pnpm changesets:check`.
+11. Open the issue with the patch. Check: the person's commit is on the branch and matches the patch.
+12. Generate a project of each of the five stacks and run `pnpm verify` in each. Check: five passes, and `git status` in a project shows no `.agents/logs/` file after `pnpm gates:check`.
+13. `pnpm verify` in the root, the review as a draft pull request until its findings are fixed, and the pull request.
 
 ## Risks
 
@@ -47,6 +71,12 @@ Committed by a person from a patch in one issue:
 - A pull request merged by a merge queue is recorded as merged by a bot, which no `Accepted by:` handle matches.
 - Options not taken: a comment or a review as the acceptance, because an agent that acts with the engineer's account can write one; trusting the `Accepted by:` text, because the agent writes it; a signed commit, because it needs a key on each engineer's machine; one pull request for the plan and its code, because nothing on it but a merge is out of the agent's reach.
 
+- Delivery 2. The riskiest step is 9: a hook that fails while it writes its record must still answer, or it blocks every command of every session. The record is written by a function that cannot fail the hook, and a case removes the write permission to show it.
+- Delivery 2. A team that lifts the gate today with `RELEASE_APPROVAL=1` is blocked after it updates, until it sets a value in the organization's form. The changeset and `SETUP.md` say so.
+- Delivery 2. `logs` is already a line of each stack's `_gitignore`, which ignores `.agents/logs/`, so no `_gitignore` changes; the spec's design names that change, and step 12 checks the result.
+- Delivery 2. The hooks of this repository's root are not changed: the spec names the template's hooks.
+- Delivery 2. Options not taken: a record in the repository, because the repository holds no log file; the command text in the record, because a command can hold a secret; one record function copied into each hook, because the five would drift.
+
 ## Proof
 
 - 1, 2, 5: the eval cases `build-plans-and-waits-for-the-engineer` and `build-continues-from-an-accepted-plan`, and `fix-reproduces-finds-the-cause-and-waits-for-the-engineer` for `fix.md`.
@@ -54,7 +84,11 @@ Committed by a person from a patch in one issue:
 - 7: the eval case `writes-spec-from-merged-intent`.
 - 8: self-test cases for a concern with and without its `Decision:` line, and this spec's seven lines.
 - 9, 10: self-test cases for an `Author:` line with and without a handle, and the eval case `drafts-intent-and-waits-for-yes`.
-- 11–21: not built by this delivery. Each gets its proof here when the plan of its delivery is added.
+- 11, 13: cases of `check-agent-gates.ts` that run each of the five hooks on an allow and on a block and read the line it appends, and a case with an unwritable `.agents/logs/`.
+- 12: a case that blocks a command holding a marker string and checks that the record does not hold it.
+- 14, 15: cases for `RELEASE_APPROVAL=CHG-123`, which lifts the gate and records the value and the name, and for `1`, which blocks with a message that names `.agents/release-approval-form`.
+- 16: `pnpm gates:check` in a generated project of each stack.
+- 17–21: not built by these deliveries. Each gets its proof here when the plan of its delivery is added.
 - 22: `pnpm plugin:check`.
 - 23: step 7.
 - 24: `pnpm changesets:check`.

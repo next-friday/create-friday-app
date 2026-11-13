@@ -10,7 +10,7 @@ disable-model-invocation: true
 2. When the topic is unclear, ask one question with these choices: how the workflow runs and starting work, keeping `/sdlc:sdlc-mode` on for a session, fixing a defect in behaviour that already exists, who decides at each gate, a mistake the agent repeats, or company policy.
 3. Read the files the topic points to before you answer. When a file disagrees with the map below, the file is right.
 4. When the person asks about a playbook, a command, or a file that this project does not have, the whole reply is three lines: it does not exist; what exists instead, as one file path; and, on the **Now** line, one message they can send next. Stop there. Do not explain the topic from other files.
-5. Otherwise answer, then list the files the answer came from, then give, on the **Now** line, one message the person can send as is, with real words from their question and no blanks to fill in.
+5. Otherwise answer, then list the files the answer came from, then give, on the **Now** line, one message the person can send as is: the word `Send` and then the whole message in a code span, with real words from their question, no blanks to fill in, and nothing the person must add.
 6. Write the reply by the reply rules in `../sdlc-mode/SKILL.md`.
 
 ## Map

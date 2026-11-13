@@ -16,8 +16,8 @@ This playbook takes a defect in behaviour that already exists to a pull request.
 5. **Gate: the engineer accepts the plan.** Ask whether an engineer could fix the defect from it, and for their GitHub handle when you cannot read it. Revise until they say yes. Change no code and commit nothing before that yes. In plan mode, approving the plan is that yes.
 6. Create the branch `fix/<short-description>` as `playbooks/open-pr.md` says. Set the plan's `Accepted by:` line, under its title, to the handle of the engineer who said yes in step 5, and commit `intent/<short-description>/plan.md` as the first commit.
 7. Reproduce the defect as a test. Run it and check that it fails for the reason the cause gives. Commit the failing test before any fix.
-8. Make the test pass without editing it. On a `fix/` branch, `.agents/hooks/agent-test-edit-gate.sh` blocks test edits once the failing test is committed. On a branch with another name, create `.git/bug-fix-in-progress` first, and delete it once the test passes.
-9. Run every check under **Verifying your work** in the project's `AGENTS.md`. Keep the output. When one fails, fix the code, and never skip, delete, or weaken a test. When a check cannot run in this session, say which one and why, and never report it as passed.
+8. Make the test pass without editing it.
+9. Run every check the project's agent instructions name. Keep the output. When one fails, fix the code, and never skip, delete, or weaken a test. When a check cannot run in this session, say which one and why, and never report it as passed.
 10. Go on in the same turn, without asking. Follow `playbooks/open-pr.md`, and then `playbooks/review.md`.
 
 **Next:** `playbooks/open-pr.md`; an agent; in the same turn, as soon as step 9 passes.

@@ -65,7 +65,7 @@ cat > 'intent/app-version/spec.md' << 'EOF'
 
 From `intent/app-version/intent.md`. Status: accepted.
 
-Request: "add a version endpoint". Skills at `0000000`.
+Request: "add a version endpoint".
 
 ## Requirements
 

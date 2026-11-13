@@ -5,8 +5,6 @@ description: Apply the organization's security policy. Use whenever writing or r
 
 # Security policy
 
-Owner: the code owner of this folder in `.github/CODEOWNERS`.
-
 Standard: [OWASP Application Security Verification Standard 5.0.0](https://github.com/OWASP/ASVS/tree/v5.0.0/5.0/en), Level 1. This is the default; the owner replaces or tightens it by editing this file.
 
 ## Rules

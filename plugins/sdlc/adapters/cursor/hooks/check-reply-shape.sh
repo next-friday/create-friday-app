@@ -36,13 +36,8 @@ outside_code=$(printf '%s\n' "$outside_urls" | tr 'A-Z' 'a-z' \
 number=$(printf '%s\n' "$outside_code" \
   | grep -Eo '(^|[^[:alnum:]_&#/])#[0-9]+([^[:alnum:]_]|$)|(^|[^[:alnum:]_])(pr|pull request|issue)s?[[:space:]]+#?[0-9]+([^[:alnum:]_.]|\.[^0-9]|\.?$)(of[[:space:]]+(the|this|that|a|an|my|our|your|these|those)[[:space:]])?' \
   | grep -Ev '[[:space:]]of[[:space:]]' | head -1 | sed -E 's/^[^#[:alnum:]]//; s/[^[:alnum:]]$//')
-machine_path=$(printf '%s\n' "$outside_urls" \
-  | grep -Eo '(^|[^[:alnum:]_./~-])(/(home|root|tmp|Users)/[^[:space:]`)"'\'']*|[A-Za-z]:[\\][^[:space:]`)"'\'']*)' \
-  | head -1 | sed -E 's/^[^/[:alpha:]]//; s/[.,;:]*$//')
-
 problems=
 [ -n "$number" ] && problems="Replace \"$number\" with the full URL of that pull request or issue, or with \"this pull request\". "
-[ -n "$machine_path" ] && problems="${problems}Write \"$machine_path\" from the project root, such as \`README.md:12\`. "
 case $last in
   '**Status:**'*)
     if printf '%s' "$request" | grep -Eq 'https?://' \

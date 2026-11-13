@@ -15,9 +15,9 @@ disable-model-invocation: true
 
 ## Map
 
-- **How the workflow runs, and starting work:** `intent/README.md` and the table in `../sdlc-mode/SKILL.md`.
+- **How the workflow runs, and starting work:** the table in `../sdlc-mode/SKILL.md`.
 - **Keeping `/sdlc:sdlc-mode` on for a session:** a person starts it; nothing routes work into it. How long an invoked skill's text stays in the conversation depends on the agent tool: a person sends `/sdlc:sdlc-mode` again to restore the full text, or uses the agent tool's own way to keep a command active for a session.
 - **Fixing a defect in behaviour that already exists:** `playbooks/fix.md` is the path with no intent and no spec, for a person's request: a plan an engineer accepts, then a failing test, the fix, and a pull request. A finding from a job always starts at intent. Every other change runs intent, spec, plan, then build.
-- **Who decides:** `.agents/rules/agent-owned-work.md` and `.github/CODEOWNERS`.
-- **A mistake the agent repeats:** the corrections section of `AGENTS.md`.
-- **Company policy:** the policy files, each the project's `.agents/skills/<area>-policy/SKILL.md` when it exists and the plugin's default at `../<area>-policy/SKILL.md` otherwise, and `.github/CODEOWNERS` for each one's owner.
+- **Who decides:** the steps marked **Gate** in the playbooks.
+- **A mistake the agent repeats:** the project's agent instructions.
+- **Company policy:** the policy files, each the project's `.agents/skills/<area>-policy/SKILL.md` when it exists and the plugin's default at `../<area>-policy/SKILL.md` otherwise.

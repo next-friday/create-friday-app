@@ -2,11 +2,11 @@
 
 Accepted by: @joetakara.
 
-The work lands as two pull requests, in this order. Each one leaves `main` working.
+The work lands as three pull requests, in this order. Each one leaves `main` working. The third follows the second, because the plugin copy that a generated project receives is rendered from the finished plugin, with `setup-sdlc` in it.
 
 This plan departs from the spec in four places. The first is by the engineer's decision: `claude plugin eval` runs the eval cases, and `run-agent-evals.ts` is deleted. The same commit changes requirements 1 and 16 of `spec.md` to say so. The second: a **Gate** step keeps its words except the path of a playbook and the name of the command, which the move changes, and requirement 13 of `spec.md` says so. The third: the eval cases and the subagent's tool fields are specific to one tool, so they sit in the adapters, in `plugins/sdlc/adapters/claude-code/evals/` and `plugins/sdlc/adapters/agents.json`, and requirement 3 holds for the source alone. The same commit changes requirements 1 and 4 of `spec.md` and its layout to say so, by the product owner's decision. The layout follows `cursor/plugins`, where one source renders a tree for each tool and a file only one tool reads sits in that tool's tree (`harness/pstack/README.md`). The fourth is by the product owner's decision: the checks do not ship as an npm package, and the plugin's source holds `scripts/check-plan.ts`, `scripts/check-bands.ts`, and `scripts/measure-loop.ts` for this repository.
 
-Generated projects are out of scope by the product owner's decision: nothing under `templates/` changes, and a generated project keeps the skills, scripts, and workflows the CLI copies into it.
+The product owner decided that a generated project runs the same plugin as this repository, from a copy inside the project that is enabled as a local marketplace. The same commit adds that decision to `spec.md` as requirements 20 to 31, and pull request 3 builds them. Pull requests 1 and 2 change nothing under `templates/`.
 
 The product owner added one requirement while this plan was written, and the same commit adds it to `spec.md` as requirement 19: a reply gives the full URL of each pull request, issue, branch, workflow run, and file on the host that it names, and its **Status** line gives the URL of the page where the person acts next.
 
@@ -46,7 +46,37 @@ Pull request 2, setup:
 | `plugins/sdlc/source/skills/sdlc-mode/playbooks/build.md`           | changed | Starts the verifier on the model and effort that `.agents/sdlc-models.md` names after `verify:`. |
 | `plugins/sdlc/adapters/claude-code/evals/setup-sdlc/`, `sdlc-mode/` | new     | Cases for requirement 14, step 4, in `setup-sdlc/`, and for requirement 15, in `sdlc-mode/`.     |
 | `plugins/sdlc/adapters/`                                            | changed | Rendered again.                                                                                  |
-| `intent/sdlc-plugin/intent.md`, `spec.md`                           | changed | `Status: done.`, in the commit that meets the last requirement.                                  |
+
+Pull request 3, the plugin in generated projects:
+
+| File                                                                                                                            | Change  | Afterwards                                                                                                                                                                                                 |
+| :------------------------------------------------------------------------------------------------------------------------------ | :------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `templates/base/plugins/sdlc/claude-code/`, `templates/base/plugins/sdlc/cursor/`                                               | new     | The rendered adapter trees of this repository, without `evals/`, byte for byte (40 files). `pnpm plugin:sync` renders them.                                                                                |
+| `templates/base/.claude-plugin/marketplace.json`                                                                                | new     | Names `next-friday-plugins` and lists `sdlc` with the source `./plugins/sdlc/claude-code`.                                                                                                                 |
+| `templates/base/scripts/check-plan.ts`, `check-bands.ts`, `measure-loop.ts`                                                     | changed | Equal to `plugins/sdlc/source/scripts/`. Only `check-plan.ts` changes, in its line 348 comment.                                                                                                            |
+| `scripts/sync-plugin.ts`                                                                                                        | changed | Renders the template copy, its marketplace file, and the three scripts. With `--check` it fails when one differs. Its self-tests gain these cases.                                                         |
+| `templates/base/.agents/skills/`, `.claude/skills/`, `.cursor/skills/`                                                          | deleted | The 45 files of the skills copied into every project.                                                                                                                                                      |
+| `templates/base/.agents/skill-evals/`, `templates/base/.agents/agents.json`                                                     | deleted | The 146 eval case files and the subagent config. The cases stay with the plugin in this repository.                                                                                                        |
+| `templates/<stack>/.agents/agents/verifier.md`, `.claude/agents/verifier.md`, `.cursor/agents/verifier.md`, for the five stacks | deleted | The 15 verifier files. The plugin's `verifier` serves every stack.                                                                                                                                         |
+| `templates/base/scripts/run-agent-evals.ts`; the `evals:run` entry in the `package.json` of each stack                          | deleted | The runner and its script leave generated projects.                                                                                                                                                        |
+| `templates/<stack>/AGENTS.md`                                                                                                   | changed | Under `## Verifying your work`, gains the stack's start instruction for the verifier. Names `/sdlc:sdlc-mode` and the plugin's folders in place of `/sdlc` and `.agents/skills/sdlc/playbooks/build.md`.   |
+| `templates/base/SETUP.md`                                                                                                       | changed | Lines 7, 35 to 39, 93, 100, and 110 to 116 name the plugin. Gains how a team replaces a default policy and its `CODEOWNERS` lines, and the names `/sdlc:sdlc-mode`, `/sdlc:sdlc-help`, `/sdlc:setup-sdlc`. |
+| `templates/base/intent/README.md`, `templates/<stack>/CONTRIBUTING.md`                                                          | changed | Name the plugin's folders and `/sdlc:sdlc-mode`; the "Agent evals" bullet of each `CONTRIBUTING.md` goes.                                                                                                  |
+| `templates/base/.agents/review.md` with `REVIEW.md`, and the copies in `templates/payload/` and `templates/turborepo/`          | changed | Line 9 names the policies in force in place of "the four policies in `.agents/skills/`". The four pairs change together, and `pnpm rules:sync` in a generated project renders each `REVIEW.md`.            |
+| `AGENTS.md`                                                                                                                     | changed | Convention 4 gains its one exception.                                                                                                                                                                      |
+| `.changeset/<name>.md`                                                                                                          | new     | `minor` for `@next-friday/create-app`, with the note for projects generated earlier.                                                                                                                       |
+| `scripts/check-changesets.ts`                                                                                                   | changed | Its fixtures at lines 326 and 432, which treat a change to the plugin source as unpublished, name a path outside the plugin source.                                                                        |
+| `intent/sdlc-plugin/intent.md`, `spec.md`                                                                                       | changed | `Status: done.`, in the commit that meets the last requirement.                                                                                                                                            |
+
+A person commits these files of the template, which are in the constitution:
+
+| File                                                                            | Change  | Afterwards                                                                                                                                    |
+| :------------------------------------------------------------------------------ | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `templates/base/.claude/settings.json`                                          | changed | Gains `extraKnownMarketplaces` and `enabledPlugins` as `.claude/settings.json` of this repository has them.                                   |
+| `templates/base/.cursor/hooks.json`, `.cursor/hooks/load-project-plugins.sh`    | changed | A `workspaceOpen` hook whose script prints `{"pluginPaths": ["<project>/plugins/sdlc/cursor"]}` from `CURSOR_PROJECT_DIR`. The script is new. |
+| `templates/base/.github/workflows/spec-on-intent-merge.yml`, `control-band.yml` | changed | Send `/sdlc:sdlc-mode` (lines 94, 91, and 106) and pass `--plugin-dir plugins/sdlc/claude-code` in `claude_args`.                             |
+| `templates/base/.github/workflows/agent-evals.yml`                              | deleted | Goes with `evals:run`.                                                                                                                        |
+| `templates/base/scripts/sync-agent-rules.ts`                                    | changed | Loses `SubagentConfig`, `renderSubagent`, the subagent loop, and the subagent entries of its orphan list.                                     |
 
 ## Order of work
 
@@ -70,7 +100,21 @@ Pull request 2:
 
 12. A person installs the Cursor adapter in Cursor and runs the `sdlc-mode` skill once. Check: the reply follows the reply shape. The result goes in the pull request.
 13. Write `setup-sdlc` with `skill-creator`, its eval cases, and the change to `playbooks/build.md` of the `sdlc-mode` skill. Check: `claude plugin eval` on the new cases, and a second run of `setup-sdlc` with the same answers leaves `git status` clean.
-14. Check each of the 19 requirements against the tree, then set `Status: done.` in `intent.md` and `spec.md`. Check: `pnpm verify` exits 0.
+14. Check each of requirements 1 to 19 against the tree. Check: `pnpm verify` exits 0.
+
+Pull request 3:
+
+15. Extend `scripts/sync-plugin.ts` to render `templates/base/plugins/sdlc/claude-code/` and `cursor/` from the two adapters without `evals/`, the template's `.claude-plugin/marketplace.json`, and the three scripts into `templates/base/scripts/`, with self-test cases for each. Run `pnpm plugin:sync`. Check: `pnpm plugin:check` exits 0, and it exits 1 after a hand edit to a file of the template copy and after a hand edit to `templates/base/scripts/check-plan.ts`.
+16. Delete the template copies of requirement 24 that a person need not commit: the skills, the eval cases, `agents.json`, the 15 verifier files, `run-agent-evals.ts`, and the `evals:run` entries. In each stack's `AGENTS.md`, put the start instruction under `## Verifying your work`: `pnpm start:dev` for `nodejs` and `nestjs`, `pnpm dev` for `nextjs`, and for `payload` and `turborepo` `pnpm dev` with the database in `DATABASE_URL` and `PAYLOAD_SECRET` in `.env`. Check: `git ls-files templates` lists no file under `.agents/skills/`, `.claude/skills/`, `.cursor/skills/`, `.agents/skill-evals/`, `.agents/agents/`, `.claude/agents/`, or `.cursor/agents/`, and no `agents.json` or `run-agent-evals.ts`; no `package.json` under `templates/` names `evals:run`.
+17. Rewrite the names and paths of requirement 27 in each stack's `AGENTS.md`, `CONTRIBUTING.md`, `templates/base/SETUP.md`, `templates/base/intent/README.md`, and the four pairs of `review.md` and `REVIEW.md`, at the lines the inventory names. Add to `SETUP.md` how a team replaces a default policy. Run `pnpm rules:sync` in a generated project and copy each `REVIEW.md` back with the file-editing tool. Check: `git grep -n -E '/sdlc(-help)?\b' templates` and `git grep -n "\.agents/skills/sdlc" templates` find only `/sdlc:sdlc-mode`, `/sdlc:sdlc-help`, and `.agents/skills/<area>-policy/`.
+18. Add the exception to convention 4 of `AGENTS.md`, the `minor` changeset with the note of requirement 30, and the new paths in the `check-changesets.ts` fixtures. Check: `pnpm changesets:check` exits 0.
+19. A person commits the files of the second table of this plan, from an issue that carries the exact text, on the branch. Check: `git ls-files templates` lists no `agent-evals.yml`; `git grep -n "/sdlc " templates/base/.github` finds nothing; in a generated project, `actionlint` and `zizmor --persona pedantic --offline` pass on the workflows, as the Template job of the root CI runs them.
+20. Prove requirements 22 and 28 in a scratch copy of a generated project: `claude plugin validate plugins/sdlc/claude-code` passes; a new session in the trusted folder lists `/sdlc:sdlc-mode`; and `claude --plugin-dir plugins/sdlc/claude-code -p "/sdlc:sdlc-mode <question>"` with the small model answers in the reply shape and changes no file. Check: the three results, with the reply and `git status`.
+21. A person opens a generated project in Cursor and runs the `sdlc-mode` skill once. Check: the skill is listed and its reply follows the reply shape. The result goes in the pull request.
+22. Generate a project of each of the five stacks and run `pnpm verify` in each. Check: all five exit 0.
+23. Check each of the 31 requirements against the tree, then set `Status: done.` in `intent.md` and `spec.md`. Check: `pnpm verify` exits 0 in this repository.
+
+Pull request 3 publishes `@next-friday/create-app` 9.3.0 when it is released. Before the pull request is opened, tell the product owner that package name and that version.
 
 ## Risks
 
@@ -78,11 +122,20 @@ Pull request 2:
 - **The riskiest step is 10.** One file a person commits must land on the branch before it merges. Without `.claude/settings.json` the repository loses its own loop, and `pnpm plugin:check` fails until it is committed.
 - **The official eval runner costs model calls**: each case runs with the plugin and again without it. The plan runs it by hand, with `--runs 1` and the small model, and in no workflow. `pnpm evals:run` grants `Write` and `Edit` and runs the cases tagged `no-shell`. `pnpm evals:run:write` also grants `Bash` and runs the cases tagged `needs-write`; `claude plugin eval` runs `Bash` only under an OS sandbox.
 - **The Cursor adapter is proved by a person, once** (step 12). The render script checks only its shape against `pstack`.
+- **The riskiest step of pull request 3 is 19.** A person commits seven files across settings, a hook, and workflows. Until that commit, a generated project holds the plugin but does not enable it, and its two workflows send a command that does not resolve.
+- **Cursor loading is unverified until a person tries it** (step 21). The `workspaceOpen` hook is the mechanism the Cursor documentation gives; the render script checks only the shape of the output. When it does not load, the pull request waits for the product owner's choice.
+- **A managed organisation can block the marketplace.** `templates/base/.claude/managed-settings.example.json:24` sets `strictKnownMarketplaces` to one `github` source, so an organisation with that key must allow the `next-friday-plugins` marketplace, and `SETUP.md` says so. The same file sets `disableSideloadFlags` at line 21; whether that blocks `--plugin-dir` in CI is not checked.
+- **A generated project does not get later plugin versions by itself.** Its copy is the version. A project that wants updates changes the source entry of its marketplace.
+- **The repository renders the plugin into one more place.** Every change to the plugin's source now changes files under `templates/`, so `pnpm changesets:check` asks for a changeset for it, and the Template job of CI runs `pnpm verify` on five projects. `pnpm plugin:check` fails when the copy is stale.
+- **A CI folder is not a trusted folder.** The `extraKnownMarketplaces` entries apply only in a trusted folder, so the workflows pass `--plugin-dir`. Step 20 proves it with a local run, not in CI, and the workflows run only in CI after the merge.
 - Options not taken:
   - Keeping `run-agent-evals.ts`. The official runner reads the same case layout and adds the comparison without the plugin.
   - One pull request. A change of this size is hard to review and waits as a whole on its slowest part.
   - Leaving the Cursor adapter for later. The spec asks for both tools from one source.
-  - Changing `scripts/sync-agent-rules.ts`. It already renders nothing when `.agents/skills/` holds no file, and it still renders a project's own policy skill.
+  - Changing `scripts/sync-agent-rules.ts` in the root. It already renders nothing when `.agents/skills/` holds no file, and it still renders a project's own policy skill.
+  - A GitHub source for the marketplace in generated projects. It needs an install, and [Cursor: Plugins](https://cursor.com/docs/plugins) says: "Plugins are distributed as Git repositories and submitted through the Cursor team."
+  - A link from `templates/` to the root's `plugins/sdlc/`. Convention 4 of `AGENTS.md` forbids it, so `pnpm plugin:sync` renders a copy.
+  - Keeping the eval runner in generated projects. The eval cases test the plugin and stay with the plugin.
 
 ## Proof
 
@@ -97,4 +150,15 @@ Pull request 2:
 - Requirement 17: outside `templates/`, `git ls-files` lists the skills, the subagent, the eval cases, and the scripts only under `plugins/sdlc/`.
 - Requirement 18: `.github/CODEOWNERS`.
 - Requirement 19: an eval case whose reply names a pull request, graded by a `regex` grader for its full URL in the reply and in the **Status** line.
-- Brand policy, rules 2 and 3: the plugin's name `sdlc` holds no organization name, and the spec's area of concern 1 records the product owner's decision on the marketplace name.
+- 20, 21: `pnpm plugin:check` and its self-tests with the two failing cases of step 15, and `git ls-files templates/base/plugins templates/base/.claude-plugin` against `git ls-files plugins/sdlc/adapters` without `evals/`.
+- 22: `templates/base/.claude/settings.json` holds both keys, and the session of step 20.
+- 23: `templates/base/.cursor/hooks.json` holds the `workspaceOpen` hook, running the script with `CURSOR_PROJECT_DIR` set prints the one-line JSON, and the person's run of step 21.
+- 24: the `git ls-files` check of step 16, and `git ls-files templates` lists no `agent-evals.yml`.
+- 25: each stack's `AGENTS.md` holds its start instruction under `## Verifying your work`, and the five `pnpm verify` runs of step 22.
+- 26: `pnpm plugin:check`, which fails on a hand edit to one of the three scripts (step 15), and the five `pnpm verify` runs, which call `plan:check` and `bands:check`.
+- 27: the `git grep` of step 17, and the reading of `SETUP.md` for the policy override and its `CODEOWNERS` lines.
+- 28: the two workflows hold `/sdlc:sdlc-mode` and `--plugin-dir`, `actionlint` and `zizmor` pass (step 19), and the run of step 20.
+- 29: `templates/base/scripts/sync-agent-rules.ts` names no subagent, and `pnpm rules:check` exits 0 in each generated project.
+- 30: `.changeset/<name>.md` and `pnpm changesets:check`.
+- 31: steps 19, 20, and 22 together.
+- Brand policy, rules 2 and 3: the plugin's name `sdlc` holds no organization name, and the spec's area of concern 1 records the product owner's decision on the marketplace name, which the template's marketplace file and settings carry too.

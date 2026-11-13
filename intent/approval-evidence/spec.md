@@ -77,7 +77,7 @@ Every delivery:
 3. No policy. The intent's open question 5 has no answer: where a tech lead's rating of a finding is kept. This spec adds no requirement for it.
    Decision: no place for ratings is built now.
 4. Compliance, rule 3. The records name a person: a handle in `plan.md`, `spec.md`, and `intent.md`, and `git config user.name` in the gate's record. The files do not say on what basis the organization keeps them or for how long. The compliance policy owner decides.
-   Decision: the handles in `plan.md`, `spec.md`, and `intent.md` are kept as the host already shows them. The name in the gate's record is decided when delivery 2 is planned.
+   Decision: the handles in `plan.md`, `spec.md`, and `intent.md` are kept as the host already shows them. The gate's record holds `git config user.name` only when the production gate is lifted; the file stays on the machine, git does not track it, and the organization decides how long to keep it.
 5. No policy. Requirement 8 keeps the spec's pull request red until each concern has a `Decision:` line, so a product owner can no longer merge a spec and decide its concerns later. Requirements 1 to 6 add one merge for each plan, and a bug fix now takes two pull requests.
    Decision: accepted.
 6. No policy. The stop hook of requirement 19 can block a reply that is right, such as one that reports a documentation change as done. Its proposal needs the product owner's yes before it ships to every project.

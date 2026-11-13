@@ -346,6 +346,20 @@ describe("create with a deploy target", () => {
     expect(turbo.globalDependencies.includes("railway.json")).toBe(isListed);
   });
 
+  it.each(["nodejs", "nestjs", "nextjs", "payload", "turborepo"])(
+    "says in the %s README what a deploy step needs without --deploy",
+    async stack => {
+      const name = `readme-${stack}`;
+
+      await create([name, "--stack", stack]);
+
+      const readme = readFileSync(path.join(cwd, name, "README.md"), "utf8");
+
+      expect(readme).toContain("The project has no deploy step yet. A deploy step needs:");
+      expect(readme.match(/^## Deploy$/gmu)).toHaveLength(1);
+    },
+  );
+
   it("writes no file for an unknown deploy target", async () => {
     const errors = captureErrors();
 

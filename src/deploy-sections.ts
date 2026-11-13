@@ -15,12 +15,13 @@ export function resolveDeploySections(content: string, target: DeployTarget): st
   const kept: string[] = [];
   let section: string | undefined;
   let isAfterMarker = false;
+  const lines = content.split("\n");
 
-  for (const line of content.split("\n")) {
+  for (const [index, line] of lines.entries()) {
     const name = marker.exec(line)?.groups?.name;
 
     if (name === undefined) {
-      const isBlankAfterMarker = isAfterMarker && line.trim() === "";
+      const isBlankAfterMarker = isAfterMarker && line.trim() === "" && index < lines.length - 1;
 
       if (!isBlankAfterMarker && (section ?? target) === target) {
         kept.push(line);

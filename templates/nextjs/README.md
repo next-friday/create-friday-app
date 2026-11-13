@@ -32,7 +32,17 @@ CI also runs the build, the end-to-end tests, the container image scan, and the 
 
 ## Container
 
+<!-- deploy:railway -->
+
+The `Dockerfile` builds a standalone production image that runs as the `node` user, for platforms such as Railway. The server listens on `PORT`, or 3000 when it is unset.
+
+<!-- deploy:end -->
+
+<!-- deploy:none -->
+
 The `Dockerfile` builds a standalone production image that runs as the `node` user for a container platform. The server listens on `PORT`, or 3000 when it is unset.
+
+<!-- deploy:end -->
 
 ```sh
 docker build -t app .
@@ -57,6 +67,8 @@ On Vercel, deploy without the image; the Next.js preset takes precedence over th
 
 3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health`.
+
+Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
 
 <!-- deploy:end -->
 

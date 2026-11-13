@@ -31,7 +31,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 - **Code quality:** TypeScript, ESLint and Prettier with the Next Friday configs, Vitest with coverage, fast-check, Knip, dependency-cruiser, editorconfig-checker, and sort-package-json.
 - **Git hooks:** Husky runs gitleaks, `pnpm rules:check`, and lint-staged before each commit, commitlint on each message, and `pnpm check` before each push. After the first commit, commits to `main` are blocked, and local merges into `main` always are; pushes to `main` are blocked once it exists on the remote.
 - **CI:** GitHub Actions run the static checks, tests with patch coverage, the build, end-to-end tests for Next.js and Payload, a container build and vulnerability scan, Semgrep, OSV-Scanner, CodeQL, dependency review, OpenSSF Scorecard, gitleaks, TruffleHog, zizmor, and pull request title validation. Dependabot keeps dependencies current.
-- **Deployment:** a `Dockerfile` that runs as the `node` user, and a Railway workflow that promotes one commit through `dev`, `uat`, and `prod`.
+- **Deployment:** a `Dockerfile` that runs as the `node` user. With `--deploy railway`, also a Railway workflow that promotes one commit through `dev`, `uat`, and `prod`.
 - **Agent rules:** `CLAUDE.md` imports `AGENTS.md`. Shared rules live in `.agents/rules`, with hooks that enforce them in Claude Code and Cursor.
 
 ## Requirements
@@ -44,17 +44,18 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 ## Options
 
 ```text
-pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turborepo]
+pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turborepo] [--deploy none|railway]
 ```
 
-| Option           | Description                                                                   |
-| :--------------- | :---------------------------------------------------------------------------- |
-| `name`           | Project directory and package name. Asked when left out.                      |
-| `--stack`        | `nodejs`, `nestjs`, `nextjs`, `payload`, or `turborepo`. Asked when left out. |
-| `--skip-git`     | Do not run `git init`.                                                        |
-| `--skip-install` | Do not run `pnpm install`.                                                    |
-| `-v, --version`  | Print the version.                                                            |
-| `-h, --help`     | Print the usage.                                                              |
+| Option           | Description                                                                               |
+| :--------------- | :---------------------------------------------------------------------------------------- |
+| `name`           | Project directory and package name. Asked when left out.                                  |
+| `--stack`        | `nodejs`, `nestjs`, `nextjs`, `payload`, or `turborepo`. Asked when left out.             |
+| `--deploy`       | Deploy target: `none` or `railway`. The default is `none`, which adds no deploy workflow. |
+| `--skip-git`     | Do not run `git init`.                                                                    |
+| `--skip-install` | Do not run `pnpm install`.                                                                |
+| `-v, --version`  | Print the version.                                                                        |
+| `-h, --help`     | Print the usage.                                                                          |
 
 The name must:
 

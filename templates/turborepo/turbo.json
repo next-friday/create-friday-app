@@ -3,12 +3,7 @@
   "futureFlags": {
     "affectedUsingTaskInputs": true
   },
-  "globalDependencies": [
-    ".dockerignore",
-    ".env",
-    "package.json",
-    "pnpm-workspace.yaml"
-  ],
+  "globalDependencies": [".dockerignore", ".env", "package.json", "pnpm-workspace.yaml"],
   "globalPassThroughEnv": [
     "APP_URL",
     "CI",

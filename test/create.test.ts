@@ -284,8 +284,10 @@ describe("create", () => {
 });
 
 describe("create with a deploy target", () => {
+  const railwayConfig = "railway.json";
+
   const railwayFiles = [
-    "railway.json",
+    railwayConfig,
     path.join("runbooks", "rollback-deploy.md"),
     path.join(".github", "workflows", "deploy.yml"),
   ];
@@ -357,6 +359,22 @@ describe("create with a deploy target", () => {
     expect(marked).toStrictEqual([]);
   });
 
+  it("keeps the deploy layer's turbo.json equal to the stack's except for railway.json", () => {
+    const templates = path.join(import.meta.dirname, "..", "templates");
+
+    const readTurbo = (layer: string): {globalDependencies: string[]} =>
+      JSON.parse(readFileSync(path.join(templates, layer, "turbo.json"), "utf8")) as {
+        globalDependencies: string[];
+      };
+
+    const deployLayer = readTurbo(path.join("deploy-railway", "turborepo"));
+
+    expect({
+      ...deployLayer,
+      globalDependencies: deployLayer.globalDependencies.filter(entry => entry !== railwayConfig),
+    }).toStrictEqual(readTurbo("turborepo"));
+  });
+
   it.each([
     ["railway", true],
     ["none", false],
@@ -369,7 +387,7 @@ describe("create with a deploy target", () => {
       globalDependencies: string[];
     };
 
-    expect(turbo.globalDependencies.includes("railway.json")).toBe(isListed);
+    expect(turbo.globalDependencies.includes(railwayConfig)).toBe(isListed);
   });
 
   it.each(["nodejs", "nestjs", "nextjs", "payload", "turborepo"])(

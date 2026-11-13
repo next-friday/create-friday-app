@@ -249,6 +249,12 @@ jobs:
           fi
           grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload, turborepo.' <<<"$output"
 
+          for deploy in none railway; do
+            npx --no-install next-friday-create-app "app-$deploy" --stack nodejs --deploy "$deploy" --skip-git --skip-install </dev/null
+          done
+          test ! -e app-none/railway.json
+          test -f app-railway/railway.json
+
   templates:
     name: Template (${{ matrix.stack }}, ${{ matrix.deploy }})
     needs: changes
@@ -288,8 +294,11 @@ jobs:
             echo "The template name was not replaced." >&2
             exit 1
           fi
-          if [ "$DEPLOY" = none ] && grep --recursive --ignore-case --files-with-matches --exclude-dir=node_modules --exclude-dir=.git railway "ci-$STACK"; then
-            echo "A project with no deploy target names a deploy host." >&2
+          if [ "$DEPLOY" = none ] && {
+            grep --recursive --ignore-case --files-with-matches --exclude-dir=node_modules --exclude-dir=.git railway "ci-$STACK" ||
+              find "ci-$STACK" -path "ci-$STACK/node_modules" -prune -o -path "ci-$STACK/.git" -prune -o -iname '*railway*' -print | grep .
+          }; then
+            echo "A project with the deploy target none names Railway in a file or a file name." >&2
             exit 1
           fi
       - name: Install verified actionlint

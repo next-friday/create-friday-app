@@ -66,12 +66,12 @@ Delivery 2:
 - **Brand:** rule 4, as requirements 6, 8, and 11: one label for one thing in every reply. The change shows no other brand value.
 - **Security:** Does not apply. The change touches no chapter of the standard: the hook reads the agent's own reply and prints a fixed reason, and the marker check reads the package's own template files. Rule 6: no secret is read, stored, or printed.
 - **Compliance:** Does not apply. The change collects, stores, shows, sends, and deletes no data about a person.
-- **UX:** the reply is text shown by the agent tool, which owns the interface. Of the standard, two criteria on content apply, as requirements 8 and 6: 2.4.4 Link Purpose (In Context), and 2.4.6 Headings and Labels. See area of concern 1.
+- **UX:** the reply is text shown by the agent tool, which owns the interface. Of the standard, two criteria on content apply. As requirement 8, 2.4.4 Link Purpose (In Context), Level A: "The purpose of each link can be determined from the link text alone or from the link text together with its programmatically determined link context, except where the purpose of the link would be ambiguous to users in general." As requirement 6, 2.4.6 Headings and Labels, Level AA: "Headings and labels describe topic or purpose." Both quoted from <https://www.w3.org/TR/WCAG22/>.
 
 ## Areas of concern
 
-1. UX, rule 2. The standard could not be opened from this session, so the two criteria are named from memory and not quoted. The UX policy owner checks their numbers and names.
-   Decision: the two criteria stay as named, and the review of delivery 2 opens the standard and corrects them.
+1. UX, rule 2. The standard could not be opened when this spec was written, so the two criteria were named from memory. `intent/starter-follow-ups/spec.md`, requirement 7, read them from the standard: the numbers and names were right, and the UX line now quotes them.
+   Decision: the two criteria stand as quoted.
 2. No policy. Requirement 12 moves the **Request** line out of every reply but the first. It was the first line of every reply so that a person sees what the agent understood.
    Decision: accepted. The first reply of a task keeps it, and later replies start with the answer or the result.
 3. No policy. `AGENTS.md` says to run `pnpm evals:run` and `pnpm evals:run:write` after a skill or a hook changes. Delivery 2 changes the reply's labels in every case's graders, so every case runs.

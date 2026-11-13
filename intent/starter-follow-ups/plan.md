@@ -1,6 +1,6 @@
 # Plan: Make the CLI easy to start, gate on evals, route work by model, and close what earlier work left open
 
-Accepted by: @<engineer>.
+Accepted by: @joetakara.
 
 This plan covers every requirement of `intent/starter-follow-ups/spec.md` in four deliveries: requirements 1 to 7, 8 to 14, 15 to 21, and 22 to 27. It is accepted by merging the pull request that adds it. Each delivery's code follows in its own pull request, and each delivery is merged and versioned before the next opens its pull request, so that no two changesets ship as one version.
 

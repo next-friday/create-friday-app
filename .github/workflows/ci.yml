@@ -82,6 +82,9 @@ jobs:
     if: needs.changes.outputs.full_verification == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read # Needed by plan:check to read who merged the plan's pull request.
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -96,6 +99,10 @@ jobs:
         run: pnpm gates:check
       - name: Check changesets
         run: pnpm changesets:check
+      - name: Check plans
+        env:
+          GH_TOKEN: ${{ github.token }} # plan:check reads who merged the plan's pull request.
+        run: pnpm plan:check
 
   format:
     name: Format & Manifests

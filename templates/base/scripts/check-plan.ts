@@ -94,8 +94,8 @@ const alsoAcceptedByPrefix = "Also accepted by: ";
 const hostTokenVariable = "GH_TOKEN";
 const hostRepositoryPath = "repos/{owner}/{repo}";
 const authorPrefix = "Author: ";
-const authorPattern = /^Author: @[\dA-Za-z][\dA-Za-z-]*[ .]/;
-const alsoAcceptedByPattern = /^Also accepted by: @([\dA-Za-z][\dA-Za-z-]*)\.$/;
+const authorPattern = /^Author: @[\dA-Za-z][\w-]*[ .]/;
+const alsoAcceptedByPattern = /^Also accepted by: @([\dA-Za-z][\w-]*)\.$/;
 
 type BranchChanges = {
   changedPaths: string[];
@@ -195,28 +195,25 @@ function findAuthorProblems(intentText: string): string[] {
  * Ask the host who merged the pull request that last changed a plan on the default branch, and who approved it.
  * @param mergeBase The commit this branch left the default branch at.
  * @param planPath Path of the plan.
- * @returns The merging account and the approving accounts, or undefined when the host cannot be read.
+ * @returns The merging account and the approving accounts, or undefined when no host token is set.
+ * @throws {Error} When a token is set and git or the host's tool fails.
  */
 function readPlanMerge(mergeBase: string, planPath: string): PlanMerge | undefined {
   if (process.env[hostTokenVariable] === undefined || process.env[hostTokenVariable] === "") {
     return undefined;
   }
 
-  try {
-    const commit = runGit(["log", "-1", "--format=%H", mergeBase, "--", planPath]);
-    const pullRequest = runHost(`${hostRepositoryPath}/commits/${commit}/pulls`, ".[0].number");
-    const pullRequestPath = `${hostRepositoryPath}/pulls/${pullRequest}`;
-    const mergedBy = runHost(pullRequestPath, ".merged_by.login");
-    const approvedFilter = '.[] | select(.state == "APPROVED") | .user.login';
-    const approvers = runHost(`${pullRequestPath}/reviews`, approvedFilter);
+  const commit = runGit(["log", "-1", "--format=%H", mergeBase, "--", planPath]);
+  const pullRequest = runHost(`${hostRepositoryPath}/commits/${commit}/pulls`, ".[0].number");
+  const pullRequestPath = `${hostRepositoryPath}/pulls/${pullRequest}`;
+  const mergedBy = runHost(pullRequestPath, ".merged_by.login");
+  const approvedFilter = '.[] | select(.state == "APPROVED") | .user.login';
+  const approvers = runHost(`${pullRequestPath}/reviews`, approvedFilter);
 
-    return {
-      mergedBy,
-      approvers: approvers.split("\n").filter(approver => approver !== ""),
-    };
-  } catch {
-    return undefined;
-  }
+  return {
+    mergedBy,
+    approvers: approvers.split("\n").filter(approver => approver !== ""),
+  };
 }
 
 /**
@@ -249,7 +246,7 @@ const intentFileName = "intent.md";
 const proofHeading = "## Proof";
 const requirementsHeading = "## Requirements";
 const acceptancePlaceholder = "@<engineer>";
-const acceptedByPattern = /^Accepted by: @[\dA-Za-z][\dA-Za-z-]*\.$/;
+const acceptedByPattern = /^Accepted by: @[\dA-Za-z][\w-]*\.$/;
 const requiredHeadings = ["## Files that change", "## Order of work", "## Risks", proofHeading];
 
 /**

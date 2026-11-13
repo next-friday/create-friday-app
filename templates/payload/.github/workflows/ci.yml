@@ -79,6 +79,9 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/payload
       PAYLOAD_SECRET: ci-only-secret
       APP_URL: http://localhost:3000
+    permissions:
+      contents: read
+      pull-requests: read # Needed by plan:check to read who merged the plan's pull request.
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -95,6 +98,8 @@ jobs:
       - name: Check agent gates
         run: pnpm gates:check
       - name: Check plans
+        env:
+          GH_TOKEN: ${{ github.token }} # plan:check reads who merged the plan's pull request.
         run: pnpm plan:check
       - name: Check bands
         run: pnpm bands:check

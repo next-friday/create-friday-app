@@ -22,7 +22,7 @@ graders:
     min: 1
   - name: spec-records-the-skills-commit
     type: regex
-    pattern: '^Request: .*Skills at (?:[0-9a-f]{7,40}|unknown)\.$'
+    pattern: '^Request: .*Skills at `?(?:[0-9a-f]{7,40}|unknown)`?\.$'
     flags: mu
     target:
       source: file

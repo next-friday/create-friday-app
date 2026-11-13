@@ -104,6 +104,7 @@ jobs:
     permissions:
       contents: read
       id-token: write # Needed to exchange GitHub OIDC for a Turborepo Remote Cache token.
+      pull-requests: read # Needed by plan:check to read who merged the plan's pull request.
     services:
       postgres:
         image: postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
@@ -156,6 +157,8 @@ jobs:
       - name: Check agent gates
         run: pnpm gates:check
       - name: Check plans
+        env:
+          GH_TOKEN: ${{ github.token }} # plan:check reads who merged the plan's pull request.
         run: pnpm plan:check
       - name: Check bands
         run: pnpm bands:check

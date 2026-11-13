@@ -39,7 +39,6 @@ The loop writes and cleans text as `pstack` does in the `cursor/plugins` reposit
 - **Proposal** for the spec to compare, with sources: a maintained prose linter, such as Vale or textlint, against a script of our own. `.agents/rules/platform-and-library-first.md` puts a maintained library before custom code.
 - Out of scope:
   - Rewriting files that already exist. An intent, a spec, or a plan that is on `main` keeps its text.
-  - Rules for Thai text.
   - Text in a product's user interface, which the brand and UX policies cover.
 
 ## Affected users and systems

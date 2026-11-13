@@ -966,14 +966,11 @@ function isRejectedCheck(entry: unknown): boolean {
   }
 }
 
-const thaiWord = String.raw`[\u0E00-\u0E7F]{5}`;
 const numberedLines = "1. first\n2. second\n";
 
 const replyExpectations: Expectation[] = [
   [makeCheck("reply_matches", "^2\\. second$"), true, numberedLines],
   [makeCheck("reply_matches", "^second$"), false, numberedLines],
-  [makeCheck("reply_matches", thaiWord), true, "สวัสดีครับ"],
-  [makeCheck("reply_matches", thaiWord), false, "hello"],
   [makeCheck("reply_lacks", "/home/"), true, "src/a.ts"],
   [makeCheck("reply_lacks", "/home/"), false, "see /home/me/a.ts"],
 ];
@@ -1091,7 +1088,7 @@ function buildSelfTests(scratch: string): SelfTest[] {
       passes: () => isFixtureApplied,
     },
     {
-      name: "a run that changed nothing passes the no_* checks, and the reply checks read line anchors and Thai",
+      name: "a run that changed nothing passes the no_* checks, and the reply checks read line anchors",
       passes: () => isUnchanged,
     },
     {

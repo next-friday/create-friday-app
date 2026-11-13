@@ -4,7 +4,7 @@ This playbook starts from a finding such as an alert, a monitoring ticket, a fai
 
 1. Read the finding the request gives: what was seen, where, when, and its link or log. When the request gives no finding, say so in two lines and stop. When the finding asks for a new capability and reports no fault, say that a person sends it with `/sdlc`, and stop.
 2. Diagnose without changing anything. Read the logs, the code, and the changes merged before the finding. When `bands.yaml` names the tools for the finding's tier, use only those. Write no file outside `intent/`, start no deploy, and act only through a route that `bands.yaml` lists for that tier: `pull_request` is the pull request in step 5, and any other route is a runbook of that name. When the finding names no tier, or the project has no `bands.yaml`, use read-only tools only. When the tier's action is only to log, put the finding in your reply and stop.
-3. Write `intent/<change>/intent.md` from the template in `.agents/skills/sdlc/playbooks/plan.md`, in the language of the files already in `intent/`. Use exactly the template's five headings.
+3. Write `intent/<change>/intent.md` from the template in `.agents/skills/sdlc/playbooks/plan.md`. Use exactly the template's five headings.
    - **Problem:** the anomaly and its evidence: the number, its source, and the time.
    - **Proposed outcome:** what the fixed system does, as its user would see it.
    - **Open questions:** everything the evidence does not settle, including the cause when you could not prove it. Never state a cause you did not verify.

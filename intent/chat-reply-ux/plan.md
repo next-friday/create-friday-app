@@ -49,6 +49,7 @@ Delivery 2:
 - The riskiest step is 5: a hook that blocks a right reply stops every session that uses the plugin. It blocks once for a turn, only a reply whose first line has one of the three labels, and only for the five things a script reads.
 - Step 7 can lower an eval score for a reason that is not the new shape: one run of a case on the small model varies. A case under its threshold runs once more before its grader is read again, and no grader is loosened.
 - A project created before delivery 2 keeps the old shape. The changeset says how to copy the plugin.
+- Delivery 2. Departure from the first plan: the line `**Next:**` that ends each playbook stays. It names the playbook that follows and who starts it; it is not a line of a reply. The eval cases held one grader that read the `**Status:**` line, in `reply-gives-full-urls`; that case gains the graders for the first line, the `**Now:**` line, and a state that was not read, and no case grades a `**Not yet:**` line, which the hook's cases cover.
 - The two deliveries are two releases. Delivery 1 is merged and versioned before delivery 2 opens its pull request, so that neither changeset rides the other's version.
 - Options not taken: one pull request for both deliveries, because a `patch` and a `minor` would ship as one version; keeping `**Status:**` as the last line with new rules, because the link after it is what the person acts on; a check on the words of the `**Now:**` line, because a script cannot tell an action from a sentence.
 
@@ -57,10 +58,10 @@ Delivery 2:
 - 1–3: the review reads the four documents against `src/create.ts`, and `pnpm rules:check` shows `REVIEW.md` is rendered.
 - 4: the case in `test/deploy-sections.test.ts`.
 - 5: the review reads the changeset against the entries of 9.7.0 and 9.7.1 in `CHANGELOG.md`.
-- 6–8, 10–12: the examples in `SKILL.md`, and the eval cases, whose graders read the first line's label, the `**Not yet:**` line, and the `**Now:**` line.
+- 6–8, 10–12: the template in `SKILL.md`, the hook's cases for the three first-line labels, the `**Not yet:**` line, and the `**Now:**` line, and the graders of the eval case `reply-gives-full-urls` for the first line and the `**Now:**` line.
 - 9, 14: the cases of `check-reply-shape.cases.json`, run by `pnpm plugin:check`.
 - 13: the eval case `reply-gives-full-urls`, with a grader for a state that was not read.
-- 15: `git grep` for `**Status:**` and `Next:` under `plugins/sdlc/`, outside `adapters/` and the rendered copies, finds nothing.
+- 15: `git grep` for `**Status` under `plugins/sdlc/` finds nothing, and `git grep` for `Next:` finds only the line that ends each playbook.
 - 16: `pnpm plugin:check`, which compares both rendered copies with the source.
 - 17: `pnpm plugin:check`.
 - 18: steps 4 and 8, and the Template job in CI.

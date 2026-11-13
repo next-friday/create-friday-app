@@ -14,12 +14,12 @@ A decision made in the chat, which the agent then writes down:
 4. A higher-risk change. The playbook says it "goes to a tech lead or architect" (page 20). `build.md:24` has the agent say so, and nothing records that approval.
 5. The spec's skill versions. The playbook says "The spec, the prompt that produced it, and the skill versions in force are all logged in version control" (page 17). `design.md:11` records the request, and no step records the version of the skills.
 6. The spec's areas of concern. The playbook says the product owner "routes flagged concerns to the named policy owners" (page 17). `design.md:15` lists the concerns, and a spec is accepted with no written decision on any of them.
-7. The intent's author. The playbook says the committed intent "lists the author, the timestamp and the full revision history" (page 13). `plan.md:6` takes the author from `git config user.name`, which is the session's name when the session is not the originator's own, and the originator's yes to the draft stays in the chat.
+7. The intent's author. The playbook says the committed intent "lists the author, the timestamp and the full revision history" (page 13). `plan.md:6` takes the author from `git config user.name`, the name set on the machine the session runs on, which is the originator only when the session runs on the originator's machine, and the originator's yes to the draft stays in the chat.
 
 A hook that decides and keeps no record:
 
 8. The playbook says "Allow and block decisions are logged with a timestamp" (page 41). None of the five hooks under `templates/base/.agents/hooks/` writes one.
-9. The playbook says the gate "defines what counts as approval" (page 41) and that "a named release manager authorizes" the release (page 46). In `templates/base/.agents/hooks/agent-production-gate.sh:19` to `:22`, any value of `RELEASE_APPROVAL` lifts the gate, and nothing records who set it.
+9. The playbook says the gate "defines what counts as approval" (page 41) and that "a named release manager authorizes" the release (page 46). In `templates/base/.agents/hooks/agent-production-gate.sh:19` to `:22`, any value of `RELEASE_APPROVAL` but an empty one, `0`, `false`, and `no` lifts the gate, and nothing records who set it.
 
 Evidence that rests on a setting a person makes, which nothing checks:
 

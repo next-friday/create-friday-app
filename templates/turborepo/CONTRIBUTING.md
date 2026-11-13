@@ -49,9 +49,11 @@ Agent rules live in `.agents/rules/` with their scope in `.agents/rules.json`. A
 
 <!-- deploy:railway -->
 We use trunk-based development. `main` is the only long-lived branch, and every deploy promotes a commit from `main` (see the Deploy section in the README).
+
 <!-- deploy:end -->
 <!-- deploy:none -->
 We use trunk-based development. `main` is the only long-lived branch.
+
 <!-- deploy:end -->
 
 - Branch from `main` and merge back within a day or two. Do not create `develop` or release branches.

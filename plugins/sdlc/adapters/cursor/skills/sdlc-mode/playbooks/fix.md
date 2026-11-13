@@ -21,4 +21,4 @@ This playbook takes a defect in behaviour that already exists to a pull request.
 10. Run every check the project's agent instructions name. Keep the output. When one fails, fix the code, and never skip, delete, or weaken a test. When a check cannot run in this session, say which one and why, and never report it as passed.
 11. Go on in the same turn, without asking. Follow `playbooks/open-pr.md`, and then `playbooks/review.md`.
 
-**Next:** `playbooks/open-pr.md`; an agent; in the same turn, as soon as step 10 passes.
+**Hands off to:** `playbooks/open-pr.md`; an agent; in the same turn, as soon as step 10 passes.

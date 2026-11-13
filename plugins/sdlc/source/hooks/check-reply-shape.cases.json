@@ -1,17 +1,17 @@
 [
   {
-    "name": "good: URL in Request and Next URL",
+    "name": "good: one URL on the Now line",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\nWaiting for a code owner.\n\n**Status:** Not checked. Next: https://github.com/acme/shop/pull/42"
+      "last_assistant_message": "**Result:** Who approves https://github.com/acme/shop/pull/42?\n\nWaiting for a code owner.\n\n**Now:** Not checked. Open it: https://github.com/acme/shop/pull/42"
     },
     "expected": "pass"
   },
   {
-    "name": "good: no URL subject, no Next",
+    "name": "good: nothing to do and no URL",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain the gate.\n\nText.\n\n**Status:** Done, waits for nobody."
+      "last_assistant_message": "**Result:** Explain the gate.\n\nText.\n\n**Now:** Done, waits for nobody."
     },
     "expected": "pass"
   },
@@ -27,7 +27,7 @@
     "name": "a: #42 in prose",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+      "last_assistant_message": "**Result:** Who approves #42?\n\n**Now:** Waiting. "
     },
     "expected": "block"
   },
@@ -35,7 +35,7 @@
     "name": "a: PR 7",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Check PR 7.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Check PR 7.\n\n**Now:** Done."
     },
     "expected": "block"
   },
@@ -43,7 +43,7 @@
     "name": "a: pull request 12 in any case",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Look at Pull Request 12.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Look at Pull Request 12.\n\n**Now:** Done."
     },
     "expected": "block"
   },
@@ -51,7 +51,7 @@
     "name": "a: issue 3",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Look at issue 3.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Look at issue 3.\n\n**Now:** Done."
     },
     "expected": "block"
   },
@@ -59,7 +59,7 @@
     "name": "a ok: number inside a URL only",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** See https://github.com/acme/shop/pull/42#issuecomment-1 and https://github.com/a/b/issues/9.\n\n**Status:** Done. Next: https://github.com/acme/shop/pull/42"
+      "last_assistant_message": "**Result:** See https://github.com/acme/shop/pull/42#issuecomment-1 and https://github.com/a/b/issues/9.\n\n**Now:** Done. Open it: https://github.com/acme/shop/pull/42"
     },
     "expected": "pass"
   },
@@ -67,7 +67,7 @@
     "name": "a ok: command code span with #42",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Review.\n\nRun `gh pr view 42 --repo acme/shop #42` next.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Review.\n\nRun `gh pr view 42 --repo acme/shop #42` next.\n\n**Now:** Done."
     },
     "expected": "pass"
   },
@@ -75,7 +75,7 @@
     "name": "a ok: fenced block with #42",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Review.\n\n```sh\ngh pr merge #42\n```\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Review.\n\n```sh\ngh pr merge #42\n```\n\n**Now:** Done."
     },
     "expected": "pass"
   },
@@ -83,7 +83,7 @@
     "name": "a: #42 alone in a code span",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Review `#42`.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Review `#42`.\n\n**Now:** Done."
     },
     "expected": "block"
   },
@@ -91,55 +91,39 @@
     "name": "a ok: hex colour and step number",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Colour #123abc and step 1.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Colour #123abc and step 1.\n\n**Now:** Done."
     },
     "expected": "pass"
   },
   {
-    "name": "b: Status not last line",
+    "name": "b: Now not last line",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Q.\n\n**Status:** Done.\n\nAnything else?"
+      "last_assistant_message": "**Result:** Q.\n\n**Now:** Done.\n\nAnything else?"
     },
     "expected": "block"
   },
   {
-    "name": "b: no Status line",
+    "name": "b: no Now line",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Q.\n\nAnswer."
+      "last_assistant_message": "**Result:** Q.\n\nAnswer."
     },
     "expected": "block"
   },
   {
-    "name": "c: URL subject, Status without Next",
+    "name": "a: a number on the Now line",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\n**Status:** Waiting for a code owner."
+      "last_assistant_message": "**Result:** Who approves https://github.com/acme/shop/pull/42?\n\n**Now:** Waiting. Open it: #42"
     },
     "expected": "block"
   },
   {
-    "name": "c: Next with a number, not a URL",
+    "name": "a: a number beside a URL",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\n**Status:** Waiting. Next: #42"
-    },
-    "expected": "block"
-  },
-  {
-    "name": "c ok: Next URL followed by a closing parenthesis",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\n**Status:** Waiting (Next: https://github.com/acme/shop/pull/42)"
-    },
-    "expected": "pass"
-  },
-  {
-    "name": "a+b+c together",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42? See #42.\n\n**Status:** Waiting."
+      "last_assistant_message": "**Result:** Who approves https://github.com/acme/shop/pull/42? See #42.\n\n**Now:** Waiting."
     },
     "expected": "block"
   },
@@ -147,7 +131,7 @@
     "name": "loop guard: bad reply but the stop hook is active",
     "input": {
       "stop_hook_active": true,
-      "last_assistant_message": "**Request:** Who approves #42?\n\n**Status:** Waiting."
+      "last_assistant_message": "**Result:** Who approves #42?\n\n**Now:** Waiting."
     },
     "expected": "pass"
   },
@@ -160,10 +144,10 @@
     "expected": "pass"
   },
   {
-    "name": "c ok: URL subject and no next page",
+    "name": "good: a URL in the reply and none on the Now line",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain https://github.com/acme/shop/pull/42.\n\nIt adds a hook.\n\n**Status:** Answered; no next page."
+      "last_assistant_message": "**Result:** Explain https://github.com/acme/shop/pull/42.\n\nIt adds a hook.\n\n**Now:** Answered; no next page."
     },
     "expected": "pass"
   },
@@ -171,7 +155,7 @@
     "name": "a ok: issue 3 of the list",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain the list.\n\nThat is issue 3 of the list below.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Explain the list.\n\nThat is issue 3 of the list below.\n\n**Now:** Done."
     },
     "expected": "pass"
   },
@@ -179,7 +163,7 @@
     "name": "a ok: issue with a decimal number",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nSee issue 3.2 of the spec.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Explain.\n\nSee issue 3.2 of the spec.\n\n**Now:** Done."
     },
     "expected": "pass"
   },
@@ -187,7 +171,7 @@
     "name": "a: issue 3 of a repository",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Look at issue 3 of acme/shop.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Look at issue 3 of acme/shop.\n\n**Now:** Done."
     },
     "expected": "block"
   },
@@ -195,7 +179,7 @@
     "name": "a ok: #42 inside a code span without a space",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain `git log --grep=#42`.\n\nThe flag is `--pr=#42`.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Explain `git log --grep=#42`.\n\nThe flag is `--pr=#42`.\n\n**Now:** Done."
     },
     "expected": "pass"
   },
@@ -203,7 +187,7 @@
     "name": "a: PR #42 in a code span",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Review `PR #42`.\n\n**Status:** Done."
+      "last_assistant_message": "**Result:** Review `PR #42`.\n\n**Now:** Done."
     },
     "expected": "block"
   },
@@ -211,7 +195,7 @@
     "name": "good: a numbered step is not a pull request",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Do step #3.\n\nDone.\n\n**Status:** Verified."
+      "last_assistant_message": "**Result:** Do step #3.\n\nDone.\n\n**Now:** Verified."
     },
     "expected": "pass"
   },
@@ -219,15 +203,7 @@
     "name": "good: a colour value is not a pull request",
     "input": {
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Set the colour.\n\nIt is #123456 now.\n\n**Status:** Verified."
-    },
-    "expected": "pass"
-  },
-  {
-    "name": "good: bold Next label and bracketed URL",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\nA code owner.\n\n**Status:** Not checked. **Next:** <https://github.com/acme/shop/pull/42>"
+      "last_assistant_message": "**Result:** Set the colour.\n\nIt is #123456 now.\n\n**Now:** Verified."
     },
     "expected": "pass"
   },
@@ -236,7 +212,7 @@
     "argument": "save",
     "input": {
       "conversation_id": "c1",
-      "text": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+      "text": "**Result:** Who approves #42?\n\n**Now:** Waiting. "
     },
     "expected": "pass"
   },
@@ -249,7 +225,7 @@
       "loop_count": 0
     },
     "expected": "block",
-    "savedReply": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+    "savedReply": "**Result:** Who approves #42?\n\n**Now:** Waiting. "
   },
   {
     "name": "followup mode: good saved reply",
@@ -260,7 +236,7 @@
       "loop_count": 0
     },
     "expected": "pass",
-    "savedReply": "**Request:** Explain the gate.\n\nText.\n\n**Status:** Done, waits for nobody."
+    "savedReply": "**Result:** Explain the gate.\n\nText.\n\n**Now:** Done, waits for nobody."
   },
   {
     "name": "followup mode: second loop",
@@ -271,7 +247,7 @@
       "loop_count": 1
     },
     "expected": "pass",
-    "savedReply": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+    "savedReply": "**Result:** Who approves #42?\n\n**Now:** Waiting. "
   },
   {
     "name": "followup mode: aborted",
@@ -282,7 +258,7 @@
       "loop_count": 0
     },
     "expected": "pass",
-    "savedReply": "**Request:** Who approves #42?\n\n**Status:** Waiting. "
+    "savedReply": "**Result:** Who approves #42?\n\n**Now:** Waiting. "
   },
   {
     "name": "followup mode: nothing saved",
@@ -299,7 +275,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["src/version.ts"],
     "expected": "block"
@@ -309,7 +285,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["src/health.ts"],
     "expected": "block"
@@ -319,7 +295,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\n**Checks:**\n\n- `pnpm test`: `Tests 3 passed (3)`\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\n**Checks:**\n\n- `pnpm test`: `Tests 3 passed (3)`\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["src/version.ts"],
     "expected": "pass"
@@ -329,7 +305,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\n**Checks:** `pnpm test` could not run: the session has no network to install the dependencies.\n\n**Status:** The endpoint is written and not checked; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\n**Checks:** `pnpm test` could not run: the session has no network to install the dependencies.\n\n**Now:** The endpoint is written and not checked; nothing waits."
     },
     "changedFiles": ["src/version.ts"],
     "expected": "pass"
@@ -339,7 +315,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\n```markdown\n**Checks:** none\n```\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\n```markdown\n**Checks:** none\n```\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["src/version.ts"],
     "expected": "block"
@@ -349,7 +325,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["intent/app-version/plan.md"],
     "expected": "pass"
@@ -359,7 +335,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": [],
     "expected": "pass"
@@ -379,7 +355,7 @@
     "input": {
       "session_id": "s-35",
       "stop_hook_active": true,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["src/version.ts"],
     "expected": "pass"
@@ -389,7 +365,7 @@
     "input": {
       "session_id": "s-none",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits.",
       "cwd": "/nonexistent/project"
     },
     "expected": "pass"
@@ -397,7 +373,7 @@
   {
     "name": "checks: the other tool, a file outside intent/ changed and no Checks section",
     "argument": "followup",
-    "savedReply": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+    "savedReply": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits.",
     "changedFiles": ["src/version.ts"],
     "input": {
       "conversation_id": "c-one",
@@ -409,7 +385,7 @@
   {
     "name": "checks: the other tool, a file outside intent/ changed and a Checks section",
     "argument": "followup",
-    "savedReply": "**Request:** Add the version endpoint.\n\n**Checks:**\n\n- `pnpm test`: `Tests 3 passed (3)`\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+    "savedReply": "**Result:** Add the version endpoint.\n\n**Checks:**\n\n- `pnpm test`: `Tests 3 passed (3)`\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits.",
     "changedFiles": ["src/version.ts"],
     "input": {
       "conversation_id": "c-two",
@@ -421,7 +397,7 @@
   {
     "name": "checks: the other tool, only a file under intent/ changed",
     "argument": "followup",
-    "savedReply": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits.",
+    "savedReply": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits.",
     "changedFiles": ["intent/app-version/plan.md"],
     "input": {
       "conversation_id": "c-three",
@@ -435,7 +411,7 @@
     "input": {
       "session_id": "s-48",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": [],
     "expected": "pass",
@@ -446,7 +422,7 @@
     "input": {
       "session_id": "s-49",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": [],
     "expected": "pass",
@@ -458,7 +434,7 @@
     "input": {
       "session_id": "s-50",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["src/version.ts"],
     "expected": "block",
@@ -469,9 +445,216 @@
     "input": {
       "session_id": "s-51",
       "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+      "last_assistant_message": "**Result:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Now:** The endpoint is written; nothing waits."
     },
     "changedFiles": ["coverage/report.txt"],
     "expected": "pass"
+  },
+  {
+    "name": "anchor: an Answer reply with no Now line",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Answer:** A code owner approves it.\n\nThe file names two owners."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "anchor: an Answer reply that ends with a Now line",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Answer:** A code owner approves it.\n\n**Now:** Nothing for you to do."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "no change: one line alone",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**No change:** The checks passed; the pull request still waits for a code owner."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "no change: more lines and no Now line",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**No change:** The checks passed.\n\nIt still waits for a code owner."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: two URLs",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge https://github.com/acme/shop/pull/7 or read https://github.com/acme/shop/pull/8"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list of pull requests",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits for the version pull request.\n\n**Now:** Open the pull requests: https://github.com/acme/shop/pulls"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list of issues",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The patch is in an issue.\n\n**Now:** Open the issues: https://github.com/acme/shop/issues"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list page with a trailing slash",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open https://github.com/acme/shop/pulls/"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: one pull request",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the plan's pull request: https://github.com/acme/shop/pull/7"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: the Now line links the page the Not yet line names",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/9; the guarded files are missing.\n\n**Now:** See https://github.com/acme/shop/pull/9"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "not yet: the Now line links another page",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/9; the guarded files are missing.\n\n**Now:** Commit the patch of this issue: https://github.com/acme/shop/issues/10"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: the Now line holds no URL",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/9; the guarded files are missing.\n\n**Now:** Nothing for you to do."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: two Not yet lines",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/9.\n\n**Not yet:** Do not approve the release.\n\n**Now:** Nothing for you to do."
+    },
+    "expected": "block"
+  },
+  {
+    "name": "not yet: a Not yet line inside a fenced block does not count",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The shape is documented.\n\n```markdown\n**Not yet:** one\n**Not yet:** two\n```\n\n**Now:** Nothing for you to do."
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "now: a list page in bold",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open **https://github.com/acme/shop/pulls**"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list page in a code span followed by a mark",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open `https://github.com/acme/shop/issues`!"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: a list page with a query",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The work waits.\n\n**Now:** Open https://github.com/acme/shop/pulls?q=is%3Aopen"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "now: one issue",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The patch is in an issue.\n\n**Now:** Commit the patch of this issue: https://github.com/acme/shop/issues/12"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "now: a repository named issues",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The repository is created.\n\n**Now:** Open the repository: https://github.com/acme/issues"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "now: one URL as a link whose text is the URL",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the plan's pull request: [https://github.com/acme/shop/pull/7](https://github.com/acme/shop/pull/7)"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: the Now line links a page whose URL starts like the named one",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/70; the guarded files are missing.\n\n**Now:** Merge the plan's pull request: https://github.com/acme/shop/pull/7"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "not yet: the Now line links the named page with a trailing slash",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/70; the guarded files are missing.\n\n**Now:** See https://github.com/acme/shop/pull/70/"
+    },
+    "expected": "block"
+  },
+  {
+    "name": "not yet: a Not yet line in a list item counts",
+    "input": {
+      "session_id": "shape",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Result:** The code is pushed.\n\n- **Not yet:** Do not merge https://github.com/acme/shop/pull/9.\n- **Not yet:** Do not approve the release.\n\n**Now:** Nothing for you to do."
+    },
+    "expected": "block"
   }
 ]

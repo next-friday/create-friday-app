@@ -12,7 +12,7 @@ This playbook writes the intent. The build plan, `intent/<change>/plan.md`, come
 6. Commit `intent.md` on a new branch, push it, and open a pull request ready for review, as the opening paragraph of `playbooks/open-pr.md` says for branches and pull requests.
 7. **Gate: the product owner accepts or rejects the intent.** The product owner merges the pull request to accept the intent, or closes it to reject it. You do neither. When the originator is not the person who merges, the originator is the pull request's author or approves it; say so when neither holds. The file stays `Status: draft.`: never write `Status: accepted.` in this pull request, because the spec's pull request sets it. Report the pull request's URL, keep it green as `playbooks/review.md` says, and wait.
 
-**Next:** `playbooks/design.md`; an agent; when the product owner has merged the intent's pull request and a person or a job asks for the spec.
+**Hands off to:** `playbooks/design.md`; an agent; when the product owner has merged the intent's pull request and a person or a job asks for the spec.
 
 ## Template
 

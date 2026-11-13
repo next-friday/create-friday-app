@@ -25,10 +25,10 @@ Do these steps in order.
 
    When a request both asks a question and reports a problem, use `question` and offer `plan` in one line. A problem reported with `/sdlc:sdlc-mode` is the person's ask for `plan`.
 
-   Do not start work a person did not ask for. When a message reports a problem without asking for work, answer in a few lines and give, on the **Status** line, the message that would start it: `/sdlc:sdlc-mode` followed by their own words.
+   Do not start work a person did not ask for. When a message reports a problem without asking for work, answer in a few lines and give, on the **Now** line, the message that would start it: `/sdlc:sdlc-mode` followed by their own words.
 
-2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Next** line chains another playbook, add that playbook's steps when you start it.
-3. **Do the playbook's steps yourself,** stopping only at a step marked **Gate**, or before an action that cannot be undone. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
+2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Hands off to** line chains another playbook, add that playbook's steps when you start it.
+3. **Do the playbook's steps yourself,** stopping only at a step marked **Gate**, or before an action that cannot be undone. At a step marked **Gate**, wait for the person it names. When a playbook's **Hands off to** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
 4. **Write the reply in the shape below.**
 
 ## Reply shape
@@ -37,29 +37,39 @@ Write replies a person can check. State as a fact only what you opened or ran in
 
 Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The person often reads the reply on a phone: a URL opens the page with one tap, and a number opens nothing.
 
-When the person writes a number and a repository, build the URL before you write anything else: the repository's URL, then the host's path for the thing, such as `/pull/<number>` for a pull request or `/issues/<number>` for an issue. Use that URL where the person wrote the number, from the **Request** line on. After the first mention you may say "this pull request", with no number.
+When the person writes a number and a repository, build the URL before you write anything else: the repository's URL, then the host's path for the thing, such as `/pull/<number>` for a pull request or `/issues/<number>` for an issue. Use that URL where the person wrote the number, from the first line on. After the first mention you may say "this pull request", with no number.
 
 For example, the person writes "who must approve pull request #7 of https://host.example/acme/shop":
 
-- **Request** line: "**Request:** Who must approve https://host.example/acme/shop/pull/7, and which page to open next."
-- **Status** line: "**Status:** Not checked yet who must approve this pull request. It waits for a code owner. Next: https://host.example/acme/shop/pull/7"
+- First line: "**Answer:** Not checked yet who must approve https://host.example/acme/shop/pull/7. It waits for a code owner."
+- Last line: "**Now:** Ask a code owner to review it: https://host.example/acme/shop/pull/7"
+
+The person reads the top of a reply and its last line first, so the answer and the one thing to do are there:
 
 ```markdown
-**Request:** <the goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. For a question, only the question. Where the request holds a number, write the URL you built from it.>
+**Answer:** | **Result:** | **No change:** <one of the three, in one or two sentences. `**Answer:**` answers a question. `**Result:**` says what the work produced, or what is known so far; a reply that only asks a round of questions or stops at a gate starts with it too. `**No change:**` is for a message that no person typed, such as a finished check or a notice from the host, when it changes nothing for the person: say what happened and what the work still waits for, and send that one line as the whole reply.>
+
+**Not yet:** <only when there is something the person must not do yet, such as merging a pull request that is not whole. What, and why, in one line. At most one such line.>
+
+**Request:** <only in the first reply of a task. The goal, the problem it solves, and the smallest change you expect to meet it, in your own words. When you cannot name the smallest change yet, say what you must learn first. Where the request holds a number, write the URL you built from it.>
+
+**Done:** | **Doing:** | **Waiting for you:** <only for work that spans turns. Three short lists; leave out a list with nothing in it.>
 
 **Steps:** <only when the session has no task-list tool, and never for the `question` playbook. One line for each numbered step of the playbook: `1. <the step, copied word for word>: done | open | skip: <reason>`. When the turn ran more than one playbook, one list for each, under its file name on a line of its own, such as `playbooks/build.md`.>
 
 **Checks:** <when a step ran checks, and always when the turn changed a file outside `intent/`, whichever playbook ran. Otherwise never for the `question` playbook. Each command, then the lines of its output that show the result, copied from the output. For a check that could not run, the check and why.>
 
-<What the current step produces: the round of questions, or the whole draft. For a question or a request no row fits, the answer.>
+<What the current step produces: the round of questions, or the whole draft, and the reasons and the evidence behind the first line.>
 
-**Status:** <what is done, what comes next, and which gate it waits on and for whom, all on this one line. When there is a page where the person acts next, the line ends with `Next: <its full URL>`, and nothing follows that URL.>
+**Now:** <which gate the work waits on and for whom, then the one thing the person does now, in words that say the action, then the full URL of the page where it is done, and nothing after that URL. An action done in the chat, such as answering the questions above or sending a message, has no URL: write the action, and the message to send when there is one. When the person has nothing to do, say so and write no URL.>
 ```
 
-The **Status** line is the last line of the reply.
+The **Now** line is the last line of the reply. It holds at most one URL. That URL is never a list page, such as a repository's pull requests or issues, and never a page the **Not yet** line names: a link at the end of a reply is where the person taps.
+
+State whether a pull request or an issue is open, a draft, merged, or closed only when you read it from the host in this turn. Otherwise say that its state was not checked.
 
 A step that is not finished is `open`, including one at its Gate.
 
 A reply that ends before a **Gate** step says which step stopped it and why.
 
-When the evidence shows that the change cannot be made in this project, say so under **Request**.
+When the evidence shows that the change cannot be made in this project, say so on the first line.

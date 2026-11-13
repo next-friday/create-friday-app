@@ -63,10 +63,9 @@ case $mode in
     ;;
 esac
 first=$(printf '%s\n' "$reply" | awk 'NF{print; exit}')
-case $first in '**Request:**'*) ;; *) exit 0 ;; esac
+case $first in '**Answer:**'* | '**Result:**'* | '**No change:**'*) ;; *) exit 0 ;; esac
 
 last=$(printf '%s\n' "$reply" | awk 'NF{l=$0} END{print l}')
-request=$(printf '%s\n' "$reply" | grep -m1 '^\*\*Request:\*\*')
 outside_fences=$(printf '%s\n' "$reply" | awk '/^[[:space:]]*(```|~~~)/{f=!f; next} !f')
 outside_urls=$(printf '%s\n' "$outside_fences" | sed -E 's#https?://[^][:space:])>]*# #g')
 outside_code=$(printf '%s\n' "$outside_urls" | tr 'A-Z' 'a-z' \
@@ -78,15 +77,35 @@ number=$(printf '%s\n' "$outside_code" \
   | grep -Ev '[[:space:]]of[[:space:]]' | head -1 | sed -E 's/^[^#[:alnum:]]//; s/[^[:alnum:]]$//')
 problems=
 [ -n "$number" ] && problems="Replace \"$number\" with the full URL of that pull request or issue, or with \"this pull request\". "
+only_line=$(printf '%s\n' "$reply" | awk 'NF{n++} END{print n+0}')
+not_yet=$(printf '%s\n' "$outside_fences" | grep -E '^[[:space:]]*([-*+][[:space:]]+)?\*\*Not yet:\*\*')
+page_urls() {
+  grep -Eo 'https?://[^][:space:]()<>]+' \
+    | sed -E 's#[`*_"'"'"'!?.,;:]+$##; s#[?\#].*$##; s#/+$##' \
+    | tr 'A-Z' 'a-z' | sort -u
+}
 case $last in
-  '**Status:**'*)
-    if printf '%s' "$request" | grep -Eq 'https?://' \
-      && ! printf '%s' "$last" | grep -Eiq 'Next:\**[[:space:]]*[<(]?https?://[^[:space:]]+[[:space:]]*$|no next page'; then
-      problems="${problems}End the **Status:** line with \`Next: <full URL of the page where the person acts next>\`, or say \"no next page\" when none waits. "
+  '**Now:**'*)
+    now_urls=$(printf '%s\n' "$last" | page_urls)
+    now_url=$(printf '%s\n' "$now_urls" | head -1)
+    if [ "$(printf '%s\n' "$now_urls" | grep -c .)" -gt 1 ]; then
+      problems="${problems}The **Now:** line holds more than one URL. Name one thing for the person to do, with one URL. "
+    fi
+    if printf '%s' "$now_url" | grep -Eq '^https?://[^/]+/[^/]+/[^/]+/(.*/)?(pulls|issues)$'; then
+      problems="${problems}The **Now:** line links a list page. Link the one page where the person acts, or write no URL when the person has nothing to do. "
+    fi
+    if [ -n "$now_url" ] && printf '%s\n' "$not_yet" | page_urls | grep -Fxq "$now_url"; then
+      problems="${problems}The **Now:** line links the page the **Not yet:** line names. Write no URL there until the person may act on that page. "
     fi
     ;;
-  *) problems="${problems}End the reply with a line that starts with **Status:**; nothing may follow it. " ;;
+  '**No change:**'*)
+    [ "$only_line" -eq 1 ] || problems="${problems}End the reply with a line that starts with **Now:**; nothing may follow it. "
+    ;;
+  *) problems="${problems}End the reply with a line that starts with **Now:**; nothing may follow it. " ;;
 esac
+if [ "$(printf '%s\n' "$not_yet" | grep -c .)" -gt 1 ]; then
+  problems="${problems}The reply holds more than one **Not yet:** line. Keep one. "
+fi
 
 if [ "$changed" = true ] && ! printf '%s\n' "$outside_fences" | grep -q '^\*\*Checks:\*\*'; then
   problems="${problems}A file outside intent/ changed in this turn and the reply has no **Checks:** section. Run the checks the project names and add **Checks:** with each command and the lines of its output that show the result, or with each check that could not run and why. "

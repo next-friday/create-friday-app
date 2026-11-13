@@ -28,7 +28,7 @@ This playbook turns a merged spec into a plan the engineer accepts, and then int
 9. Run every check the project's agent instructions name and keep the output. Every check must pass: fix the code, and never skip, delete, or weaken a test. Then run the `verifier` subagent and fix what it reports. Start it on the model that `.agents/sdlc-models.md` names after `verify:`, at the effort on that line when the session can set one; when you cannot start a subagent, do what `../../../agents/verifier.md`, relative to this playbook, says yourself. For UI work, when the session has a browser tool, also close the loop with a visual check: start the app, give the browser tool the page and the mock the spec or the request names, screenshot, compare, and adjust, and repeat until it matches; two or three rounds is normal. When a check cannot run in this session, say which one and why, and never report it as passed.
 10. Go on in the same turn, without asking: follow `playbooks/open-pr.md`, and then `playbooks/review.md`. Pushing the branch and opening the pull request are part of this task.
 
-**Next:** `playbooks/open-pr.md`; an agent; in the same turn, as soon as step 9 passes.
+**Hands off to:** `playbooks/open-pr.md`; an agent; in the same turn, as soon as step 9 passes.
 
 ## Template
 

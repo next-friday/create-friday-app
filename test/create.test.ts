@@ -284,7 +284,11 @@ describe("create", () => {
 });
 
 describe("create with a deploy target", () => {
-  const railwayFiles = ["railway.json", path.join("runbooks", "rollback-deploy.md")];
+  const railwayFiles = [
+    "railway.json",
+    path.join("runbooks", "rollback-deploy.md"),
+    path.join(".github", "workflows", "deploy.yml"),
+  ];
 
   it("copies the files of the railway deploy target", async () => {
     await create(["railway-api", "--stack", "nestjs", "--deploy", "railway"]);
@@ -307,6 +311,28 @@ describe("create with a deploy target", () => {
       expect(existsSync(path.join(directory, file))).toBe(false);
     }
   });
+
+  it.each(["nodejs", "nestjs", "nextjs", "payload", "turborepo"])(
+    "names no deploy host in a %s project without --deploy",
+    async stack => {
+      const name = `hostless-${stack}`;
+
+      await create([name, "--stack", stack]);
+
+      const directory = path.join(cwd, name);
+
+      const files = readdirSync(directory, {
+        recursive: true,
+        withFileTypes: true,
+      }).filter(entry => entry.isFile());
+
+      const naming = files
+        .map(entry => path.join(entry.parentPath, entry.name))
+        .filter(file => /railway/iu.test(file) || /railway/iu.test(readFileSync(file, "utf8")));
+
+      expect(naming).toStrictEqual([]);
+    },
+  );
 
   it.each(["none", "railway"])("leaves no deploy target marker with --deploy %s", async target => {
     const name = `markers-${target}`;
@@ -359,6 +385,20 @@ describe("create with a deploy target", () => {
       expect(readme.match(/^## Deploy$/gmu)).toHaveLength(1);
     },
   );
+
+  it.each([
+    ["railway", true],
+    ["none", false],
+  ])("holds the deploy-dev job only with --deploy %s", async (target, hasJob) => {
+    const name = `workflow-${target}`;
+
+    await create([name, "--stack", "nestjs", "--deploy", target]);
+
+    const workflow = readFileSync(path.join(cwd, name, ".github", "workflows", "ci.yml"), "utf8");
+
+    expect(workflow.includes("\n  deploy-dev:\n")).toBe(hasJob);
+    expect(workflow).toContain("&& vars.CONTAINER_IMAGE != 'false'\n");
+  });
 
   it("writes no file for an unknown deploy target", async () => {
     const errors = captureErrors();

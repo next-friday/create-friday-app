@@ -250,7 +250,7 @@ jobs:
           grep --fixed-strings 'Unknown stack "unknown". Use one of: nodejs, nestjs, nextjs, payload, turborepo.' <<<"$output"
 
   templates:
-    name: Template (${{ matrix.stack }})
+    name: Template (${{ matrix.stack }}, ${{ matrix.deploy }})
     needs: changes
     if: needs.changes.outputs.full_verification == 'true'
     runs-on: ubuntu-latest
@@ -264,6 +264,9 @@ jobs:
           - nextjs
           - payload
           - turborepo
+        deploy:
+          - none
+          - railway
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -276,12 +279,17 @@ jobs:
       - name: Generate the project from the packed CLI
         env:
           STACK: ${{ matrix.stack }}
+          DEPLOY: ${{ matrix.deploy }}
         run: |
           tarball_dir="$(mktemp -d)"
           pnpm pack --pack-destination "$tarball_dir"
-          npm exec --yes --package "$(ls "$tarball_dir"/*.tgz)" -- next-friday-create-app "ci-$STACK" --stack "$STACK" </dev/null
+          npm exec --yes --package "$(ls "$tarball_dir"/*.tgz)" -- next-friday-create-app "ci-$STACK" --stack "$STACK" --deploy "$DEPLOY" </dev/null
           if grep --recursive --files-with-matches --exclude-dir=node_modules --exclude-dir=.git "next-friday-template-$STACK" "ci-$STACK"; then
             echo "The template name was not replaced." >&2
+            exit 1
+          fi
+          if [ "$DEPLOY" = none ] && grep --recursive --ignore-case --files-with-matches --exclude-dir=node_modules --exclude-dir=.git railway "ci-$STACK"; then
+            echo "A project with no deploy target names a deploy host." >&2
             exit 1
           fi
       - name: Install verified actionlint

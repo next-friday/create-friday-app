@@ -212,7 +212,7 @@ jobs:
     needs:
       - changes
       - affected-apps
-    if: (needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule') && needs.affected-apps.outputs.apps != '[]'
+    if: (needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule') && needs.affected-apps.outputs.apps != '[]' && vars.CONTAINER_IMAGE != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -272,6 +272,7 @@ jobs:
           tar --extract --gzip --file "$archive" trivy
           ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress "$APP:ci"
 
+  # deploy:railway
   deploy-dev:
     name: Deploy to dev
     needs:
@@ -286,6 +287,7 @@ jobs:
       environment: dev
       commit_sha: ${{ github.sha }}
 
+  # deploy:end
   triage:
     name: Triage failed build
     needs:

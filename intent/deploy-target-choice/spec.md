@@ -1,6 +1,6 @@
 # Spec: Choose where the project deploys
 
-From `intent/deploy-target-choice/intent.md`. Status: draft.
+From `intent/deploy-target-choice/intent.md`. Status: accepted.
 
 Request: "docs(repo): add the deploy target intent (#184)", the merge of the intent's pull request by the product owner.
 
@@ -58,9 +58,13 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 ## Areas of concern
 
 1. No policy. `AGENTS.md` says to check a template by generating a project so that "edited files copy back as they are" (`AGENTS.md:18`). A file with marked sections no longer copies back as it is, because the CLI removes the markers. The convention needs a sentence for those files, or the design needs another way to hold the text of a target.
+   Decision: the design keeps marked sections. The root `AGENTS.md` says that a file with marked sections is edited under `templates/` and is not copied back from a generated project.
 2. No policy. A team that runs `--stack <stack>` today gets the Railway files; after this change it gets none until it adds `--deploy railway`. The intent accepts this and calls the release `minor`; `.changeset/README.md` reserves `major` for "a command that ran before no longer runs", and this command still runs.
+   Decision: accepted. The release is `minor`, and the changeset and the root `README.md` say that `--deploy railway` gives the files a project got before.
 3. No policy. Requirement 13 doubles the Template job of this repository's CI from five projects to ten.
+   Decision: accepted. The Template job runs ten projects.
 4. No policy. With `railway` and `CONTAINER_IMAGE` set to `false`, the `deploy-dev` job needs the skipped `image` job and does not run. The spec leaves that as it is: a project that deploys the image keeps the job that builds it.
+   Decision: accepted as the spec leaves it.
 
 ## Open questions
 

@@ -81,10 +81,9 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 
 **Who:** a Cursor team admin.
 
-- **Bugbot:** enable the repository at [Bugbot](https://cursor.com/automations/from-cursor/bugbot). Bugbot reviews pull requests by the files `.cursor/BUGBOT.md` links, including `.agents/review.md`.
 - **Sandbox:** set the team's sandbox policy ([Cursor sandbox](https://cursor.com/docs/reference/sandbox)), which repository and user settings cannot weaken.
 
-**Check:** the test pull request gets a Bugbot review.
+**Check:** the team's settings in Cursor show the sandbox policy.
 
 ## 6. Team decisions
 

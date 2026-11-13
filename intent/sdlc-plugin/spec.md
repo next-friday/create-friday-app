@@ -19,7 +19,7 @@ Choices the product owner has not made are marked **Proposal**. The product owne
 9. A project that has its own policy keeps it at `.agents/skills/<area>-policy/SKILL.md`. The `design`, `build`, and `review` playbooks read that file when it exists, and the plugin's default otherwise.
 10. The plugin's playbooks carry the text of these five conventions, and name no `AGENTS.md` convention by its heading: **Start from the accepted spec, in plan mode**; **Start a bug fix with a failing test**; **Do not start work a person did not ask for**; **Branch from the latest `origin/main`, and open the pull request ready for review**; **Write replies a person can check**.
 11. `AGENTS.md` holds none of the five conventions of requirement 10. One convention names the plugin's `sdlc-mode` skill as the way work runs. It keeps the sentence of its branch convention that is a fact about this repository: its skills and playbooks decide over a skill from another checkout.
-12. The plugin's skills name `.agents/rules/agent-owned-work.md` and `.agents/rules/evidence-before-claims.md` by path where they rely on them, and restate neither.
+12. The plugin's skills name no file under a project's `.agents/rules/`; each states the rule it relies on.
 13. Every step marked **Gate** in a playbook today is in the plugin's playbook word for word, except that `.agents/skills/sdlc/playbooks/<file>` is written `playbooks/<file>` and `/sdlc` is written `/sdlc:sdlc-mode`.
 14. The `setup-sdlc` skill, run in a project:
     1. Asks for a budget in one question and writes the model for each role to `.agents/sdlc-models.md`, chosen from the models the session offers. **Proposal:** the four choices are those of `setup-pstack` (`unlimited`, `large`, `medium`, `small`), and the roles are build, review, verify, and evals.
@@ -59,7 +59,7 @@ The `cursor/plugins` repository ships `pstack` the same way: its root holds `.cl
 
 Moving the plugin to a repository of its own moves `plugins/sdlc/` and the two marketplace files.
 
-**What the plugin reads in a project.** `intent/`, `bands.yaml`, `SETUP.md`, `AGENTS.md`, `.agents/rules/agent-owned-work.md`, `.agents/rules/evidence-before-claims.md`, `.agents/skills/<area>-policy/SKILL.md`, and `.agents/sdlc-models.md`. It reads them where the project keeps them, and holds no copy.
+**What the plugin reads in a project.** `intent/`, `bands.yaml`, `SETUP.md`, the project's agent instructions, `.agents/skills/<area>-policy/SKILL.md`, and `.agents/sdlc-models.md`. It reads them where the project keeps them, and holds no copy.
 
 **Files that change.**
 
@@ -92,7 +92,7 @@ Moving the plugin to a repository of its own moves `plugins/sdlc/` and the two m
 
 1. **The organization's name outside the manifests.** Brand policy, rule 3, and `.agents/rules/descriptive-naming.md`; owner: @joetakara. The name is in the marketplace name of requirement 6. **Proposal:** the marketplace name is the product owner's to choose.
 2. **Where the model choices live** (requirements 14 and 15). Decision the files do not settle; owner: @joetakara. `setup-pstack` writes one file for a person, under that person's home directory. **Proposal:** one committed file for the project, `.agents/sdlc-models.md`, because the intent speaks of the budget the team has.
-3. **The duplicate between the rules and the skill.** Decision the files do not settle; owner: @joetakara. The intent names `.agents/rules/agent-owned-work.md` and `.agents/rules/evidence-before-claims.md` as repeating the skill, and puts moving rules out of scope. **Proposal:** requirement 12: the rules stay the one place that says it, and the skill points to them.
+3. **The duplicate between the rules and the skill.** Decision the files do not settle; owner: @joetakara. The intent names `.agents/rules/agent-owned-work.md` and `.agents/rules/evidence-before-claims.md` as repeating the skill, and puts moving rules out of scope. **Proposal:** requirement 12: the skill states the rule it relies on and names no rule file, so the plugin runs in a project that has no such file.
 4. **A person commits two of the changed files.** `.claude/settings.json` and `scripts/sync-agent-rules.ts` are in the constitution; owner: @joetakara. The plan names them as steps for a person.
 
 ## Open questions

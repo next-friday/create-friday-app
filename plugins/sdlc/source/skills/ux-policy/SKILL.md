@@ -5,8 +5,6 @@ description: Apply the organization's UX policy. Use whenever writing or reviewi
 
 # UX policy
 
-Owner: the code owner of this folder in `.github/CODEOWNERS`.
-
 Standard: [Web Content Accessibility Guidelines (WCAG) 2.2](https://www.w3.org/TR/WCAG22/), Level AA: the page satisfies all the Level A and Level AA success criteria. This is the default; the owner replaces or tightens it by editing this file.
 
 ## Rules

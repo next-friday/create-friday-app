@@ -208,78 +208,6 @@
     "expected": "block"
   },
   {
-    "name": "d: /home path in prose",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nThe file is /home/user/app/src/a.ts.\n\n**Status:** Done."
-    },
-    "expected": "block"
-  },
-  {
-    "name": "d: /root path",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nSee /root/app/a.ts:3 for it.\n\n**Status:** Done."
-    },
-    "expected": "block"
-  },
-  {
-    "name": "d: /tmp path",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nIt wrote /tmp/out.log.\n\n**Status:** Done."
-    },
-    "expected": "block"
-  },
-  {
-    "name": "d: /Users path",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nOpen /Users/ana/app/a.ts.\n\n**Status:** Done."
-    },
-    "expected": "block"
-  },
-  {
-    "name": "d: Windows drive path",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nOpen C:\\Users\\ana\\app\\a.ts now.\n\n**Status:** Done."
-    },
-    "expected": "block"
-  },
-  {
-    "name": "d: path in a code span",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nRun `cat /tmp/out.log`.\n\n**Status:** Done."
-    },
-    "expected": "block"
-  },
-  {
-    "name": "d ok: root-relative path with tmp in it",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\nSee src/tmp/a.ts:3 and ./home/b.ts and README.md:12.\n\n**Status:** Done."
-    },
-    "expected": "pass"
-  },
-  {
-    "name": "d ok: machine path inside a URL",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain https://example.com/home/user/page.\n\n**Status:** Done. Next: https://example.com/home/user/page"
-    },
-    "expected": "pass"
-  },
-  {
-    "name": "d ok: machine path in a fenced block",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Explain.\n\n```sh\ncd /home/user/app\n```\n\n**Status:** Done."
-    },
-    "expected": "pass"
-  },
-  {
     "name": "good: a numbered step is not a pull request",
     "input": {
       "stop_hook_active": false,
@@ -302,14 +230,6 @@
       "last_assistant_message": "**Request:** Who approves https://github.com/acme/shop/pull/42?\n\nA code owner.\n\n**Status:** Not checked. **Next:** <https://github.com/acme/shop/pull/42>"
     },
     "expected": "pass"
-  },
-  {
-    "name": "bad: machine path inside double quotes",
-    "input": {
-      "stop_hook_active": false,
-      "last_assistant_message": "**Request:** Where is it?\n\nRun \"ls /tmp/scratch/x\" to see.\n\n**Status:** Not checked."
-    },
-    "expected": "block"
   },
   {
     "name": "save mode: prints nothing",

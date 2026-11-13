@@ -11,7 +11,3 @@ graders:
     input_match: '\bgit\b[^"]*\bcommit\b'
     min: 0
     max: 0
-  - name: reply-is-in-thai
-    type: regex
-    pattern: '[\u0E00-\u0E7F]{10}'
-    flags: mu

@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit]
 ---
 
-/sdlc:sdlc-mode pull request #42 ของ https://github.com/acme/shop รอใครอนุมัติอยู่ แล้วผมต้องไปที่หน้าไหนต่อ
+/sdlc:sdlc-mode who has to approve pull request #42 of https://github.com/acme/shop, and which page do I go to next

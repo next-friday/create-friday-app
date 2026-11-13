@@ -16,8 +16,7 @@ The plugin ships `check-reply-shape.sh`, a POSIX `sh` script that reads the hook
 
 - names a pull request or an issue by number outside a URL, a fenced block, and a code span that holds more than the bare number;
 - does not end with a line that starts with `**Status:**`;
-- has a URL on its **Request** line, and a **Status** line that neither ends with `Next: <URL>` nor says "no next page";
-- holds a path from the machine's root, such as `/home/…` or `C:\…`, outside a URL and a fenced block.
+- has a URL on its **Request** line, and a **Status** line that neither ends with `Next: <URL>` nor says "no next page".
 
 Cursor's `stop` hook gets no reply text, so the Cursor adapter runs the script twice, from `hooks/hooks.json`:
 

@@ -5,8 +5,6 @@ description: Apply the organization's compliance policy. Use whenever writing or
 
 # Compliance policy
 
-Owner: the code owner of this folder in `.github/CODEOWNERS`.
-
 Standard: the eight basic principles of the [OECD Guidelines Governing the Protection of Privacy and Transborder Flows of Personal Data](https://legalinstruments.oecd.org/en/instruments/OECD-LEGAL-0188) (adopted 1980, revised 2013), paragraphs 7 to 14. This is the default and names no country's law; the owner adds the laws and contracts that bind the organization by editing this file. The points below summarize those paragraphs; the standard's text governs.
 
 ## Rules

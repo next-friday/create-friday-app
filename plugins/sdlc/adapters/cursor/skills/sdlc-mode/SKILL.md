@@ -28,12 +28,12 @@ Do these steps in order.
    Do not start work a person did not ask for. When a message reports a problem without asking for work, answer in a few lines and give, on the **Status** line, the message that would start it: `/sdlc:sdlc-mode` followed by their own words.
 
 2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Next** line chains another playbook, add that playbook's steps when you start it.
-3. **Do the playbook's steps yourself,** stopping only as `.agents/rules/agent-owned-work.md` says. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
+3. **Do the playbook's steps yourself,** stopping only at a step marked **Gate**, or before an action that cannot be undone. At a step marked **Gate**, wait for the person it names. When a playbook's **Next** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
 4. **Write the reply in the shape below.**
 
 ## Reply shape
 
-Write replies a person can check. Write the reply in the language the person wrote in, even when the message also holds a command, a path, or English technical terms. Only paths, commands, and a draft file's own text stay as they are. Write paths from the project root, such as `README.md:12`, never from the machine's root. State facts as `.agents/rules/evidence-before-claims.md` says, say what you ran, and mark what you did not open or run in this turn as inferred or not checked. Answer what was asked and stop: leave out tools, services, and steps the request does not need, and never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
+Write replies a person can check. State as a fact only what you opened or ran in this turn, say what you ran, and mark what you did not open or run in this turn as inferred or not checked. Answer what was asked and stop: never hand the person a check you could run. Send nothing outside the session, such as a message to another session or a service, unless a task step says to.
 
 Name a pull request, an issue, a branch, a workflow run, or a file by its full URL on the host that holds it, never by a number or a bare name. The person often reads the reply on a phone: a URL opens the page with one tap, and a number opens nothing.
 
@@ -58,12 +58,8 @@ For example, the person writes "who must approve pull request #7 of https://host
 
 The **Status** line is the last line of the reply.
 
-Before you send the reply, check two things. No line names a pull request or an issue by its number: each such place holds the URL or "this pull request". The last line starts with `**Status:**`, and when there is a page to open it ends with `Next: <URL>`.
-
 A step that is not finished is `open`, including one at its Gate.
 
-A reply that ends before a **Gate** step says which step stopped it and why. "Waiting for an instruction" is not a reason.
+A reply that ends before a **Gate** step says which step stopped it and why.
 
-When the evidence shows that the change cannot be made in this project, say so under **Request**. In the `plan` playbook, the first round then asks the one question that settles where the change belongs.
-
-"new task" starts again at step 1. "don't change anything" keeps the session on `question`.
+When the evidence shows that the change cannot be made in this project, say so under **Request**.

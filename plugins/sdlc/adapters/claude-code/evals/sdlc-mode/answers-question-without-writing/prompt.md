@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc:sdlc-mode ทำไม pnpm verify ถึงรัน knip ด้วย
+/sdlc:sdlc-mode why does pnpm verify also run knip

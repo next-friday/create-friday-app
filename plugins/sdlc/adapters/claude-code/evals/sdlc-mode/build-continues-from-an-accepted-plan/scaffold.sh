@@ -65,7 +65,7 @@ cat > 'intent/app-version/spec.md' << 'EOF'
 
 From `intent/app-version/intent.md`. Status: accepted.
 
-Request: "add a version endpoint". Skills at `0000000`.
+Request: "add a version endpoint".
 
 ## Requirements
 
@@ -98,7 +98,7 @@ git remote add origin "$remote"
 git checkout -q -b feat/app-version
 mkdir -p intent/app-version
 cat > intent/app-version/plan.md << 'PLAN'
-# Plan: app version endpoint (from intent.md 2026-01-05)
+# Plan: app version endpoint
 
 ## Files that change
 

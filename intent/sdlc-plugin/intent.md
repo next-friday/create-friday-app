@@ -15,6 +15,7 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
 - What one agent tool needs to load the plugin, such as its manifest, its command name, and its settings keys, is a thin adapter kept beside the content. The first adapters are for the tools the company uses today, Claude Code and Cursor; another tool is added by adding an adapter, with no change to the content.
 - The plugin holds: the `sdlc-mode` skill and every playbook, `sdlc-help`, `setup-sdlc`, the verifier subagent, the eval cases, and the scripts behind `plan:check`, `bands:check`, `loop:measure`, and `evals:run`.
 - The plugin holds the default brand, security, compliance, and UX policies. A project that has its own policy keeps a file of the same name, and the playbooks use the project's file instead of the default.
+- A project generated from a template runs the same `sdlc` plugin as this repository, not a separately edited copy of its skills. The template ships the plugin itself inside the project and enables it as a local marketplace, so nothing has to be installed. The product owner decided this.
 - `AGENTS.md`, in the root, states only facts about this repository and points to the plugin's `sdlc-mode` skill for how work runs; the conventions that repeat a playbook are removed.
 - The plugin's `setup-sdlc` skill does three things, and can be run again at any time:
   1. Asks for a budget in one question and sets the model for each role from the models the session offers, as `setup-pstack` does (`cursor/plugins`, `pstack/skills/setup-pstack/SKILL.md`).
@@ -25,13 +26,13 @@ Author: Joe Takara (Developer Productivity). Status: accepted.
   - Moving rules, hooks, or agent settings into the plugin.
   - Listing the plugin in a public marketplace.
   - The `monorepo-apps` change.
-  - Changing generated projects to use the plugin.
 
 ## Affected users and systems
 
 - Every engineer and agent that works in this repository, whichever agent tool and model they use.
 - Policy owners, who change the default policies in the plugin and a project's own policy in that project.
 - This repository: `.agents/skills/`, `.agents/skill-evals/`, the verifier subagent, the four scripts, `scripts/sync-agent-rules.ts`, `AGENTS.md`, the agent settings, CI, and the intents that name `/sdlc` or the copied skills.
+- Every project generated from `templates/`, and the contributors and workflows of that project.
 - Pull request #140, whose skills, eval cases, and scripts move into the plugin.
 
 ## Constraints

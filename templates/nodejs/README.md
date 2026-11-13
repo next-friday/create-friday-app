@@ -32,12 +32,14 @@ CI also runs the build, the container image scan, and the security scans, includ
 
 ## Container
 
-The `Dockerfile` builds a production image that runs as a non-root user (UID 1000). The platform must set `PORT`; Railway sets it automatically. The build needs `pnpm-lock.yaml`, so run `pnpm install` once before the first `docker build`.
+The `Dockerfile` builds a production image that runs as a non-root user (UID 1000). The platform must set `PORT`. The build needs `pnpm-lock.yaml`, so run `pnpm install` once before the first `docker build`.
 
 ```sh
 docker build -t app .
 docker run --env PORT=3000 --publish 3000:3000 app
 ```
+
+<!-- deploy:railway -->
 
 ## Deploy
 
@@ -54,6 +56,18 @@ docker run --env PORT=3000 --publish 3000:3000 app
 3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health`.
 
-Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
+<!-- deploy:end -->
+
+<!-- deploy:none -->
+
+## Deploy
+
+The project has no deploy step yet. A deploy step needs:
+
+- a workflow under `.github/workflows/` that deploys;
+- the `prod` environment under **Settings → Environments**, with the release managers as its required reviewers;
+- the image the `Dockerfile` builds.
+
+<!-- deploy:end -->
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.

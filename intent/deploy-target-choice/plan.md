@@ -1,6 +1,6 @@
 # Plan: Choose where the project deploys
 
-Accepted by: @<engineer>.
+Accepted by: @joetakara.
 
 This plan covers every requirement of `intent/deploy-target-choice/spec.md` in one delivery. It is accepted by merging the pull request that adds it, and its code follows in a second pull request.
 

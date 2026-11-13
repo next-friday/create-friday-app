@@ -7,8 +7,7 @@
     ".dockerignore",
     ".env",
     "package.json",
-    "pnpm-workspace.yaml",
-    "railway.json"
+    "pnpm-workspace.yaml"
   ],
   "globalPassThroughEnv": [
     "APP_URL",

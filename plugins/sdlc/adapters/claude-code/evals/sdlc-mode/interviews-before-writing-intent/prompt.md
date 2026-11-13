@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc:sdlc-mode ลูกค้าบ่นว่าหน้า login ช้ามาก อยากให้แก้
+/sdlc:sdlc-mode customers complain that the login page is very slow, and I want it fixed

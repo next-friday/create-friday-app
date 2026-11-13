@@ -5,6 +5,6 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc:sdlc-mode เขียน intent เรื่องเพิ่มปุ่ม export CSV ในหน้ารายงาน
+/sdlc:sdlc-mode write an intent for adding a CSV export button to the reports page
 
-คำตอบของผม: ผู้ใช้คือทีมบัญชี 12 คน ใช้ทุกสิ้นเดือน ตอนนี้ต้อง copy ตารางไปวางใน Excel เอง ใช้เวลาคนละราว 20 นาที (ตัวเลขจากหัวหน้าทีมบัญชี) ผลที่อยากได้คือกดปุ่มเดียวแล้วได้ไฟล์ CSV ของรายงานที่เปิดอยู่ ข้อจำกัดคือห้ามเปลี่ยนสิทธิ์การเข้าถึงรายงาน นอกขอบเขตคือ export เป็น PDF และ Excel หน้ารายงานอยู่ใน repo web-app ของทีม Finance Tools ส่วน intent ให้เก็บไว้ที่ repo นี้ ผมชื่อ Joe ทีม Developer Productivity ไม่มีคำถามค้าง
+My answers: the users are the 12 people of the accounting team, who use it at every month end. Today they copy the table into Excel by hand, about 20 minutes each (the figure is from the head of accounting). The outcome I want is one button that gives a CSV file of the open report. The constraint is that access rights to reports must not change. Out of scope are PDF and Excel export. The reports page is in the web-app repo of the Finance Tools team; keep the intent in this repo. I am Joe from the Developer Productivity team. No open questions.

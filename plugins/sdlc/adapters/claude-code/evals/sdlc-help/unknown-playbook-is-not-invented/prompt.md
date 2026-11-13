@@ -5,4 +5,4 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-/sdlc:sdlc-help playbook rollback ใช้ยังไง
+/sdlc:sdlc-help how do I use the rollback playbook

@@ -44,6 +44,13 @@ describe("resolveDeploySections", () => {
     expect(resolveDeploySections(content, "none")).toBe("a\nc\n");
   });
 
+  it("keeps the final newline when the file ends with an end marker", () => {
+    const content = "a\n<!-- deploy:railway -->\nb\n<!-- deploy:end -->\n";
+
+    expect(resolveDeploySections(content, "railway")).toBe("a\nb\n");
+    expect(resolveDeploySections(content, "none")).toBe("a\n");
+  });
+
   it("leaves a file with no marker line as it is", () => {
     const content = "run: deploy:all\n\n\nnext\n";
 

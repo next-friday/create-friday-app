@@ -137,7 +137,7 @@ const allowedCommands = [
   'gh api repos/next-friday/example/issues/1/comments -f body="APPROVED by QA"',
 ];
 
-const railwayProductionCommand = "railway up -e prod";
+const sampleProductionCommand = "gh workflow run deploy.yml -f environment=prod";
 
 const productionCommands = [
   "gh workflow run deploy.yml -f environment=prod -f commit_sha=abc",
@@ -158,8 +158,30 @@ const productionCommands = [
   "gh api repos/o/r/actions/workflows/1/dispatches --input body.json",
   "gh api repos/o/r/actions/workflows/1/dispatches -f inputs[environment]=$E",
   "bash -c 'gh workflow run deploy.yml -f environment=prod'",
+  sampleProductionCommand,
+  "git push origin v1.0.0",
+  "git push origin HEAD:refs/tags/v1.0.0",
+  "git push --tags",
+  "git push --follow-tags origin main",
+  "git -C . push origin v2.3.4",
+  "gh workflow run deploy.yml -f environment=pr''od",
+  "gh workflow run deploy.yml -f environment=p\\rod",
+  'gh workflow run deploy.yml -f "envi"ronment=prod',
+  "git push origin 'refs/tags/*'",
+  'git push origin "refs/tags/v*"',
+  "git push --mirror",
+  "git -c push.followTags=true push origin main",
+  "git config push.followTags true && git push",
+  "gh workflow run deploy.yml 2>&1 -f environment=prod",
+  "git push origin tags/v1.0.0",
+  "git --git-dir .git push origin v1.0.0",
+  "gh workflow run deploy.yml \\\n  -f environment=prod \\\n  -f commit_sha=abc",
+  "git push \\\n  origin v1.0.0",
+  "git push &>/dev/null origin v1.0.0",
+  "cd a\\\\\ngit push origin v1.0.0",
+  // deploy:railway
   "railway up --ci --environment prod",
-  railwayProductionCommand,
+  "railway up -e prod",
   "railway up -e=prod",
   "railway up -eprod",
   "railway up -ce prod",
@@ -181,32 +203,13 @@ const productionCommands = [
   "/usr/local/bin/railway up -e prod",
   "timeout 60 railway up -e prod",
   "eval railway up -e prod",
-  "git push origin v1.0.0",
-  "git push origin HEAD:refs/tags/v1.0.0",
-  "git push --tags",
-  "git push --follow-tags origin main",
-  "git -C . push origin v2.3.4",
   "npx @railway/cli@5.71.0 up -e prod",
   "npx @railway/cli@latest up --environment prod",
   "railway up -e pr''od",
-  "gh workflow run deploy.yml -f environment=pr''od",
-  "gh workflow run deploy.yml -f environment=p\\rod",
-  'gh workflow run deploy.yml -f "envi"ronment=prod',
-  "git push origin 'refs/tags/*'",
-  'git push origin "refs/tags/v*"',
-  "git push --mirror",
-  "git -c push.followTags=true push origin main",
-  "git config push.followTags true && git push",
-  "gh workflow run deploy.yml 2>&1 -f environment=prod",
   "railway up 2>&1 -e prod",
-  "git push origin tags/v1.0.0",
-  "git --git-dir .git push origin v1.0.0",
-  "gh workflow run deploy.yml \\\n  -f environment=prod \\\n  -f commit_sha=abc",
   "railway up \\\n  --environment prod",
-  "git push \\\n  origin v1.0.0",
   "railway up &>/dev/null -e prod",
-  "git push &>/dev/null origin v1.0.0",
-  "cd a\\\\\ngit push origin v1.0.0",
+  // deploy:end
 ];
 
 const approvalLiftsGate = ["CHG-123", "CHG-1"];
@@ -229,10 +232,6 @@ const approvalKeepsGate = [
 const nonProductionCommands = [
   "gh workflow run deploy.yml -f environment=uat -f commit_sha=abc",
   "gh api repos/o/r/actions/workflows/deploy.yml/dispatches -f 'inputs[environment]=uat'",
-  "railway up -e uat",
-  "railway up -e prod-eu",
-  "railway environment uat",
-  "railway status",
   "gh workflow list",
   "gh run list --workflow deploy.yml",
   "gh api repos/o/r/environments/prod",
@@ -241,14 +240,20 @@ const nonProductionCommands = [
   'git commit -m "release v1.0" && git push',
   'git commit -m "docs(x): deploy to production"',
   'gh pr create --title "ci(x): promote to prod" --body "run gh workflow run later"',
-  "echo railway",
   "git tag v1.0.0",
   'git stash push -m "wip v2"',
   'git commit -m "fix(ci): push v2 images"',
-  'git commit -m "fix: railway env uat and prod split"',
   "git push -u origin HEAD",
   "git push origin feature/push-v2",
   "pnpm verify 2>&1 | tail && git push",
+  // deploy:railway
+  "railway up -e uat",
+  "railway up -e prod-eu",
+  "railway environment uat",
+  "railway status",
+  "echo railway",
+  'git commit -m "fix: railway env uat and prod split"',
+  // deploy:end
 ];
 
 const mcpTools = {
@@ -461,11 +466,11 @@ const cases: GateCase[] = [
     expectedApproval: releaseApproval,
     input: {
       tool_input: {
-        command: railwayProductionCommand,
+        command: sampleProductionCommand,
       },
     },
     expectedPermission: "allow" as const,
-    name: `production with RELEASE_APPROVAL="${releaseApproval}": ${railwayProductionCommand}`,
+    name: `production with RELEASE_APPROVAL="${releaseApproval}": ${sampleProductionCommand}`,
     expectedExit: 0 as const,
   })),
   ...approvalKeepsGate.map(releaseApproval => ({
@@ -473,10 +478,10 @@ const cases: GateCase[] = [
     releaseApproval,
     input: {
       tool_input: {
-        command: railwayProductionCommand,
+        command: sampleProductionCommand,
       },
     },
-    name: `production with RELEASE_APPROVAL="${releaseApproval}": ${railwayProductionCommand}`,
+    name: `production with RELEASE_APPROVAL="${releaseApproval}": ${sampleProductionCommand}`,
     expectedExit: 2 as const,
   })),
   ...nonProductionCommands.map(command => ({
@@ -590,7 +595,7 @@ const cases: GateCase[] = [
     name: "record: the conversation of a Cursor hook input",
     expectedExit: 2,
     input: {
-      command: railwayProductionCommand,
+      command: sampleProductionCommand,
       conversation_id: "cursor-conversation",
     },
   },
@@ -617,7 +622,7 @@ const cases: GateCase[] = [
     releaseApproval: "CHG-123",
     expectedExit: 2,
     input: {
-      command: railwayProductionCommand,
+      command: sampleProductionCommand,
     },
   },
   {
@@ -636,7 +641,7 @@ const cases: GateCase[] = [
     expectedExit: 2,
     isRecordUnwritable: true,
     input: {
-      command: railwayProductionCommand,
+      command: sampleProductionCommand,
     },
   },
 ];

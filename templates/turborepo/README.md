@@ -86,6 +86,8 @@ On Vercel, deploy an app without its image. The Next.js preset takes precedence 
 3. Set the repository variable `DEPLOY_ENABLED` to `true`. Each push to `main` that passes CI then deploys to `dev`. The workflow compares the commit with the commit of the last successful deploy to that environment, found from the successful `deploy.yml` and `ci.yml` runs on `main`, and runs `railway up` only for services whose packages changed. A promotion through `uat` or `prod` uses the same comparison against the commit last deployed there, so several commits still ship every changed service. The first deploy to an environment ships both services.
 4. Promote with **Actions → Deploy → Run workflow**, giving the environment and the full commit SHA. The workflow requires a successful CI run on `main` for that commit and a successful deployment to the previous environment, then waits for `/health` on each service it uploaded.
 
+Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere.
+
 <!-- deploy:end -->
 
 <!-- deploy:none -->
@@ -108,6 +110,16 @@ To add an Expo app, create it under `apps/mobile`:
 2. Use `@expo/fingerprint` with `expo-github-action/fingerprint` so a pull request requests a native build only when the native layer changed ([Expo fingerprint](https://docs.expo.dev/versions/latest/sdk/fingerprint/)).
 3. Keep a single `react-native` version in the workspace. Duplicate React Native versions in one monorepo are not supported ([Expo: Monorepos](https://docs.expo.dev/guides/monorepos/)).
 
+<!-- deploy:railway -->
+
+EAS Build and Submit replace Railway for that app. CI `--affected` already includes `apps/*` and `packages/*`, so an Expo app is skipped when it did not change.
+
+<!-- deploy:end -->
+
+<!-- deploy:none -->
+
 EAS Build and Submit deploy that app, in place of the project's deploy step. CI `--affected` already includes `apps/*` and `packages/*`, so an Expo app is skipped when it did not change.
+
+<!-- deploy:end -->
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.

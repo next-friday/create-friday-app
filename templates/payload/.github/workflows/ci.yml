@@ -141,7 +141,7 @@ jobs:
   image:
     name: Container Image
     needs: changes
-    if: needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule'
+    if: (needs.changes.outputs.full_verification == 'true' || github.event_name == 'schedule') && vars.CONTAINER_IMAGE != 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:
@@ -196,6 +196,7 @@ jobs:
           tar --extract --gzip --file "$archive" trivy
           ./trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress app:ci
 
+  # deploy:railway
   deploy-dev:
     name: Deploy to dev
     needs:
@@ -210,6 +211,7 @@ jobs:
       environment: dev
       commit_sha: ${{ github.sha }}
 
+  # deploy:end
   triage:
     name: Triage failed build
     needs:

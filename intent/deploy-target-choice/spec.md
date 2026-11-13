@@ -1,6 +1,6 @@
 # Spec: Choose where the project deploys
 
-From `intent/deploy-target-choice/intent.md`. Status: accepted.
+From `intent/deploy-target-choice/intent.md`. Status: done.
 
 Request: "docs(repo): add the deploy target intent (#184)", the merge of the intent's pull request by the product owner.
 

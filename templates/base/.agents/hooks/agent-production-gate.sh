@@ -45,9 +45,9 @@ release_gate="A release manager runs prod deploys, commands against prod, and re
 
 # The gate reads the command line as text, joining continued lines and dropping quotes,
 # backslashes, and fd redirections, so wrappers such as bash -c, eval, or npx and split words such
-# as pr''od do not hide the common forms. A dispatch input or Railway environment the gate cannot
-# read (a variable, a command substitution, a file, or stdin) counts as prod. It is a convenience,
-# not a security boundary: the prod environment's required reviewers and Railway credentials are.
+# as pr''od do not hide the common forms. A dispatch input the gate cannot read (a variable, a
+# command substitution, a file, or stdin) counts as prod. It is a convenience, not a security
+# boundary: the prod environment's required reviewers and the deploy credentials are.
 text=${command//'\\'/}
 text=${text//$'\\\n'/}
 text=$(sed -E 's/([0-9]*[<>]&[0-9-]*|&>>?)//g' <<< "${text//[\"\'\\]/}")
@@ -56,16 +56,21 @@ prod="(prod([^[:alnum:]_-]|$)|[\$\`@])"
 dispatch="(workflow[[:space:]]+run|/dispatches)"
 environment_field="environment[]]*[=:][[:space:]]*$prod"
 unreadable_inputs="--(json|input)([[:space:]=]|$)"
+# deploy:railway
+# A Railway environment the gate cannot read counts as prod too.
 railway="(^|[^[:alnum:]_.-])(railway|@railway/cli(@[^[:space:]]*)?)([[:space:]]$simple)?"
+# deploy:end
 git_push="(^|[^[:alnum:]_.-])git([[:space:]]+(-[Cc][[:space:]]+[^[:space:]]+|--(git-dir|work-tree|namespace|config-env)[[:space:]]+[^[:space:]]+|--?[^[:space:]]+))*[[:space:]]+push([[:space:]]$simple)?"
 tag_ref="([[:space:]:+]((refs/)?tags/|v[0-9])|[[:space:]]--((follow-)?tags|mirror)([[:space:]=]|$))"
 
 if [[ $text =~ $dispatch$simple($environment_field|$unreadable_inputs) || $text =~ $environment_field$simple$dispatch ]]; then
   block "$release_gate"
 fi
+# deploy:railway
 if [[ $text =~ $railway[[:space:]](-[[:alpha:]]*e([[:space:]]+|=)?|--environment([[:space:]]+|=))$prod || $text =~ $railway[[:space:]](env|environment)([[:space:]]+[[:alpha:]]+)?[[:space:]]+$prod ]]; then
   block "$release_gate"
 fi
+# deploy:end
 if [[ $text =~ $git_push$tag_ref || $(tr '[:upper:]' '[:lower:]' <<< "$text") == *push.followtags* ]]; then
   block "$release_gate"
 fi

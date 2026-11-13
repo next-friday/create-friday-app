@@ -8,7 +8,7 @@ graders:
   - name: new-branch-is-created
     type: tool_used
     tool: Bash
-    input_match: '\bgit\s+(?:checkout\s+-[bB]|switch\s+-[cC])\s+(?!main\b)\S+'
+    input_match: '\bgit\s+(?:checkout|switch)\s+(?:-\S+\s+)*-[bBcC]\s+(?!main(?:\s|$))\S+'
     min: 1
   - name: plan-names-the-engineer
     type: regex

@@ -1,5 +1,11 @@
 # @next-friday/create-app
 
+## 9.3.1
+
+### Patch Changes
+
+- a092416: A generated project no longer ships `.cursor/BUGBOT.md`, and `SETUP.md` no longer has the step that enables Cursor Bugbot. The Cursor step of `SETUP.md` keeps the sandbox policy.
+
 ## 9.3.0
 
 ### Minor Changes

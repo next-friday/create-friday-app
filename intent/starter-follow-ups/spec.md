@@ -1,6 +1,6 @@
 # Spec: Make the CLI easy to start, gate on evals, route work by model, and close what earlier work left open
 
-From `intent/starter-follow-ups/intent.md`. Status: draft.
+From `intent/starter-follow-ups/intent.md`. Status: accepted.
 
 Request: "docs(repo): add the starter follow-ups intent (#218)", the merge of the intent's pull request by the product owner. Skills at `9d4c827`.
 

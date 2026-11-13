@@ -3,33 +3,37 @@ command -v jq > /dev/null || exit 0
 mode=${1:-}
 input=$(cat)
 state_directory=${TMPDIR:-/tmp}/sdlc-reply-shape
-conversation=$(printf '%s' "$input" | jq -r '.conversation_id // .session_id // ""' | tr -cd 'A-Za-z0-9_-')
+conversation=$(printf '%s' "$input" | jq -r '.conversation_id // .session_id // ""')
+conversation=${conversation:+$(printf '%s' "$conversation" | cksum | tr ' ' '-')}
 project=$(printf '%s' "$input" | jq -r '.cwd // .workspace_roots[0] // ""')
 snapshot_file=$state_directory/$conversation.files
 
-# The content of every file outside intent/ that Git does not ignore, as one checksum. It is
-# taken through a copy of the index, so staging or committing a change does not alter it, and
-# only a file whose content changed is read. Two snapshots that differ mean a file outside
-# intent/ changed between them, whichever tool changed it.
+# A copy of the index and a scratch object store keep the project's own Git data unwritten.
 snapshot() {
   [ -n "$project" ] && [ -n "$conversation" ] || return 1
-  index=$(cd "$project" 2> /dev/null && git rev-parse --git-path index 2> /dev/null) || return 1
-  case $index in /*) ;; *) index=$project/$index ;; esac
-  index_copy=$state_directory/$conversation.index
-  mkdir -p "$state_directory" || return 1
-  cp "$index" "$index_copy" 2> /dev/null
-  GIT_INDEX_FILE=$index_copy git -C "$project" add -A -- ':(top)' ':(top,exclude)intent' 2> /dev/null
-  GIT_INDEX_FILE=$index_copy git -C "$project" ls-files -s --full-name -- ':(top)' ':(top,exclude)intent' | cksum
-  rm -f "$index_copy"
+  repository=$(git -C "$project" rev-parse --show-toplevel 2> /dev/null) || return 1
+  index=$(git -C "$repository" rev-parse --git-path index) || return 1
+  objects=$(git -C "$repository" rev-parse --git-path objects) || return 1
+  case $index in /*) ;; *) index=$repository/$index ;; esac
+  case $objects in /*) ;; *) objects=$repository/$objects ;; esac
+  scratch=$state_directory/$conversation.git
+  rm -rf "$scratch"
+  mkdir -p "$scratch/objects" || return 1
+  cp "$index" "$scratch/index" 2> /dev/null
+  content=$(
+    export GIT_INDEX_FILE="$scratch/index" GIT_OBJECT_DIRECTORY="$scratch/objects" GIT_ALTERNATE_OBJECT_DIRECTORIES="$objects"
+    git -C "$repository" add -A -- ':(top)' ':(top,exclude)intent' 2> /dev/null
+    git -C "$repository" ls-files -s -- ':(top)' ':(top,exclude)intent' | cksum
+  )
+  rm -rf "$scratch"
+  printf '%s|%s' "$repository" "$content"
 }
 
-# Tells whether a file outside intent/ changed since the last snapshot, then takes a new one.
-# With no earlier snapshot, or outside a Git repository, nothing counts as changed.
 changed_since_snapshot() {
   current=$(snapshot) || return 1
   previous=$(cat "$snapshot_file" 2> /dev/null)
   printf '%s' "$current" > "$snapshot_file"
-  [ -n "$previous" ] && [ "$previous" != "$current" ]
+  [ "${previous%|*}" = "${current%|*}" ] && [ "$previous" != "$current" ]
 }
 
 case $mode in

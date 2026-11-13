@@ -62,7 +62,7 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
   - the required checks `All Checks` and `Validate pull request title`;
   - a pull request before merging, with at least one approval, review from Code Owners, and stale approvals dismissed when new commits are pushed. Claude Code Review follows the severity, exclusion, and nit-cap rules in `REVIEW.md` only on a default branch protected this way ([customize Code Review](https://code.claude.com/docs/en/code-review-customize)).
 
-  The ruleset needs a repository admin. Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
+  Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
 
 - **Secrets and variables → Actions → Variables:** in a private repository, set `CODE_SCANNING` to `true` to run CodeQL, Scorecard, and Dependency Review, which need GitHub Code Security there; public repositories run them without it. Set `DEPLOY_ENABLED` to `true` when each push to `main` that passes CI should deploy to `dev`; the README's deploy section sets up the environments.
 - Create the `needs triage` label, which the issue forms apply: `gh label create "needs triage"`.

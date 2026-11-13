@@ -102,7 +102,7 @@ Delivery 3:
 
 - Delivery 3. The riskiest step is 14: a hook that blocks a right reply stops every session that uses the plugin. It fires only on a reply in the `sdlc-mode` shape, only after an edit outside `intent/` in that turn, and never twice for one turn; a reply that names, under **Checks**, the check it could not run and why, passes.
 - Delivery 3. Departure from the first plan: the hook does not read the session's transcript. A transcript shows an edit made by the edit tool and misses one made by a shell command, and its format and its tool names belong to the agent tool. The content of the working tree shows both, and the rule joins `check-reply-shape.sh`, which already reads the reply and already blocks a turn only once.
-- Delivery 3. A file that a person or another process changes while the agent's turn runs counts as changed in that turn. A file Git ignores never counts.
+- Delivery 3. A file that a person or another process changes while the agent's turn runs counts as changed in that turn. A file Git ignores and does not track never counts.
 - Delivery 3. Options not taken: reading the words of the **Status** line for "done", because every **Status** line says what is done; `git status` alone as the sign of an edit, because a question asked in a dirty tree would be blocked; failing `pnpm verify` on a setting that is not made, because the spec keeps a new project green.
 
 ## Proof
@@ -119,7 +119,7 @@ Delivery 3:
 - 17: the review reads each of the three steps of `SETUP.md` against the documentation it cites.
 - 18: the eval case `setup-sdlc` reports the three steps, and `pnpm verify` in a new project of each stack.
 - 19: the `checks:` cases of `check-reply-shape.cases.json`, run by `pnpm plugin:check`.
-- 20: the eval case `review-reports-findings-and-never-merges`, with a session that cannot post.
+- 20: the review reads `review.md` step 1, and the eval case `review-reports-findings-and-never-merges` still passes. Its scaffold has no host, so no case holds a pull request that the session cannot post on.
 - 21: the review reads `maintain.md` step 6, and the eval case `maintain-writes-intent-from-a-finding` still passes.
 - 22: `pnpm plugin:check`.
 - 23: step 7.

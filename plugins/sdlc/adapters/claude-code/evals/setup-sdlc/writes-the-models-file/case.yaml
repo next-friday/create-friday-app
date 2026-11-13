@@ -1,7 +1,7 @@
 schema_version: "1.1"
 name: writes-the-models-file
 expected_outcome: |
-  The request states the budget `medium`, so the agent asks no question. It writes `.agents/sdlc-models.md` in the fixed shape with the default model of each role and the effort `high`, reports the project description step as done and the branch protection step as one a person does on GitHub, and does not touch other files.
+  The request states the budget `medium`, so the agent asks no question. It writes `.agents/sdlc-models.md` in the fixed shape with the default model of each role and the effort `high`, reports the project description step as done and the branch protection step as one a person does on GitHub, with what the ruleset needs, and does not touch other files.
 context:
   scaffold_script: scaffold.sh
 graders:
@@ -14,6 +14,10 @@ graders:
     target:
       source: file
       path: .agents/sdlc-models.md
+  - name: reply-says-what-the-ruleset-needs
+    type: regex
+    pattern: "GitHub Pro, Team, or Enterprise"
+    flags: mu
   - name: package-json-is-unchanged
     type: regex
     pattern: '^  "description": "Orders service for the web shop",$'

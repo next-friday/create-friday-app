@@ -429,5 +429,49 @@
       "loop_count": 0
     },
     "expected": "pass"
+  },
+  {
+    "name": "checks: a file changed before the turn and none during it",
+    "input": {
+      "session_id": "s-48",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": [],
+    "expected": "pass",
+    "filesBeforeTurn": ["src/version.ts"]
+  },
+  {
+    "name": "checks: a change made before the turn is committed during it",
+    "input": {
+      "session_id": "s-49",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": [],
+    "expected": "pass",
+    "filesBeforeTurn": ["src/version.ts"],
+    "committed": true
+  },
+  {
+    "name": "checks: a file changed and committed during the turn",
+    "input": {
+      "session_id": "s-50",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["src/version.ts"],
+    "expected": "block",
+    "committed": true
+  },
+  {
+    "name": "checks: only a file Git ignores changed",
+    "input": {
+      "session_id": "s-51",
+      "stop_hook_active": false,
+      "last_assistant_message": "**Request:** Add the version endpoint.\n\nThe endpoint is written.\n\n**Status:** The endpoint is written; nothing waits."
+    },
+    "changedFiles": ["coverage/report.txt"],
+    "expected": "pass"
   }
 ]

@@ -36,6 +36,8 @@ Set `description` in `package.json` to what the service does.
 
 On GitHub, open https://github.com/acme/orders-service/settings/rules and protect `main` with a ruleset that requires a pull request.
 
+The ruleset needs a repository admin. Rulesets in a private repository need GitHub Pro, Team, or Enterprise.
+
 **Check:** the ruleset is listed on that page.
 SETUP
 git add -A

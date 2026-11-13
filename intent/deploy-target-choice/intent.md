@@ -4,9 +4,9 @@ Author: Joe Takara (Developer Productivity). Status: draft.
 
 ## Problem
 
-- A template is a starter: it holds what every project uses under company rules. Where a project deploys is not known when the project is generated, and the CLI does not ask. It asks for the project name and the stack only (`src/create.ts:334`, `src/create.ts:353`).
+- A template is a starter: it holds what every project uses under company rules. Where a project deploys is not known when the project is generated, and the CLI does not ask. It asks for the project name and the stack only (`src/create.ts:334`, `src/create.ts:352`).
 - Every generated project still gets the files of one host, Railway: `templates/base/.github/workflows/deploy.yml`, `templates/base/railway.json`, `templates/base/runbooks/rollback-deploy.md`, and the `deploy-dev` job in each stack's `ci.yml`. A project that deploys elsewhere removes them by hand; each stack's `README.md` says "Remove the workflow, `railway.json`, and the `deploy-dev` job in `ci.yml` if the project deploys elsewhere" (`templates/nestjs/README.md:59`).
-- The production gate knows one host. `templates/base/.agents/hooks/agent-production-gate.sh:40` and `:47` block the `railway` command against `prod`. A project on another host has no such block for its own deploy command, and nothing says so when the project is generated.
+- The production gate knows one host. `templates/base/.agents/hooks/agent-production-gate.sh:47` blocks the `railway` command against `prod`. A project on another host has no such block for its own deploy command, and nothing says so when the project is generated.
 - Every project builds, smoke tests, and scans a container image on each pull request (the `image` job, `templates/nestjs/.github/workflows/ci.yml:113`). A project on a host that builds from source does not use the image, and a failure in that job still fails its pull request.
 
 ## Proposed outcome

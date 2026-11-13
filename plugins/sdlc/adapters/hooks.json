@@ -1,11 +1,21 @@
 {
   "claude-code": [
     {
+      "event": "UserPromptSubmit",
+      "script": "check-reply-shape.sh",
+      "argument": "snapshot"
+    },
+    {
       "event": "Stop",
       "script": "check-reply-shape.sh"
     }
   ],
   "cursor": [
+    {
+      "event": "beforeSubmitPrompt",
+      "script": "check-reply-shape.sh",
+      "argument": "snapshot"
+    },
     {
       "event": "afterAgentResponse",
       "script": "check-reply-shape.sh",

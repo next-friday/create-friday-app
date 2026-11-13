@@ -26,6 +26,7 @@ type HookConfig = {
 
 type HookCase = {
   argument?: string;
+  changedFiles?: string[];
   expected: "block" | "pass";
   input: Record<string, unknown>;
   name: string;
@@ -360,9 +361,40 @@ function runHookScript(
 }
 
 /**
+ * Create a Git repository with one commit that holds a source file and a plan, for a hook case.
+ * @param parentDirectory The directory to create the repository in.
+ * @returns The repository's path.
+ */
+function createCaseRepository(parentDirectory: string): string {
+  const repository = path.join(parentDirectory, "repository");
+  const identity = ["-c", "user.name=case", "-c", "user.email=case@example.invalid"];
+
+  for (const file of ["src/version.ts", "intent/app-version/plan.md"]) {
+    mkdirSync(path.join(repository, path.dirname(file)), {
+      recursive: true,
+    });
+
+    writeFileSync(path.join(repository, file), "first\n");
+  }
+
+  for (const gitArguments of [
+    ["init", "--quiet"],
+    ["add", "--all"],
+    [...identity, "commit", "--quiet", "--message", "first"],
+  ]) {
+    execFileSync("git", gitArguments, {
+      cwd: repository,
+      stdio: "ignore",
+    });
+  }
+
+  return repository;
+}
+
+/**
  * Run a hook script on one case in a private state directory.
  * @param script Path of the script from the repository root.
- * @param hookCase The case; a saved reply is stored first by the script's `save` argument.
+ * @param hookCase The case. A saved reply is stored first by the script's `save` argument. Changed files make the case run in a new Git repository: the script takes its `snapshot`, the files are written, and the case input gains the repository as `cwd` and `workspace_roots`.
  * @returns The standard output of the script on the case input.
  */
 function runHookCase(script: string, hookCase: HookCase): string {
@@ -381,7 +413,27 @@ function runHookCase(script: string, hookCase: HookCase): string {
       );
     }
 
-    return runHookScript(script, hookCase.argument, hookCase.input, stateDirectory);
+    if (hookCase.changedFiles === undefined) {
+      return runHookScript(script, hookCase.argument, hookCase.input, stateDirectory);
+    }
+
+    const input = {
+      ...hookCase.input,
+      cwd: createCaseRepository(stateDirectory),
+    };
+
+    const caseInput = {
+      ...input,
+      workspace_roots: [input.cwd],
+    };
+
+    runHookScript(script, "snapshot", caseInput, stateDirectory);
+
+    for (const file of hookCase.changedFiles) {
+      writeFileSync(path.join(input.cwd, file), "changed\n");
+    }
+
+    return runHookScript(script, hookCase.argument, caseInput, stateDirectory);
   } finally {
     rmSync(stateDirectory, {
       force: true,

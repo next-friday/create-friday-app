@@ -43,6 +43,8 @@ In `.github/CODEOWNERS`, add these lines in this order. GitHub uses the last mat
 
 Replace every owner above with a GitHub user or team that has write access to the repository. Also replace the owner placeholder in `.github/zizmor.yml`.
 
+Code owners need: write access to the repository for each owner; for a team, a visible team that itself has write access; and, in a private repository, GitHub Pro, Team, or Enterprise ([code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)). Until the ruleset of step 3 requires their review, a code owner is asked for a review and a pull request merges without it.
+
 Replace `security@example.com` in `SECURITY.md` with the contact the security policy owner names, such as the security email of the company or of the client.
 
 **Check:** on GitHub, open `.github/CODEOWNERS`; GitHub shows no errors in the file. `grep example.com SECURITY.md` prints nothing.
@@ -60,7 +62,7 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
   - the required checks `All Checks` and `Validate pull request title`;
   - a pull request before merging, with at least one approval, review from Code Owners, and stale approvals dismissed when new commits are pushed. Claude Code Review follows the severity, exclusion, and nit-cap rules in `REVIEW.md` only on a default branch protected this way ([customize Code Review](https://code.claude.com/docs/en/code-review-customize)).
 
-  Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
+  The ruleset needs a repository admin. Rulesets in a private repository need GitHub Pro, Team, or Enterprise; on GitHub Free, make the repository public or upgrade.
 
 - **Secrets and variables → Actions → Variables:** in a private repository, set `CODE_SCANNING` to `true` to run CodeQL, Scorecard, and Dependency Review, which need GitHub Code Security there; public repositories run them without it. Set `DEPLOY_ENABLED` to `true` when each push to `main` that passes CI should deploy to `dev`; the README's deploy section sets up the environments.
 - Create the `needs triage` label, which the issue forms apply: `gh label create "needs triage"`.
@@ -73,7 +75,7 @@ Replace `security@example.com` in `SECURITY.md` with the contact the security po
 
 - **Code Review:** in [**Admin settings → Claude Code**](https://claude.ai/admin-settings/claude-code#code-review), turn on **Allow code review**, install the Claude GitHub App, and add this repository ([set up Code Review](https://code.claude.com/docs/en/code-review-setup)). It needs a Team or Enterprise plan ([availability](https://code.claude.com/docs/en/code-review#availability)). Keep **Review runs** at **After every push**, the default, so every push to a pull request gets a review. Reviews run on Anthropic's infrastructure, so the repository has no review workflow. Anyone with write access can also comment `@claude review` on a pull request to start a review ([comment commands](https://code.claude.com/docs/en/code-review-pull-requests#comment-commands)).
 - **Managed settings:** deploy the non-negotiable settings and hooks as [managed settings](https://code.claude.com/docs/en/settings), tailored from the example in `.claude/managed-settings.example.json`. Engineers cannot override them. When `strictKnownMarketplaces` is set, as in the example, add the marketplace `next-friday-plugins` of this project to it, or Claude Code does not register the project's plugin.
-- **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage).
+- **Monitoring:** turn on the [OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage). It needs an OpenTelemetry collector or backend that the organization runs, and its endpoint. Set `CLAUDE_CODE_ENABLE_TELEMETRY`, the exporters, and `OTEL_EXPORTER_OTLP_ENDPOINT` in managed settings, or each engineer sets them in a shell or in `~/.claude/settings.json`: Claude Code ignores these variables in the repository's `.claude/settings.json`, so the project cannot turn the export on.
 
 **Check:** the test pull request gets a **Claude Code Review** check run within a few minutes.
 

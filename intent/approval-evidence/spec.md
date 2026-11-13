@@ -1,6 +1,6 @@
 # Spec: Record who approved at every gate
 
-From `intent/approval-evidence/intent.md`. Status: accepted.
+From `intent/approval-evidence/intent.md`. Status: done.
 
 Request: "docs(repo): add the approval evidence intent (#186)", the merge of the intent's pull request by the product owner. Skills at `ebe18df`.
 

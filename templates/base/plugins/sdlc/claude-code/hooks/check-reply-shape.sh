@@ -3,8 +3,40 @@ command -v jq > /dev/null || exit 0
 mode=${1:-}
 input=$(cat)
 state_directory=${TMPDIR:-/tmp}/sdlc-reply-shape
-conversation=$(printf '%s' "$input" | jq -r '.conversation_id // ""' | tr -cd 'A-Za-z0-9_-')
+conversation=$(printf '%s' "$input" | jq -r '.conversation_id // .session_id // ""' | tr -cd 'A-Za-z0-9_-')
+project=$(printf '%s' "$input" | jq -r '.cwd // .workspace_roots[0] // ""')
+snapshot_file=$state_directory/$conversation.files
+
+# The content of every file outside intent/ that Git does not ignore, as one checksum. It is
+# taken through a copy of the index, so staging or committing a change does not alter it, and
+# only a file whose content changed is read. Two snapshots that differ mean a file outside
+# intent/ changed between them, whichever tool changed it.
+snapshot() {
+  [ -n "$project" ] && [ -n "$conversation" ] || return 1
+  index=$(cd "$project" 2> /dev/null && git rev-parse --git-path index 2> /dev/null) || return 1
+  case $index in /*) ;; *) index=$project/$index ;; esac
+  index_copy=$state_directory/$conversation.index
+  mkdir -p "$state_directory" || return 1
+  cp "$index" "$index_copy" 2> /dev/null
+  GIT_INDEX_FILE=$index_copy git -C "$project" add -A -- ':(top)' ':(top,exclude)intent' 2> /dev/null
+  GIT_INDEX_FILE=$index_copy git -C "$project" ls-files -s --full-name -- ':(top)' ':(top,exclude)intent' | cksum
+  rm -f "$index_copy"
+}
+
+# Tells whether a file outside intent/ changed since the last snapshot, then takes a new one.
+# With no earlier snapshot, or outside a Git repository, nothing counts as changed.
+changed_since_snapshot() {
+  current=$(snapshot) || return 1
+  previous=$(cat "$snapshot_file" 2> /dev/null)
+  printf '%s' "$current" > "$snapshot_file"
+  [ -n "$previous" ] && [ "$previous" != "$current" ]
+}
+
 case $mode in
+  snapshot)
+    changed_since_snapshot
+    exit 0
+    ;;
   save)
     text=$(printf '%s' "$input" | jq -r '.text // ""')
     [ -n "$text" ] && [ -n "$conversation" ] || exit 0
@@ -12,12 +44,16 @@ case $mode in
     exit 0
     ;;
   followup)
+    changed=false
+    changed_since_snapshot && changed=true
     [ -n "$conversation" ] && [ -f "$state_directory/$conversation" ] || exit 0
     reply=$(cat "$state_directory/$conversation")
     rm -f "$state_directory/$conversation"
     [ "$(printf '%s' "$input" | jq -r '"\(.status // "") \(.loop_count // "")"')" = 'completed 0' ] || exit 0
     ;;
   *)
+    changed=false
+    changed_since_snapshot && changed=true
     [ "$(printf '%s' "$input" | jq -r '.stop_hook_active // false')" = true ] && exit 0
     reply=$(printf '%s' "$input" | jq -r '.last_assistant_message // ""')
     ;;
@@ -47,6 +83,10 @@ case $last in
     ;;
   *) problems="${problems}End the reply with a line that starts with **Status:**; nothing may follow it. " ;;
 esac
+
+if [ "$changed" = true ] && ! printf '%s\n' "$outside_fences" | grep -q '^\*\*Checks:\*\*'; then
+  problems="${problems}A file outside intent/ changed in this turn and the reply has no **Checks:** section. Run the checks the project names and add **Checks:** with each command and the lines of its output that show the result, or with each check that could not run and why. "
+fi
 
 [ -z "$problems" ] && exit 0
 jq -n --arg mode "$mode" --arg reason "${problems}Send the whole reply again." \

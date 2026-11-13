@@ -1,6 +1,6 @@
 # Intent: Record who approved at every gate
 
-Author: Joe Takara (Developer Productivity). Status: accepted.
+Author: Joe Takara (Developer Productivity). Status: done.
 
 ## Problem
 

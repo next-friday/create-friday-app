@@ -11,8 +11,8 @@ The product owner decided that a plan is accepted by merging its pull request. O
 Delivery 1, items 1 to 7:
 
 1. `build.md` and `fix.md`: the agent commits the draft `plan.md` on a new branch, pushes it, and opens a pull request that changes no file outside `intent/`. Each revision of the plan is a commit on that branch.
-2. The engineer accepts the plan by merging that pull request, and rejects it by closing it. The agent never merges it: merging is the one action the project's settings deny the agent (`templates/base/.claude/settings.json`, `Bash(gh pr merge*)`), so the host's record of who merged is the engineer's.
-3. The plan's `Accepted by:` line holds the handle of the account that merged that pull request. The agent copies it from the host, in the first commit of the branch that builds the plan, and never from the chat.
+2. The engineer accepts the plan by merging that pull request, and rejects it by closing it. The agent never merges it: merging is the one action the project's settings and hooks deny the agent (`Bash(gh pr merge*)` in `templates/base/.claude/settings.json`, and the `pr merge` rule of `templates/base/.agents/hooks/agent-shell-gate.sh`), so the host's record of who merged is the engineer's.
+3. The plan's `Accepted by:` line holds the handle of the account that merged that pull request. The agent copies it from the host, in the first commit of the branch that builds the plan. In a session that cannot reach the host, it writes the handle the engineer gives, and the CI check of requirement 4 proves it.
 4. `plan:check` fails a branch that changes a file outside `intent/` and adds a `plan.md` that is not on the default branch: the plan's pull request is merged first. In CI, with the host's token, it also fails when the `Accepted by:` handle is not the account that merged the pull request that added the plan. Run where it cannot read the host, it says that the handle was not checked.
 5. In a session that cannot reach the host, the agent waits for the engineer's word that the plan is merged, and confirms it with `git fetch`: the plan is on the default branch.
 6. For a change the spec classes as higher risk, the plan's pull request holds an approving review from a second person before it is merged. The plan names that person on a line `Also accepted by: @<handle>.`, and `plan:check` in CI checks that review when the line is present.
@@ -48,10 +48,11 @@ Every delivery:
 
 - `build.md`, steps 4 to 6: the plan is written to the file, committed, pushed, and its pull request opened; the gate is the engineer's merge of that pull request; the build then starts on a new branch, whose first commit copies `Accepted by:` from the host. `fix.md`, steps 4 to 6, the same.
 - `design.md`: step 3 gains the `Skills at` hash and the `Decision:` line with the agent's proposal; the gate says that the product owner, or the policy owner, corrects each decision before merging.
+- `plugins/sdlc/source/skills/sdlc-mode/SKILL.md`: the row for a build names the merged plan.
 - `plan.md` (the intent playbook): step 2 loses `git config user.name`; the template's `Author:` line becomes `Author: @<handle> (<team>). Status: draft.`; step 7 gains the originator's acceptance.
 - `review.md`, step 1, and `maintain.md`, step 6: the sentences of requirements 20 and 21.
 - `plugins/sdlc/source/scripts/check-plan.ts`: checks requirements 4, 8, and 9 from git and the files alone; reads who merged the plan's pull request, and its reviews, through the host's command-line tool when a token is present, for requirements 4 and 6; gains self-test cases for each.
-- Each stack's `templates/<stack>/.github/workflows/ci.yml`: the step that runs `plan:check` passes the workflow's token and the pull request's number. The root's `.github/workflows/ci.yml` runs `plan:check` in no job today; its Agent Gates job gains that step.
+- Each stack's `templates/<stack>/.github/workflows/ci.yml`: the step that runs `plan:check` passes the workflow's token. The root's `.github/workflows/ci.yml` runs `plan:check` in no job today; its Agent Gates job gains that step.
 - The five hooks of requirement 11: one shared function writes the record. Each of the five `templates/<stack>/_gitignore` files lists `.agents/logs/`.
 - `templates/base/.agents/release-approval-form` (new), and `agent-production-gate.sh` reads it.
 - `templates/base/scripts/check-agent-gates.ts`: the cases of requirement 16.

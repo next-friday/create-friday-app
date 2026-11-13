@@ -1,16 +1,15 @@
 schema_version: "1.1"
 name: second-run-changes-nothing
 expected_outcome: |
-  The project already holds exactly what a first run writes for the budget `medium`, and the request states the same budget. The agent reads `SETUP.md`, reports the project description step as done and the branch protection step as a person's, shows the five lines it holds, and leaves each of them as it was.
+  The project already holds exactly what a first run writes for the budget `medium`, and the request states the same budget. The agent reads `SETUP.md`, reports the project description step as done and the branch protection step as a person's, shows the role lines of `~/.claude/rules/sdlc-models.md`, and leaves each of them as it was.
 context:
   scaffold_script: scaffold.sh
 graders:
-  - name: models-file-keeps-its-five-lines
-    type: regex
-    pattern: '^# SDLC models\n\nbudget: medium \(high\)\nbuild: sonnet high\nreview: sonnet high\nverify: sonnet high\nevals: haiku high\n$'
-    target:
-      source: file
-      path: .agents/sdlc-models.md
+  - name: rule-keeps-its-lines
+    type: tool_used
+    tool: Write
+    input_match: 'rules/sdlc-models\.md(?![\s\S]*budget: medium \(high\)[\s\S]*main: sonnet high[\s\S]*explore: haiku high[\s\S]*advise: opus high)'
+    max: 0
   - name: package-json-is-unchanged
     type: regex
     pattern: '^  "description": "Orders service for the web shop",$'
@@ -28,7 +27,7 @@ graders:
     type: regex
     pattern: '\bmedium\b[^\n]*\bhigh\b'
     flags: im
-  - name: reply-shows-the-evals-model
+  - name: reply-shows-the-advise-model
     type: regex
-    pattern: '\bevals\b[^\n]*\bhaiku\b'
+    pattern: '\badvise\b[^\n]*\bopus\b'
     flags: im

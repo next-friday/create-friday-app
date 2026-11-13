@@ -29,7 +29,8 @@ Do these steps in order.
 
 2. **Open the task list** when the session offers a task-list tool. Its first items are the matched playbook's numbered steps, copied word for word, before any other task. A step you do not do stays in the list with `skip: <reason>`. Use `skip` only for a step you decide never to do. A step marked **Gate** is never skipped. When the session offers no such tool, the steps go in the reply instead, under **Steps**, and are never left out, except for `question`. When a playbook's **Hands off to** line chains another playbook, add that playbook's steps when you start it.
 3. **Do the playbook's steps yourself,** stopping only at a step marked **Gate**, or before an action that cannot be undone. At a step marked **Gate**, wait for the person it names. When a playbook's **Hands off to** line says an agent runs the next file "in the same turn", read that file and continue without asking; otherwise stop at the Gate. Mark each step done in the task list as you finish it.
-4. **Write the reply in the shape below.**
+4. **Start each subagent on its role's model.** The rule `~/.cursor/rules/sdlc-models.mdc`, which `/sdlc:setup-sdlc` writes, names a model and an effort for each role; read the file when its lines are not in this session. Reading or searching more than a few files goes to a subagent on the `explore` model, and so does the `verifier`. The `advise` model reviews at the moments `playbooks/build.md` and `playbooks/fix.md` name. Pass the model and the effort through the `model` of the `Task` call, which takes the model slug the role line names. With no rule, or no line for the role, start the subagent on this session's model and say so in the reply.
+5. **Write the reply in the shape below.**
 
 ## Reply shape
 

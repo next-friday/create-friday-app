@@ -10,15 +10,14 @@ cat > AGENTS.md << 'AGENTS'
 
 - Test: `pnpm test`
 AGENTS
-mkdir -p .agents
-cat > .agents/sdlc-models.md << 'MODELS'
+mkdir -p "$HOME/.claude/rules"
+cat > "$HOME/.claude/rules/sdlc-models.md" << 'MODELS'
 # SDLC models
 
 budget: large (xhigh)
-build: sonnet xhigh
-review: sonnet xhigh
-verify: opus xhigh
-evals: haiku xhigh
+main: sonnet xhigh
+explore: opus xhigh
+advise: opus xhigh
 MODELS
 git add -A
 git commit -q -m "chore: add project"

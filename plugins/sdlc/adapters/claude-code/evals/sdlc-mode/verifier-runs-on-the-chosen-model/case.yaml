@@ -1,7 +1,7 @@
 schema_version: "1.1"
 name: verifier-runs-on-the-chosen-model
 expected_outcome: |
-  The project's `.agents/sdlc-models.md` names `opus xhigh` after `verify:`. Asked what the verify step of the build playbook starts the verifier subagent on, the agent reads that playbook and the file, answers `opus` at the effort `xhigh`, and writes nothing.
+  The person's `~/.claude/rules/sdlc-models.md` names `opus xhigh` after `explore:`. Asked what the build playbook starts the verifier subagent on, the agent reads that playbook and the rule, answers `opus` at the effort `xhigh`, and writes nothing.
 context:
   scaffold_script: scaffold.sh
 graders:

@@ -55,6 +55,7 @@ const sourceRoot = path.join(pluginRoot, "source");
 const adaptersRoot = path.join(pluginRoot, "adapters");
 const vendorNamesPath = path.join(adaptersRoot, "vendor-names.json");
 const subagentConfigPath = path.join(adaptersRoot, "agents.json");
+const toolWordsPath = path.join(adaptersRoot, "tool-words.json");
 const hookConfigPath = path.join(adaptersRoot, "hooks.json");
 const hooksDirectory = path.join(sourceRoot, "hooks");
 const hookCasesSuffix = ".cases.json";
@@ -618,6 +619,22 @@ function renderTemplateCopy(adapterFiles: Map<string, string>): Map<string, stri
 }
 
 /**
+ * Replace each tool word of the source with the text one agent tool needs, such as a path in the person's home directory.
+ * @param text Source text.
+ * @param words Each tool word, such as `{{rules-file}}`, and its text for one agent tool.
+ * @returns The text with every tool word replaced.
+ */
+function renderToolWords(text: string, words: Record<string, string>): string {
+  let rendered = text;
+
+  for (const [word, value] of Object.entries(words)) {
+    rendered = rendered.split(word).join(value);
+  }
+
+  return rendered;
+}
+
+/**
  * Render every adapter from the source.
  * @returns The expected content of each adapter file, by path from the repository root.
  */
@@ -636,6 +653,11 @@ function renderAdapters(): Map<string, string> {
     HookConfig[]
   >;
 
+  const toolWords = JSON.parse(readFileSync(toolWordsPath, "utf8")) as Record<
+    string,
+    Record<string, string>
+  >;
+
   for (const adapter of adapters) {
     const adapterRoot = path.join(adaptersRoot, adapter.directory);
 
@@ -644,11 +666,12 @@ function renderAdapters(): Map<string, string> {
       `${JSON.stringify(adapter.manifest, undefined, 2)}\n`,
     );
 
+    const words = toolWords[adapter.directory] ?? {};
+
     for (const file of listFiles(skillsDirectory, false)) {
-      expected.set(
-        path.join(adapterRoot, "skills", file),
-        readFileSync(path.join(skillsDirectory, file), "utf8"),
-      );
+      const text = readFileSync(path.join(skillsDirectory, file), "utf8");
+
+      expected.set(path.join(adapterRoot, "skills", file), renderToolWords(text, words));
     }
 
     const hooks = hooksConfig[adapter.directory];

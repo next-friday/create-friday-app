@@ -85,6 +85,7 @@ Delivery 4:
 - Step 4 needs a host the session does not reach. The spec's decision removes the numbers when the host is declined.
 - Step 14: a workflow that calls a model costs money on each pull request it runs on. It runs only with `CLAUDE_CI_ENABLED` set, only on a pull request that changes `plugins/sdlc/` or `.agents/`, and under `EVAL_MAX_COST_USD`.
 - Steps 5 and 14 wait for a person's commit. Each pull request stays a draft until that commit is on its branch.
+- Delivery 2. Departure from the first plan: the plugin's source may not name an agent tool or its folders (`plugins/sdlc/adapters/vendor-names.json`), and requirement 9 needs each tool's home-directory path. `scripts/sync-plugin.ts` therefore replaces tool words such as `{{rules-file}}` in each skill with the text in `plugins/sdlc/adapters/tool-words.json` for that tool. The eval cases cannot read a file in the run's home directory, so the `setup-sdlc` cases grade the `Write` call's path and lines instead of the file.
 - Options not taken: one pull request for all four deliveries, because three `minor` changesets and a `patch` would ship as one version and a person's two commits would hold the whole; Claude Code's advisor tool as the only way to advise, because it works on two providers only and not in Cursor; a project file for the model choice, because the spec's decision keeps it per person.
 
 ## Proof

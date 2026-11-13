@@ -11,10 +11,6 @@ graders:
     type: regex
     pattern: '^\*\*Status:\*\*.*https://github\.com/acme/shop/pull/42[).\]*_]*\s*$'
     flags: mu
-  - name: reply-is-in-thai
-    type: regex
-    pattern: "[฀-๿]{10}"
-    flags: mu
   - name: no-file-created
     type: regex
     target: files

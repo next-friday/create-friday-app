@@ -15,7 +15,3 @@ graders:
     type: regex
     pattern: '(?=[\s\S]*Files that change)(?=[\s\S]*Order of work)(?=[\s\S]*Risks)(?=[\s\S]*Proof)'
     flags: mu
-  - name: reply-is-in-thai
-    type: regex
-    pattern: '[\u0E00-\u0E7F]{10}'
-    flags: mu

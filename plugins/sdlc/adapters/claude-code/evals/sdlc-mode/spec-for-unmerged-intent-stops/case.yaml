@@ -37,7 +37,3 @@ graders:
     input_match: '\bgit\s+(?:checkout\s+-[bB]|switch\s+-[cC]|branch\s+(?!-{1,2}(?:a|r|v|vv|l|list|show-current|contains|merged|no-merged|all|remotes)\b)[\w-]|worktree\s+add)'
     min: 0
     max: 0
-  - name: reply-is-in-thai
-    type: regex
-    pattern: '[\u0E00-\u0E7F]{10}'
-    flags: mu

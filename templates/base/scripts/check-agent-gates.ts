@@ -1,13 +1,16 @@
 import {execFileSync, spawnSync} from "node:child_process";
-import {mkdtempSync, rmSync, writeFileSync} from "node:fs";
+import {existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import path from "node:path";
 import {tmpdir} from "node:os";
 
 type GateCase = {
+  expectedApproval?: string;
   expectedExit: 0 | 2;
   expectedPermission?: "allow";
+  expectedSession?: string;
   gate: string;
   input: Record<string, unknown>;
+  isRecordUnwritable?: boolean;
   name: string;
   projectDirectory?: string;
   releaseApproval?: string;
@@ -31,6 +34,7 @@ const mcpGate = ".agents/hooks/agent-mcp-gate.sh";
 const productionGate = ".agents/hooks/agent-production-gate.sh";
 const testEditGate = ".agents/hooks/agent-test-edit-gate.sh";
 const sourceFile = "src/example.ts";
+const statusCommand = "git status";
 
 const blockedCommands = [
   "printf 'exit 0' > .husky/pre-commit",
@@ -109,7 +113,7 @@ const blockedCommands = [
 
 const allowedCommands = [
   'git commit -m "add login"',
-  "git status",
+  statusCommand,
   "pnpm check",
   "cat .husky/pre-commit",
   "git diff .husky/pre-commit",
@@ -205,8 +209,22 @@ const productionCommands = [
   "cd a\\\\\ngit push origin v1.0.0",
 ];
 
-const approvalLiftsGate = ["CHG-123", "1", "CHG-1", "off", "00", " "];
-const approvalKeepsGate = ["", "0", "false", "no", "FALSE", "No", "nO"];
+const approvalLiftsGate = ["CHG-123", "CHG-1"];
+
+const approvalKeepsGate = [
+  "",
+  "0",
+  "false",
+  "no",
+  "FALSE",
+  "No",
+  "nO",
+  "1",
+  "off",
+  "00",
+  " ",
+  "chg-123",
+];
 
 const nonProductionCommands = [
   "gh workflow run deploy.yml -f environment=uat -f commit_sha=abc",
@@ -440,6 +458,7 @@ const cases: GateCase[] = [
   ...approvalLiftsGate.map(releaseApproval => ({
     gate: productionGate,
     releaseApproval,
+    expectedApproval: releaseApproval,
     input: {
       tool_input: {
         command: railwayProductionCommand,
@@ -554,12 +573,166 @@ const cases: GateCase[] = [
     expectedExit: expectedExit as 0 | 2,
     name: `test edit: ${name}`,
   })),
+  {
+    gate: shellGate,
+    expectedPermission: "allow",
+    expectedSession: "claude-session",
+    name: "record: the session of a Claude Code hook input",
+    expectedExit: 0,
+    input: {
+      command: statusCommand,
+      session_id: "claude-session",
+    },
+  },
+  {
+    gate: productionGate,
+    expectedSession: "cursor-conversation",
+    name: "record: the conversation of a Cursor hook input",
+    expectedExit: 2,
+    input: {
+      command: railwayProductionCommand,
+      conversation_id: "cursor-conversation",
+    },
+  },
+  {
+    gate: shellGate,
+    name: "record: a blocked command that holds a secret",
+    expectedExit: 2,
+    input: {
+      command: "rm sk_live_SECRET123=.agents/hooks/agent-shell-gate.sh",
+    },
+  },
+  {
+    gate: constitutionGate,
+    name: "record: a blocked path that holds a secret",
+    expectedExit: 2,
+    input: {
+      file_path: ".agents/rules/sk_live_SECRET123.md",
+    },
+  },
+  {
+    gate: productionGate,
+    projectDirectory: outsideRepository,
+    name: "record: an approval in the form when the project has no form file",
+    releaseApproval: "CHG-123",
+    expectedExit: 2,
+    input: {
+      command: railwayProductionCommand,
+    },
+  },
+  {
+    gate: shellGate,
+    expectedPermission: "allow",
+    name: "record: an allow when the record cannot be written",
+    expectedExit: 0,
+    isRecordUnwritable: true,
+    input: {
+      command: statusCommand,
+    },
+  },
+  {
+    gate: productionGate,
+    name: "record: a block when the record cannot be written",
+    expectedExit: 2,
+    isRecordUnwritable: true,
+    input: {
+      command: railwayProductionCommand,
+    },
+  },
 ];
 
-const failures = cases.filter(gateCase => {
+const recordDirectory = mkdtempSync(path.join(tmpdir(), "agent-gates-records-"));
+const recordKeys = new Set(["approval", "decision", "hook", "reason", "session", "time", "user"]);
+
+const gitUsername = spawnSync("git", ["config", "user.name"], {
+  encoding: "utf8",
+}).stdout.trim();
+
+const unwritableRecord = path.join(recordDirectory, "a-file");
+
+writeFileSync(unwritableRecord, "");
+
+/**
+ * Read the lines a gate appended to its record.
+ * @param recordPath The file the gate was told to append to.
+ * @returns The lines, or none when the gate wrote no file.
+ */
+function readRecordLines(recordPath: string): string[] {
+  return existsSync(recordPath) ? readFileSync(recordPath, "utf8").trim().split("\n") : [];
+}
+
+/**
+ * List the words of a hook input that look like a path, an assignment, or a file name.
+ * @param input The hook input.
+ * @returns Each such word of six characters or more.
+ */
+function listInputWords(input: Record<string, unknown>): string[] {
+  return JSON.stringify(input)
+    .split(/[\s"'\\{}:,]+/u)
+    .filter(word => word.length >= 6 && /[./=]/u.test(word));
+}
+
+/**
+ * Tell whether a gate wrote the record its decision calls for, and nothing a record must not hold.
+ * @param gateCase The case that ran.
+ * @param recordPath The file the gate was told to append to.
+ * @returns True when the record is missing, malformed, or wrong.
+ */
+function isRecordWrong(gateCase: GateCase, recordPath: string): boolean {
+  type DecisionRecord = {
+    approval?: string;
+    decision?: string;
+    hook?: string;
+    reason?: string;
+    session?: string;
+    time?: string;
+    user?: string;
+  };
+
+  const lines = readRecordLines(recordPath);
+  const lastLine = lines.at(-1) ?? "{}";
+  const record = JSON.parse(lastLine) as DecisionRecord;
+  const isBlock = gateCase.expectedExit === 2;
+  const isLifted = gateCase.expectedApproval !== undefined;
+  const secondsFromNow = Math.abs(Date.now() - Date.parse(record.time ?? "")) / 1000;
+
+  const found = [
+    record.decision,
+    record.hook,
+    record.session,
+    record.approval,
+    record.user,
+    record.reason !== undefined,
+    (record.time ?? "").endsWith("Z") && secondsFromNow < 600,
+    Object.keys(record).every(key => recordKeys.has(key)),
+  ];
+
+  const expected = [
+    isBlock ? "block" : "allow",
+    path.basename(gateCase.gate, ".sh"),
+    gateCase.expectedSession,
+    gateCase.expectedApproval,
+    isLifted ? gitUsername : undefined,
+    isBlock,
+    true,
+    true,
+  ];
+
+  const isHoldingInput = listInputWords(gateCase.input).some(word => lastLine.includes(word));
+
+  return lines.length !== 1 || JSON.stringify(found) !== JSON.stringify(expected) || isHoldingInput;
+}
+
+const failures = cases.filter((gateCase, index) => {
+  const recordPath =
+    gateCase.isRecordUnwritable === true
+      ? path.join(unwritableRecord, "gate-decisions.jsonl")
+      : path.join(recordDirectory, `${index}.jsonl`);
+
   const result = spawnSync(gateCase.gate, {
     env: {
       ...childEnvironment,
+      AGENT_GATE_LOG: recordPath,
       CLAUDE_PROJECT_DIR: gateCase.projectDirectory ?? process.cwd(),
       CURSOR_PROJECT_DIR: gateCase.projectDirectory ?? process.cwd(),
       RELEASE_APPROVAL: gateCase.releaseApproval,
@@ -572,10 +745,17 @@ const failures = cases.filter(gateCase => {
     (JSON.parse(result.stdout.toString()) as {permission?: string}).permission !==
       gateCase.expectedPermission;
 
-  return result.status !== gateCase.expectedExit || isPermissionWrong;
+  const isRecordChecked = gateCase.isRecordUnwritable !== true;
+
+  return (
+    result.status !== gateCase.expectedExit ||
+    isPermissionWrong ||
+    (isRecordChecked && isRecordWrong(gateCase, recordPath))
+  );
 });
 
 for (const directory of [
+  recordDirectory,
   fixBranchWithTest,
   fixBranchWithoutTest,
   featureBranchWithTest,

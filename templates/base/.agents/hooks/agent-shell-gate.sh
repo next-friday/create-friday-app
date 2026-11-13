@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+# shellcheck source=.agents/hooks/record-gate-decision.sh
+if ! source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/record-gate-decision.sh"; then
+  printf '%s\n' '{"permission":"deny","user_message":"agent-shell-gate: .agents/hooks/record-gate-decision.sh could not be loaded, so the gate cannot record its decision. Stop and report this error to the user; agents may not edit the gate."}'
+  exit 2
+fi
+
 allow() {
+  record_gate_decision agent-shell-gate allow "" "${input:-}" "${lifted_approval:-}"
   printf '%s\n' '{"permission":"allow"}'
   exit 0
 }
 
 block() {
+  record_gate_decision agent-shell-gate block "${2:-$1}" "${input:-}"
   jq -n --arg message "$1" '{permission:"deny",user_message:$message,agent_message:$message}'
   printf 'agent-shell-gate: %s\n' "$1" >&2
   exit 2
@@ -147,7 +155,7 @@ lex() {
 }
 
 writes_protected() {
-  block "Changing $1 from the shell is blocked. $policy"
+  block "Changing $1 from the shell is blocked. $policy" "Changing a protected path from the shell is blocked. $policy"
 }
 
 check_git() {

@@ -1,7 +1,29 @@
-import {execFileSync} from "node:child_process";
 import {existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync} from "node:fs";
 import path from "node:path";
 import {tmpdir} from "node:os";
+
+import {
+  acceptedByPrefix,
+  defaultBranch,
+  findSectionBounds,
+  intentDirectory,
+  maskFencedBlocks,
+  readSection,
+  runGit,
+  splitLines,
+  statusLineLimit,
+} from "./plan-text.ts";
+import {
+  alsoAcceptedByPrefix,
+  concernsHeading,
+  decisionPrefix,
+  findAuthorProblems,
+  findDecisionProblems,
+  findHostAcceptanceProblems,
+  findUnmergedPlanProblems,
+  hostTokenVariable,
+  readPlanMerge,
+} from "./plan-approval-records.ts";
 
 type BranchChanges = {
   changedPaths: string[];
@@ -15,30 +37,15 @@ type SelfTestCase = {
   problems: string[];
 };
 
-const defaultBranch = "origin/main";
-const intentDirectory = "intent";
 const planFileName = "plan.md";
 const specFileName = "spec.md";
 const intentFileName = "intent.md";
 const proofHeading = "## Proof";
 const requirementsHeading = "## Requirements";
 const acceptancePlaceholder = "@<engineer>";
-const statusLineLimit = 5;
-const acceptedByPrefix = "Accepted by: ";
 const acceptedByPattern = /^Accepted by: @[\dA-Za-z][\dA-Za-z-]*\.$/;
 const requiredHeadings = ["## Files that change", "## Order of work", "## Risks", proofHeading];
-
-/**
- * Run git in the current directory.
- * @param gitArguments Arguments after `git`.
- * @returns Trimmed standard output.
- */
-function runGit(gitArguments: string[]): string {
-  return execFileSync("git", gitArguments, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  }).trim();
-}
+const unverifiedPlanPaths: string[] = [];
 
 /**
  * Find what this branch changed since it left the default branch.
@@ -84,68 +91,6 @@ function describeMissingDefaultBranch(
   return branchChanges === undefined
     ? `${defaultBranch} cannot be found, so the "${acceptedByPrefix}" rule cannot be applied; run "git fetch origin main" to apply it`
     : undefined;
-}
-
-/**
- * Blank every line of a fenced code block, keeping line numbers.
- * @param lines Document lines.
- * @returns The lines with fenced ones emptied.
- */
-function maskFencedBlocks(lines: string[]): string[] {
-  let isFenced = false;
-
-  return lines.map(line => {
-    const isFence = /^\s*(?:```|~~~)/.test(line);
-    const isMasked = isFenced || isFence;
-
-    isFenced = isFence ? !isFenced : isFenced;
-
-    return isMasked ? "" : line;
-  });
-}
-
-/**
- * Split a document into LF-terminated lines without a byte order mark.
- * @param text Document content.
- * @returns The lines.
- */
-function splitLines(text: string): string[] {
-  return text
-    .replace(/^\u{FEFF}/u, "")
-    .replaceAll("\r\n", "\n")
-    .split("\n");
-}
-
-/**
- * Find the lines of a level-2 section.
- * @param maskedLines Document lines with fenced code blocks emptied.
- * @param heading The section heading.
- * @returns The first line after the heading and the line of the next level-2 heading, or undefined when the heading is absent.
- */
-function findSectionBounds(maskedLines: string[], heading: string): [number, number] | undefined {
-  const start = maskedLines.findIndex(line => line.trimEnd() === heading);
-
-  if (start === -1) {
-    return undefined;
-  }
-
-  const nextHeading = maskedLines.findIndex(
-    (line, index) => index > start && line.startsWith("## "),
-  );
-
-  return [start + 1, nextHeading === -1 ? maskedLines.length : nextHeading];
-}
-
-/**
- * Collect the text of a level-2 section.
- * @param maskedLines Document lines with fenced code blocks emptied.
- * @param heading The section heading.
- * @returns The lines under the heading up to the next level-2 heading, or undefined when the heading is absent.
- */
-function readSection(maskedLines: string[], heading: string): string[] | undefined {
-  const bounds = findSectionBounds(maskedLines, heading);
-
-  return bounds === undefined ? undefined : maskedLines.slice(...bounds);
 }
 
 /**
@@ -843,6 +788,109 @@ const selfTestCases: SelfTestCase[] = [
       false,
     ),
   },
+  {
+    name: "a plan added together with code",
+    expectedMessagePart: `is not on ${defaultBranch}`,
+    problems: findUnmergedPlanProblems(false, true),
+  },
+  {
+    name: "a plan added alone",
+    problems: findUnmergedPlanProblems(false, false),
+  },
+  {
+    name: "a plan that is on the default branch, built with code",
+    problems: findUnmergedPlanProblems(true, true),
+  },
+  {
+    name: "the accepting handle is the account that merged, in another letter case",
+    problems: findHostAcceptanceProblems(splitLines(buildPlan({})), {
+      mergedBy: "Engineer",
+      approvers: [],
+    }),
+  },
+  {
+    name: "the accepting handle is not the account that merged",
+    expectedMessagePart: "@someone-else merged",
+    problems: findHostAcceptanceProblems(splitLines(buildPlan({})), {
+      mergedBy: "someone-else",
+      approvers: [],
+    }),
+  },
+  {
+    name: "the second accepter approved the plan's pull request",
+    problems: findHostAcceptanceProblems(
+      splitLines(
+        buildPlan({
+          accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@lead.`,
+        }),
+      ),
+      {
+        mergedBy: "engineer",
+        approvers: ["lead"],
+      },
+    ),
+  },
+  {
+    name: "the second accepter gave no approving review",
+    expectedMessagePart: "no approving review",
+    problems: findHostAcceptanceProblems(
+      splitLines(
+        buildPlan({
+          accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@lead.`,
+        }),
+      ),
+      {
+        mergedBy: "engineer",
+        approvers: [],
+      },
+    ),
+  },
+  {
+    name: "the second accepter is the account that merged",
+    expectedMessagePart: "no approving review",
+    problems: findHostAcceptanceProblems(
+      splitLines(
+        buildPlan({
+          accepted: `${engineerLine}\n${alsoAcceptedByPrefix}@engineer.`,
+        }),
+      ),
+      {
+        mergedBy: "engineer",
+        approvers: ["engineer"],
+      },
+    ),
+  },
+  {
+    name: "every area of concern has a decision",
+    problems: findDecisionProblems(
+      `${concernsHeading}\n\n1. A.\n   ${decisionPrefix}yes.\n2. B.\n   ${decisionPrefix}no.\n\n## Open questions\n`,
+    ),
+  },
+  {
+    name: "a spec with no area of concern",
+    problems: findDecisionProblems(`${concernsHeading}\n\nNone\n\n## Open questions\n`),
+  },
+  {
+    name: "an area of concern has no decision",
+    expectedMessagePart: "area of concern 2 has no",
+    problems: findDecisionProblems(
+      `${concernsHeading}\n\n1. A.\n   ${decisionPrefix}yes.\n2. B.\n\n## Open questions\n`,
+    ),
+  },
+  {
+    name: "a decision line with no text is not a decision",
+    expectedMessagePart: "area of concern 1 has no",
+    problems: findDecisionProblems(`${concernsHeading}\n\n1. A.\n   ${decisionPrefix}\n`),
+  },
+  {
+    name: "an intent whose author is a handle",
+    problems: findAuthorProblems("# Intent: A\n\nAuthor: @originator (Team). Status: draft.\n"),
+  },
+  {
+    name: "an intent whose author is a name",
+    expectedMessagePart: "holds no handle",
+    problems: findAuthorProblems("# Intent: A\n\nAuthor: A Person (Team). Status: draft.\n"),
+  },
 ];
 
 /**
@@ -945,17 +993,27 @@ function findPlanLines(planPaths: string[]): string[] {
         `${planPath}: the file does not exist; pass the path of an existing ${planFileName}`,
     );
 
-  const checkedLines = planPaths
+  const changedPlanPaths = planPaths
     .filter(planPath => existsSync(planPath))
     .filter(
       planPath =>
         branchChanges === undefined ||
         readDefaultBranchFile(branchChanges.mergeBase, planPath) !==
           readFileSync(planPath, "utf8").trim(),
-    )
-    .flatMap(planPath => findPlanFileLines(planPath, isAcceptanceRequired));
+    );
 
-  return [...missingBranchLines, ...missingLines, ...checkedLines];
+  const checkedLines = changedPlanPaths.flatMap(planPath =>
+    findPlanFileLines(planPath, isAcceptanceRequired),
+  );
+
+  const acceptanceLines =
+    branchChanges === undefined
+      ? []
+      : changedPlanPaths.flatMap(planPath =>
+          findPlanAcceptanceLines(planPath, branchChanges.mergeBase, isAcceptanceRequired),
+        );
+
+  return [...missingBranchLines, ...missingLines, ...checkedLines, ...acceptanceLines];
 }
 
 /**
@@ -970,6 +1028,76 @@ function readDefaultBranchFile(mergeBase: string, filePath: string): string | un
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Check that a plan this branch builds was accepted by a merge, and by whom.
+ * @param planPath Path of the plan.
+ * @param mergeBase The commit this branch left the default branch at.
+ * @param isAcceptanceRequired Whether the branch changes a file outside `intent/`.
+ * @returns One line per problem.
+ */
+function findPlanAcceptanceLines(
+  planPath: string,
+  mergeBase: string,
+  isAcceptanceRequired: boolean,
+): string[] {
+  const isOnDefaultBranch = readDefaultBranchFile(mergeBase, planPath) !== undefined;
+  const unmergedProblems = findUnmergedPlanProblems(isOnDefaultBranch, isAcceptanceRequired);
+
+  if (!isAcceptanceRequired || unmergedProblems.length > 0) {
+    return unmergedProblems.map(message => `${planPath}: ${message}`);
+  }
+
+  const planMerge = readPlanMerge(mergeBase, planPath);
+
+  if (planMerge === undefined) {
+    unverifiedPlanPaths.push(planPath);
+
+    return [];
+  }
+
+  const planLines = splitLines(readFileSync(planPath, "utf8"));
+
+  return findHostAcceptanceProblems(maskFencedBlocks(planLines), planMerge).map(
+    message => `${planPath}: ${message}`,
+  );
+}
+
+/**
+ * Report each spec this branch adds or changes that leaves an area of concern undecided, and each intent it adds whose author is not a handle.
+ * @param changeFolders The `intent/<change>` folders.
+ * @returns One line per problem.
+ */
+function findRecordLines(changeFolders: string[]): string[] {
+  const branchChanges = changeFolders.length > 0 ? findBranchChanges() : undefined;
+
+  if (branchChanges === undefined) {
+    return [];
+  }
+
+  return changeFolders.flatMap(folder => {
+    const specPath = path.join(folder, specFileName);
+    const intentPath = path.join(folder, intentFileName);
+    const specText = readSpec(specPath);
+
+    const specProblems =
+      specText === undefined ||
+      readDefaultBranchFile(branchChanges.mergeBase, specPath) === specText.trim()
+        ? []
+        : findDecisionProblems(specText);
+
+    const authorProblems =
+      existsSync(intentPath) &&
+      readDefaultBranchFile(branchChanges.mergeBase, intentPath) === undefined
+        ? findAuthorProblems(readFileSync(intentPath, "utf8"))
+        : [];
+
+    return [
+      ...specProblems.map(message => `${specPath}: ${message}`),
+      ...authorProblems.map(message => `${intentPath}: ${message}`),
+    ];
+  });
 }
 
 /**
@@ -1034,7 +1162,14 @@ if (selfTestFailures.length > 0) {
     ...findPlanLines(planPaths),
     ...findMissingPlanLines(changeFolders),
     ...findAcceptedStatusLines(changeFolders),
+    ...findRecordLines(changeFolders),
   ];
+
+  for (const planPath of unverifiedPlanPaths) {
+    process.stdout.write(
+      `${planPath}: the "${acceptedByPrefix}" handle was not checked against the host; set ${hostTokenVariable} and install gh to check who merged the plan's pull request\n`,
+    );
+  }
 
   if (problemLines.length > 0) {
     process.stderr.write(`${problemLines.join("\n")}\n`);

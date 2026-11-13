@@ -1,6 +1,6 @@
 # Plan: Record who approved at every gate, delivery 1
 
-Accepted by: @<engineer>.
+Accepted by: @joetakara.
 
 This plan covers requirements 1 to 10 and 22 to 24 of `intent/approval-evidence/spec.md`. Requirements 11 to 21 get their own plan in this file when their delivery starts. The plan is accepted by merging the pull request that holds it, and the code follows in a second pull request.
 

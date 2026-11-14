@@ -128,6 +128,8 @@ The jobs that send `/sdlc:sdlc-mode` load the plugin from `plugins/sdlc/claude-c
 - **`triage` job of `Verify`:** when a pull request from this repository fails a check, reads the failed logs with the `Read` tool only and posts a three-line summary.
 - **`Control band`:** every day, runs the command in the repository variable `CONTROL_BAND_METRIC_COMMAND`, which writes `metric-values.json` as `{"baseline": [...], "recent": [...]}`, then `pnpm bands:check metric-values.json`. A tier whose action is `diagnose` or `propose` runs `/sdlc:sdlc-mode` with the finding, and the `pull_request` route opens an intent pull request. It never acts on production.
 
+- **`Plugin evals`:** on a pull request from this repository that changes a file under `plugins/sdlc/` or `.agents/`, runs `claude plugin eval plugins/sdlc/claude-code` on the small model, fails when a case scores under the repository variable `EVAL_PASS_THRESHOLD` (default `0.8`), stops starting runs once the list-price estimate reaches `EVAL_MAX_COST_USD` (default `20`, in US dollars), and keeps `results.json` as an artifact of the run. Each run is a model call billed to the account, on every such pull request. Before you turn it on, run the same command once on a machine: a case that fails there makes every such pull request red.
+
 On a machine, `pnpm loop:measure` reports the loop's measures. It is not part of `pnpm verify`.
 
 **Check:** with `CLAUDE_CI_ENABLED` unset, **Actions** shows these jobs as skipped.

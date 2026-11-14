@@ -1,0 +1,20 @@
+schema_version: "1.1"
+name: drafts-intent-and-waits-for-yes
+expected_outcome: |
+  The agent writes `intent/<change>/intent.md` from the template, shows the whole draft, and asks whether it matches. It does not commit, push, or open a pull request before the originator says yes.
+graders:
+  - name: intent-file-exists
+    type: file_exists
+    path: intent/*/intent.md
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: no-branch-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\s+(?:checkout\s+-[bB]|switch\s+-[cC]|branch\s+(?!-{1,2}(?:a|r|v|vv|l|list|show-current|contains|merged|no-merged|all|remotes)\b)[\w-]|worktree\s+add)'
+    min: 0
+    max: 0

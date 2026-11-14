@@ -1,0 +1,27 @@
+schema_version: "1.1"
+name: writes-the-models-file
+expected_outcome: |
+  The request states the budget `medium`, so the agent asks no question. The run's home directory is closed to it, so it shows `~/.claude/rules/sdlc-models.md` in the fixed shape, with the default model of each of the three roles and the effort `high`, for the person to save, writes no models file in the project, reports the project description step as done and the branch protection step as one a person does on GitHub, with what the ruleset needs, and does not touch other files.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-gives-the-rule-with-the-defaults-at-the-medium-effort
+    type: regex
+    pattern: 'rules/sdlc-models\.md[\s\S]*budget: medium \(high\)\s*\n\s*main: (?:claude-)?sonnet\S* high\s*\n\s*explore: (?:claude-)?haiku\S* high\s*\n\s*advise: (?:claude-)?opus\S* high'
+  - name: no-models-file-in-the-project
+    type: regex
+    target: files
+    pattern: '^\.agents/sdlc-models\.md$'
+    flags: m
+    match: not_contains
+  - name: reply-says-what-the-ruleset-needs
+    type: regex
+    pattern: "GitHub Pro, Team, or Enterprise"
+    flags: mu
+  - name: package-json-is-unchanged
+    type: regex
+    pattern: '^  "description": "Orders service for the web shop",$'
+    flags: m
+    target:
+      source: file
+      path: package.json

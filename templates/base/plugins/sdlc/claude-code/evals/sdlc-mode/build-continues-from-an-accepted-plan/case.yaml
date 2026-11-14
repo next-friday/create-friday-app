@@ -1,0 +1,19 @@
+schema_version: "1.1"
+name: build-continues-from-an-accepted-plan
+expected_outcome: |
+  The plan intent/app-version/plan.md is on the default branch, so its pull request is merged, and the engineer says which account merged it because the session cannot reach the host. The agent creates a new branch, sets the plan's `Accepted by:` line to that account in the first commit, implements the plan, runs the checks the project's agent instructions name, pushes the branch, opens the pull request, reviews it, and stops at the gate for the code owner. It neither approves nor merges.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: new-branch-is-created
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\s+(?:checkout|switch)\s+(?:-\S+\s+)*-[bBcC]\s+(?!main(?:\s|$))\S+'
+    min: 1
+  - name: plan-names-the-engineer
+    type: regex
+    pattern: '^Accepted by: @joe-dev\.$'
+    flags: mu
+    target:
+      source: file
+      path: intent/app-version/plan.md

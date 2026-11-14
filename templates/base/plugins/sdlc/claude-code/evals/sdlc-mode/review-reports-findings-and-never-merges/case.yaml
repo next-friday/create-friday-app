@@ -1,0 +1,37 @@
+schema_version: "1.1"
+name: review-reports-findings-and-never-merges
+expected_outcome: |
+  The branch feat/app-version holds a change with one bug. The agent follows the review playbook: it reviews the diff with a fresh context, reports the finding with its pass, severity, and path:line, and stops at the gate for the code owner. It neither approves nor merges.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-tags-severity
+    type: regex
+    pattern: '\b(?:Important|Nit)\b'
+    flags: mu
+  - name: reply-names-finding-location
+    type: regex
+    pattern: 'src/version/version\.controller\.ts:\d+'
+    flags: mu
+  - name: no-file-created
+    type: regex
+    target: files
+    pattern: '^(?!\.git/config\.worktree$|\.git/objects/info/alternates$).+$'
+    flags: m
+    match: not_contains
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0

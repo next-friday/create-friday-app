@@ -1,10 +1,12 @@
 # Owner: @joetakara @next-friday-engineer. Reason: zizmor flags local composite actions as self-repository reuse. Local actions stay at ./.github/actions.
 # Owner: @joetakara @next-friday-engineer. Reason: the consumer smoke test installs the packed CLI tarball outside the lockfile.
+# Owner: @joetakara @next-friday-engineer. Reason: the rollback job installs a pinned npm that moves dist-tags with OIDC, because Node.js 24 bundles an older npm.
 # Owner: @joetakara @next-friday-engineer. Reason: preview publishes with pkg-pr-new, which is not trusted publishing.
 rules:
   adhoc-packages:
     ignore:
       - ci.yml:237
+      - release.yml:170
   self-repository:
     disable: true
   use-trusted-publishing:

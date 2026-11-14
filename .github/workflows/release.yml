@@ -9,6 +9,12 @@ on:
       - "package.json"
       - ".github/workflows/release.yml"
       - ".github/actions/setup-pnpm/action.yml"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The published version that npm's latest tag points to after the rollback
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,6 +25,7 @@ permissions: {}
 jobs:
   select-mode:
     name: Detect Release Mode
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -144,3 +151,28 @@ jobs:
           fi
           npm stage publish "$PACK_DIR/$tarball" --access "$access" --tag "$dist_tag"
           gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file "$RUNNER_TEMP/release-notes.md"
+
+  rollback:
+    name: Point latest to an earlier version
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: Release
+    permissions:
+      id-token: write # Needed for npm trusted publishing to move the dist-tag.
+    steps:
+      - name: Set up Node.js for the npm registry
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - name: Install an npm that moves dist-tags with OIDC
+        run: npm install --global npm@11.21.1
+      - name: Point latest to the version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Pass a version such as 9.8.1"; exit 1; }
+          npm view "@next-friday/create-app@$VERSION" version > /dev/null
+          npm dist-tag add "@next-friday/create-app@$VERSION" latest
+          npm dist-tag ls @next-friday/create-app

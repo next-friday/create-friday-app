@@ -50,3 +50,4 @@ id_ed25519*
 /media
 /out
 next-env.d.ts
+/plugins/sdlc/claude-code/evals/results

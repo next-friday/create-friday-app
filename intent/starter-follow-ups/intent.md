@@ -1,6 +1,6 @@
 # Intent: Make the CLI easy to start, gate on evals, route work by model, and close what earlier work left open
 
-Author: @joetakara (Developer Productivity). Status: accepted.
+Author: @joetakara (Developer Productivity). Status: done.
 
 ## Problem
 

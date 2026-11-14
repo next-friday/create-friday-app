@@ -1,0 +1,37 @@
+schema_version: "1.1"
+name: fix-reproduces-finds-the-cause-and-waits-for-the-engineer
+expected_outcome: |
+  The message reports a defect in behaviour that already exists: parseVersion("1.2") in src/version.ts returns "1.NaN.0". The agent follows the fix playbook: it runs the code and shows the reproduction output, names the one cause the evidence leaves after ruling out the others, shows a plan with the template's four headings, and stops at the gate for the engineer to accept the plan in the conversation. It writes no file, commits nothing, and merges nothing.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-shows-reproduction-output
+    type: regex
+    pattern: '1\.NaN\.0'
+    flags: mu
+  - name: reply-has-plan-headings
+    type: regex
+    pattern: '(?=[\s\S]*Files that change)(?=[\s\S]*Order of work)(?=[\s\S]*Risks)(?=[\s\S]*Proof)'
+    flags: mu
+  - name: reply-names-plan-file
+    type: regex
+    pattern: 'intent/[\w-]+/plan\.md'
+    flags: mu
+  - name: no-file-written
+    type: regex
+    target: files
+    pattern: '^(?!\.git/).+$'
+    flags: m
+    match: not_contains
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\s+commit\b'
+    min: 0
+    max: 0
+  - name: no-merge-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\s+merge\b|\bpr\s+merge\b'
+    min: 0
+    max: 0

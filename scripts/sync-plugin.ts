@@ -597,7 +597,7 @@ function renderTemplateMarketplace(marketplaceText: string): string {
 }
 
 /**
- * Render what a generated project holds of the plugin: the adapters without their eval cases, the marketplace file, and the three scripts.
+ * Render what a generated project holds of the plugin: the adapters with their eval cases, the marketplace file, and the three scripts.
  * @param adapterFiles The expected content of each adapter file, from `renderAdapters`.
  * @returns The expected content of each file under `templates/base/`, by path from the repository root.
  */
@@ -607,6 +607,16 @@ function renderTemplateCopy(adapterFiles: Map<string, string>): Map<string, stri
       findTemplateCopyPath(file),
       content,
     ]),
+    ...adapters
+      .filter(({hasAuthoredEvals}) => hasAuthoredEvals)
+      .map(({directory}) => path.join(adaptersRoot, directory, "evals"))
+      .flatMap(evalsDirectory =>
+        listFiles(evalsDirectory, true).map((file): [string, string] => {
+          const evalFile = path.join(evalsDirectory, file);
+
+          return [findTemplateCopyPath(evalFile), readFileSync(evalFile, "utf8")];
+        }),
+      ),
     [
       path.join(templateRoot, claudeMarketplacePath),
       renderTemplateMarketplace(readFileSync(claudeMarketplacePath, "utf8")),

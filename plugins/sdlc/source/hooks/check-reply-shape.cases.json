@@ -527,7 +527,7 @@
     "input": {
       "session_id": "shape",
       "stop_hook_active": false,
-      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the plan's pull request: https://github.com/acme/shop/pull/7"
+      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the spec's pull request: https://github.com/acme/shop/pull/7"
     },
     "expected": "pass"
   },
@@ -626,7 +626,7 @@
     "input": {
       "session_id": "shape",
       "stop_hook_active": false,
-      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the plan's pull request: [https://github.com/acme/shop/pull/7](https://github.com/acme/shop/pull/7)"
+      "last_assistant_message": "**Result:** The plan is pushed.\n\n**Now:** Merge the spec's pull request: [https://github.com/acme/shop/pull/7](https://github.com/acme/shop/pull/7)"
     },
     "expected": "pass"
   },
@@ -635,7 +635,7 @@
     "input": {
       "session_id": "shape",
       "stop_hook_active": false,
-      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/70; the guarded files are missing.\n\n**Now:** Merge the plan's pull request: https://github.com/acme/shop/pull/7"
+      "last_assistant_message": "**Result:** The code is pushed.\n\n**Not yet:** Do not merge https://github.com/acme/shop/pull/70; the guarded files are missing.\n\n**Now:** Merge the spec's pull request: https://github.com/acme/shop/pull/7"
     },
     "expected": "pass"
   },

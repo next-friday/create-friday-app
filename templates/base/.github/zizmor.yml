@@ -1,4 +1,8 @@
 # Owner: @your-org/your-team. Reason: Semgrep rejects the `$/` self-repository syntax, so local actions use `./`.
+# Owner: @your-org/your-team. Reason: the plugin evals job installs a pinned Claude Code CLI with npm, because no lockfile of the project holds it.
 rules:
+  adhoc-packages:
+    ignore:
+      - plugin-evals.yml:38
   self-repository:
     disable: true

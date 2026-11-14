@@ -5,6 +5,8 @@ on:
     paths:
       - ".agents/**"
       - "plugins/sdlc/**"
+  schedule:
+    - cron: "0 2 * * *"
 
 permissions: {}
 
@@ -15,7 +17,7 @@ concurrency:
 jobs:
   evals:
     name: Run the plugin's eval cases
-    if: vars.CLAUDE_CI_ENABLED == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    if: vars.CLAUDE_CI_ENABLED == 'true' && (github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:

@@ -10,9 +10,11 @@ The `sdlc` plugin runs the software development loop: a skill that matches a req
 | `adapters/`                   | The render of `source/` for each agent tool, with `agents.json` for each tool's subagent fields and `hooks.json` for its hook. `pnpm plugin:sync` writes it. |
 | `adapters/claude-code/evals/` | The eval cases, authored there.                                                                                                                              |
 
-## Hook
+## Hooks
 
-The plugin ships `check-reply-shape.sh`, a POSIX `sh` script that reads the hook input with `jq`, as a `UserPromptSubmit` and a `Stop` hook for Claude Code and as three hooks for Cursor. It checks only a reply whose first line starts with `**Answer:**`, `**Result:**`, or `**No change:**`, and it blocks that reply once, with a reason that asks for the whole reply again, when the reply:
+The plugin ships `sdlc-status.sh` as a `SessionStart` hook for Claude Code and a `sessionStart` hook for Cursor. When a session starts, it lists each `intent/<change>/` whose intent and spec are not `Status: done.`, with its stage and who acts next, from the files alone, and prints nothing when there is no such change or no `jq`. Claude Code adds the plain text to the session's context; Cursor gets it as `additional_context` from `sdlc-status.sh json`. `/sdlc:sdlc-status` gives the same summary with each change's pull requests. `pnpm plugin:check` runs the hook against `source/hooks/sdlc-status.cases.json`.
+
+The plugin also ships `check-reply-shape.sh`, a POSIX `sh` script that reads the hook input with `jq`, as a `UserPromptSubmit` and a `Stop` hook for Claude Code and as three hooks for Cursor. It checks only a reply whose first line starts with `**Answer:**`, `**Result:**`, or `**No change:**`, and it blocks that reply once, with a reason that asks for the whole reply again, when the reply:
 
 - names a pull request or an issue by number outside a URL, a fenced block, and a code span that holds more than the bare number;
 - does not end with a line that starts with `**Now:**`, unless the reply is a `**No change:**` line alone;

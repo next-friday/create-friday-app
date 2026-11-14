@@ -26,6 +26,8 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 The `verifier` subagent starts the app with `pnpm dev`, which needs a PostgreSQL database in `DATABASE_URL` and `PAYLOAD_SECRET` in `.env`. It exercises the changed behavior and the two nearest neighboring flows.
 
+After a change to a page, open that page with the `playwright` MCP server from `.mcp.json`, take a screenshot, look at it, and compare it with the approved mock when there is one; repeat until it matches.
+
 ## Architecture
 
 - `src/payload.config.ts` wires the collections in `src/collections/` to PostgreSQL. The site lives in `src/app/(frontend)/`, and `src/app/health/route.ts` serves `/health`. `next.config.ts` builds `output: "standalone"` and leaves Cache Components off.

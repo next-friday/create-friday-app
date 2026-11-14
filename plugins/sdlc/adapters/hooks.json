@@ -8,6 +8,10 @@
     {
       "event": "Stop",
       "script": "check-reply-shape.sh"
+    },
+    {
+      "event": "SessionStart",
+      "script": "sdlc-status.sh"
     }
   ],
   "cursor": [
@@ -26,6 +30,11 @@
       "script": "check-reply-shape.sh",
       "argument": "followup",
       "loopLimit": 1
+    },
+    {
+      "event": "sessionStart",
+      "script": "sdlc-status.sh",
+      "argument": "json"
     }
   ]
 }

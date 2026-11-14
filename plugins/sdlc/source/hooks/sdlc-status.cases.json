@@ -1,0 +1,22 @@
+[
+  {
+    "name": "no intent folder: nothing printed",
+    "input": {
+      "cwd": "/nonexistent-project"
+    },
+    "expected": "pass"
+  },
+  {
+    "name": "an open plan: plain text",
+    "input": {},
+    "changedFiles": ["intent/app-version/plan.md"],
+    "expected": "Changes in intent/ that are not done (send /sdlc:sdlc-mode to work on one):\n- intent/app-version: plan accepted; the engineer builds it, then a code owner reviews the pull request\n"
+  },
+  {
+    "name": "an open plan: json for the second tool",
+    "argument": "json",
+    "input": {},
+    "changedFiles": ["intent/app-version/plan.md"],
+    "expected": "{\n  \"additional_context\": \"Changes in intent/ that are not done (send /sdlc:sdlc-mode to work on one):\\n- intent/app-version: plan accepted; the engineer builds it, then a code owner reviews the pull request\\n\"\n}\n"
+  }
+]

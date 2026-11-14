@@ -27,6 +27,8 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 The `verifier` subagent starts the app with `pnpm dev`, which needs a PostgreSQL database in `DATABASE_URL` and `PAYLOAD_SECRET` in `.env`. It exercises the changed behavior and the two nearest neighboring flows.
 
+After a change to a page, open that page with the `playwright` MCP server from `.mcp.json`, take a screenshot, look at it, and compare it with the approved mock when there is one; repeat until it matches.
+
 ## Architecture
 
 - Root scripts run lint, format, Knip, and the agent checks once for the workspace, and hand `build`, `test`, `typecheck`, and `depcruise` to Turborepo for each app. `TURBO_FILTER` narrows them; the default is every app.

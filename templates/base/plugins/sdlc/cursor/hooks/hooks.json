@@ -16,6 +16,11 @@
         "command": "sh \"${CURSOR_PLUGIN_ROOT}/hooks/check-reply-shape.sh\" followup",
         "loop_limit": 1
       }
+    ],
+    "sessionStart": [
+      {
+        "command": "sh \"${CURSOR_PLUGIN_ROOT}/hooks/sdlc-status.sh\" json"
+      }
     ]
   }
 }

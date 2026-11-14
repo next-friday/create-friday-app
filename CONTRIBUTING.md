@@ -79,6 +79,8 @@ Two cases need a maintainer, because CI cannot see what npm has staged:
 - **Staged, but the run failed before it created the tag.** Every later run fails at `npm stage publish`. Create the tag and release from the commit the run built: `gh release create v<version> --target <commit> --title v<version> --notes-file <file>`, where the file holds that version's `CHANGELOG.md` section without its heading.
 - **A maintainer rejected the staged version.** Delete its release and tag with `gh release delete v<version> --cleanup-tag --yes`, then ship the fix as a new version through a changeset.
 
+To roll back a bad release, run the **Release** workflow by hand with the version that should be `latest` again; its `rollback` job runs `npm dist-tag add @next-friday/create-app@<version> latest` from the `Release` environment. The trusted publisher needs **Allow npm dist-tag** turned on. A maintainer then marks the bad version with `npm deprecate @next-friday/create-app@<bad> "Use <version>"` from their own account, and the fix ships as a new version through a changeset.
+
 The package's trusted publisher on npmjs.com is `next-friday/next-friday-create-app`, workflow `release.yml`, and environment `Release`. The workflow stages with `npm stage publish` and never runs `npm publish`; npm's own checks of these fields and of the allowed actions are not verified here.
 
 To try a pull request before release, add the `preview` label. [`.github/workflows/preview.yml`](.github/workflows/preview.yml) publishes it to pkg.pr.new and comments the install command.

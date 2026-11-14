@@ -402,7 +402,7 @@ jobs:
       - compatibility
       - knip
       - audit
-    if: failure() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: failure() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && vars.ANTHROPIC_FEDERATION_RULE_ID != '' && vars.ANTHROPIC_ORGANIZATION_ID != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -434,6 +434,7 @@ jobs:
             --allowedTools "Read"
             --json-schema '{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}'
       - name: Post the summary
+        if: steps.triage.outputs.structured_output != ''
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

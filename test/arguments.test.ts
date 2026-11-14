@@ -9,6 +9,12 @@ describe("usage", () => {
     expect(usage).toContain(`[--stack ${stacks.map(stack => stack.id).join("|")}]`);
   });
 
+  it("lists --yes and the defaults it takes", () => {
+    expect(usage).toContain("-y, --yes");
+    expect(usage).toContain("my-app");
+    expect(usage).toContain("nextjs");
+  });
+
   it("lists every deploy target and names the default", () => {
     expect(usage).toContain(`[--deploy ${deployTargets.join("|")}]`);
     expect(usage).toContain("Deploy target: none or railway. The default is none.");
@@ -28,6 +34,7 @@ describe("parseCliArguments", () => {
       name: "my-api",
       stack: "nestjs",
       deploy: "none",
+      yes: false,
       help: false,
       skipGit: false,
       skipInstall: false,
@@ -58,6 +65,10 @@ describe("parseCliArguments", () => {
 
   it.each(["--help", "--version"])("reads %s despite other bad arguments", flag => {
     expect(parseCliArguments([flag, "--stack", "rails", "first", "second"]).stack).toBeUndefined();
+  });
+
+  it.each(["--yes", "-y"])("reads %s", flag => {
+    expect(parseCliArguments([flag]).yes).toBe(true);
   });
 
   it("reads the deploy target", () => {

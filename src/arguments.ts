@@ -1,7 +1,8 @@
 import {parseArgs} from "node:util";
 
+import {defaultProjectName} from "./project-name.ts";
+import {defaultStackId, isStackId, stacks} from "./stacks.ts";
 import {deployTargets, isDeployTarget} from "./deploy-targets.ts";
-import {isStackId, stacks} from "./stacks.ts";
 import type {DeployTarget} from "./deploy-targets.ts";
 import type {StackId} from "./stacks.ts";
 
@@ -13,13 +14,15 @@ export interface CliOptions {
   skipInstall: boolean;
   stack?: StackId;
   version: boolean;
+  yes: boolean;
 }
 
-export const usage = `Usage: pnpm create @next-friday/app [name] [--stack ${stacks.map(stack => stack.id).join("|")}] [--deploy ${deployTargets.join("|")}]
+export const usage = `Usage: pnpm create @next-friday/app [name] [--stack ${stacks.map(stack => stack.id).join("|")}] [--deploy ${deployTargets.join("|")}] [--yes]
 
   name            Project directory and package name, or . for the current directory. Asked when left out.
   --stack         Template stack. Asked when left out.
   --deploy        Deploy target: ${deployTargets.join(" or ")}. The default is none.
+  -y, --yes       Ask nothing and take the defaults: the name ${defaultProjectName} and the stack ${defaultStackId}.
   --skip-git      Do not run git init.
   --skip-install  Do not run pnpm install.
   -v, --version   Show the version.
@@ -60,6 +63,11 @@ export function parseCliArguments(cliArguments: string[]): CliOptions {
         short: "h",
         default: false,
       },
+      yes: {
+        type: "boolean",
+        short: "y",
+        default: false,
+      },
     },
   });
 
@@ -84,6 +92,7 @@ export function parseCliArguments(cliArguments: string[]): CliOptions {
     stack: stack !== undefined && isStackId(stack) ? stack : undefined,
     skipGit: values["skip-git"],
     skipInstall: values["skip-install"],
+    yes: values.yes,
   };
 }
 

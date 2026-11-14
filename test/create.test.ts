@@ -428,6 +428,66 @@ describe("create with a deploy target", () => {
   });
 });
 
+describe("create with defaults", () => {
+  it("offers my-app and Next.js as the defaults a person accepts with Enter", async () => {
+    vi.mocked(text).mockResolvedValue("enter-defaults");
+    vi.mocked(select).mockResolvedValue("nextjs");
+    await create([]);
+
+    expect(vi.mocked(text)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultValue: "my-app",
+      }),
+    );
+
+    expect(vi.mocked(select)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialValue: "nextjs",
+      }),
+    );
+
+    expect(process.exitCode).toBe(0);
+  });
+
+  it("creates my-app from Next.js with --yes and asks nothing, without a terminal", async () => {
+    const directory = path.join(cwd, "yes-defaults");
+
+    mkdirSync(directory);
+    vi.spyOn(process, "cwd").mockReturnValue(directory);
+    setTerminal(false);
+    await create(["--yes"]);
+    expect(vi.mocked(text)).not.toHaveBeenCalled();
+    expect(vi.mocked(select)).not.toHaveBeenCalled();
+    expect(existsSync(path.join(directory, "my-app", "next.config.ts"))).toBe(true);
+    expect(process.exitCode).toBe(0);
+  });
+
+  it("lets a name and --stack given with --yes win over the defaults", async () => {
+    setTerminal(false);
+    await create(["yes-api", "--stack", "nestjs", "-y"]);
+    expect(existsSync(path.join(cwd, "yes-api", nestModule))).toBe(true);
+    expect(process.exitCode).toBe(0);
+  });
+
+  it("stops before writing a file when --yes meets a my-app directory that holds files", async () => {
+    const directory = path.join(cwd, "yes-taken");
+    const errors = captureErrors();
+
+    mkdirSync(path.join(directory, "my-app"), {
+      recursive: true,
+    });
+
+    writeFileSync(path.join(directory, "my-app", "notes.txt"), "keep");
+    vi.spyOn(process, "cwd").mockReturnValue(directory);
+    setTerminal(false);
+    await create(["--yes"]);
+    expect(errors.join("")).toMatch(/my-app/u);
+    expect(errors.join("")).toMatch(/Pass a project name/u);
+    expect(readdirSync(path.join(directory, "my-app"))).toStrictEqual(["notes.txt"]);
+    expect(process.exitCode).toBe(1);
+  });
+});
+
 describe("create interruptions and edge cases", () => {
   it.each(["SIGINT", "SIGTERM", "SIGHUP"] as const)(
     "removes the partial project and exits with 130 on %s during the copy",
@@ -532,7 +592,8 @@ describe("create interruptions and edge cases", () => {
       }
 
       expect(validate("Bad Name")).toMatch(/^Use lowercase letters/);
-      expect(validate(undefined)).toMatch(/^Use lowercase letters/);
+      expect(validate("")).toBeUndefined();
+      expect(validate(undefined)).toBeUndefined();
 
       return "typed-api";
     });

@@ -4,13 +4,13 @@ import {existsSync, readdirSync, readFileSync, realpathSync, rmSync} from "node:
 import {fileURLToPath} from "node:url";
 import path from "node:path";
 
+import {defaultProjectName, packageName, validateProjectName} from "./project-name.ts";
+import {defaultStackId, stackById, stacks, templateName} from "./stacks.ts";
 import {didInstallDependencies, initGit, writeEnvironmentFile} from "./setup.ts";
 import {listProjectFiles} from "./project-files.ts";
-import {packageName, validateProjectName} from "./project-name.ts";
 import {parseCliArguments, usage} from "./arguments.ts";
 import {renameProject} from "./rename.ts";
 import {resolveDeploySections} from "./deploy-sections.ts";
-import {stackById, stacks, templateName} from "./stacks.ts";
 import type {CliOptions} from "./arguments.ts";
 import type {DeployTarget} from "./deploy-targets.ts";
 import type {GitResult} from "./setup.ts";
@@ -121,6 +121,10 @@ async function resolveProject(
   options: CliOptions,
   cwd: string,
 ): Promise<{name: string; stack: StackId}> {
+  if (options.yes) {
+    return resolveDefaults(options, cwd);
+  }
+
   if (!process.stdin.isTTY && (options.name === undefined || options.stack === undefined)) {
     throw new Error(`Pass the project name and --stack when not running in a terminal.\n${usage}`);
   }
@@ -139,6 +143,28 @@ async function resolveProject(
   return {
     name,
     stack,
+  };
+}
+
+/**
+ * Take the project name and stack from the options, and the defaults for any left out, without asking.
+ * @param options - Parsed command-line options.
+ * @param cwd - Directory the project is created in.
+ * @returns A valid project name and the stack.
+ */
+function resolveDefaults(options: CliOptions, cwd: string): {name: string; stack: StackId} {
+  const name = options.name ?? defaultProjectName;
+  const nameError = validateProjectName(name, cwd);
+
+  if (nameError !== undefined) {
+    throw new Error(
+      options.name === undefined ? `${nameError} Pass a project name with --yes.` : nameError,
+    );
+  }
+
+  return {
+    name,
+    stack: options.stack ?? defaultStackId,
   };
 }
 
@@ -380,9 +406,10 @@ function packageVersion(): string {
  */
 async function askName(cwd: string): Promise<string> {
   const name = await text({
-    message: "Project name",
-    placeholder: "my-app",
-    validate: (value = "") => validateProjectName(value, cwd),
+    placeholder: defaultProjectName,
+    defaultValue: defaultProjectName,
+    message: `What is the project called? It names the new directory and the package. Press Enter for ${defaultProjectName}.`,
+    validate: (value = "") => validateProjectName(value === "" ? defaultProjectName : value, cwd),
   });
 
   if (isCancel(name)) {
@@ -398,7 +425,8 @@ async function askName(cwd: string): Promise<string> {
  */
 async function askStack(): Promise<StackId> {
   const stack = await select<StackId>({
-    message: "Stack",
+    initialValue: defaultStackId,
+    message: `Which stack should the project start from? Press Enter for ${stackById[defaultStackId].label}.`,
     options: stacks.map(option => ({
       value: option.id,
       label: option.label,

@@ -6,13 +6,13 @@ Create a Next Friday project with the company's tooling, Git hooks, CI, and agen
 pnpm create @next-friday/app
 ```
 
-Answer the prompts for a project name and a stack. To skip the prompts, pass both:
+Answer the prompts for a project name and a stack, or press Enter at each for `my-app` and Next.js. To skip the prompts and take those defaults, pass `--yes`. To skip them with your own choices, pass both:
 
 ```sh
 pnpm create @next-friday/app my-api --stack nestjs
 ```
 
-Without a terminal, as in CI or an agent, the name and `--stack` are required. Pass `.` as the name to create the project in the current directory, for example in a fresh clone.
+Without a terminal, as in CI or an agent, pass `--yes`, or the name and `--stack`. Pass `.` as the name to create the project in the current directory, for example in a fresh clone.
 
 ## Stacks
 
@@ -51,6 +51,7 @@ pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turbor
 | :--------------- | :---------------------------------------------------------------------------------------- |
 | `name`           | Project directory and package name. Asked when left out.                                  |
 | `--stack`        | `nodejs`, `nestjs`, `nextjs`, `payload`, or `turborepo`. Asked when left out.             |
+| `-y, --yes`      | Ask nothing: the name `my-app` and the stack `nextjs`, unless given.                      |
 | `--deploy`       | Deploy target: `none` or `railway`. The default is `none`, which adds no deploy workflow. |
 | `--skip-git`     | Do not run `git init`.                                                                    |
 | `--skip-install` | Do not run `pnpm install`.                                                                |

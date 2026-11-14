@@ -1,0 +1,62 @@
+name: Plugin evals
+
+on:
+  pull_request:
+    paths:
+      - ".agents/**"
+      - "plugins/sdlc/**"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  evals:
+    name: Run the plugin's eval cases
+    if: vars.CLAUDE_CI_ENABLED == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Require a Claude credential
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          [[ -n "$ANTHROPIC_API_KEY" || -n "$CLAUDE_CODE_OAUTH_TOKEN" ]] || { echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret"; exit 1; }
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install the shell sandbox and Claude Code
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes bubblewrap socat
+          npm install --global @anthropic-ai/claude-code@2.1.312
+      - name: Run the eval cases
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          EVAL_MAX_COST_USD: ${{ vars.EVAL_MAX_COST_USD || '20' }}
+          EVAL_PASS_THRESHOLD: ${{ vars.EVAL_PASS_THRESHOLD || '0.8' }}
+        run: |
+          claude plugin eval plugins/sdlc/claude-code \
+            --trust-plugin \
+            --scaffold \
+            --allow-tools Write Edit Bash \
+            --json results.json \
+            --threshold "$EVAL_PASS_THRESHOLD" \
+            --model claude-haiku-5-5 \
+            --judge-model claude-haiku-5-5 \
+            --no-publish \
+            --max-cost-usd "$EVAL_MAX_COST_USD"
+      - name: Keep the result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: plugin-evals-results
+          path: results.json
+          if-no-files-found: warn

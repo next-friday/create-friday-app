@@ -3,6 +3,6 @@
 rules:
   adhoc-packages:
     ignore:
-      - plugin-evals.yml:38
+      - plugin-evals.yml:40
   self-repository:
     disable: true

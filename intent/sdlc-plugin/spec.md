@@ -1,6 +1,6 @@
 # Spec: Ship the SDLC playbook as the `sdlc` plugin
 
-From `intent/sdlc-plugin/intent.md`. Status: accepted.
+From `intent/sdlc-plugin/intent.md`. Status: done.
 
 Request: "/sdlc intent/sdlc-plugin/intent.md". Skills at `90c2ed0`.
 
@@ -125,15 +125,25 @@ In Claude Code the project's `.claude/settings.json` registers the project folde
 ## Areas of concern
 
 1. **The organization's name outside the manifests.** Brand policy, rule 3, and `.agents/rules/descriptive-naming.md`; owner: @joetakara. The name is in the marketplace name of requirement 6, and again in the marketplace file and the settings of a generated project (requirements 20 and 22). **Proposal:** the marketplace name is the product owner's to choose.
+   Decision: the marketplace name is `next-friday-plugins`, as built in `.claude-plugin/marketplace.json`.
 2. **Where the model choices live** (requirements 14 and 15). Decision the files do not settle; owner: @joetakara. `setup-pstack` writes one file for a person, under that person's home directory. **Proposal:** one committed file for the project, `.agents/sdlc-models.md`, because the intent speaks of the budget the team has.
+   Decision: superseded by `intent/starter-follow-ups/spec.md` requirement 9: each person's roles live in `~/.claude/rules/sdlc-models.md` or `~/.cursor/rules/sdlc-models.mdc`.
 3. **The duplicate between the rules and the skill.** Decision the files do not settle; owner: @joetakara. The intent names `.agents/rules/agent-owned-work.md` and `.agents/rules/evidence-before-claims.md` as repeating the skill, and puts moving rules out of scope. **Proposal:** requirement 12: the skill states the rule it relies on and names no rule file, so the plugin runs in a project that has no such file.
+   Decision: as proposed; no file under `plugins/sdlc/source/` names `.agents/rules`.
 4. **A person commits two of the changed files.** `.claude/settings.json` and `scripts/sync-agent-rules.ts` are in the constitution; owner: @joetakara. The plan names them as steps for a person.
+   Decision: a person committed both files; they are on `main`.
 5. **Paths and marketplace name in a generated project** (requirement 20). Decision the files do not settle; owner: @joetakara. **Proposal:** `plugins/sdlc/claude-code/`, `plugins/sdlc/cursor/`, and the name `next-friday-plugins`, which is also the key the official marketplace uses (`sdlc@next-friday-plugins`), so a project that wants later plugin versions changes one source entry and nothing else.
+   Decision: as proposed; a generated project holds `plugins/sdlc/claude-code/` and `plugins/sdlc/cursor/` under the marketplace name `next-friday-plugins`.
 6. **How Cursor loads the plugin** (requirement 23). Decision the files do not settle; owner: @joetakara. **Proposal:** the script name `.cursor/hooks/load-project-plugins.sh`. The `workspaceOpen` hook is not verified in a real Cursor; a person tries it once before the pull request is merged.
+   Decision: as proposed; `templates/base/.cursor/hooks/load-project-plugins.sh` is built. Whether the `workspaceOpen` hook loads it in a real Cursor is not recorded in this repository.
 7. **Eval runner and workflow leave generated projects** (requirement 24). Decision the files do not settle; owner: @joetakara. **Proposal:** remove `run-agent-evals.ts`, `evals:run`, and `agent-evals.yml`, because the eval cases test the plugin and stay with the plugin in this repository.
+   Decision: the runner and `agent-evals.yml` are removed as proposed; `intent/starter-follow-ups/spec.md` requirements 22 to 26 later ship the eval cases and `plugin-evals.yml` in a generated project.
 8. **Where the verifier's start instruction lives** (requirement 25). Decision the files do not settle; owner: @joetakara. **Proposal:** the stack's `AGENTS.md`, under `## Verifying your work`, so one `verifier` subagent serves every stack.
+   Decision: as proposed; each stack's `AGENTS.md` holds the instruction under `## Verifying your work`.
 9. **How a workflow loads the plugin** (requirement 28). Decision the files do not settle; owner: @joetakara. **Proposal:** `--plugin-dir plugins/sdlc/claude-code` in `claude_args`, because a CI folder is not a trusted folder. The plan proves it with a run.
+   Decision: as proposed; `spec-on-intent-merge.yml` and `control-band.yml` pass `--plugin-dir plugins/sdlc/claude-code`.
 10. **A person commits the constitution files of the template** (requirements 22, 23, 24, 28, 29). Owner: @joetakara. They are `templates/base/.claude/settings.json`, `templates/base/.cursor/hooks.json` and its script, `spec-on-intent-merge.yml`, `control-band.yml`, the deletion of `agent-evals.yml`, and `templates/base/scripts/sync-agent-rules.ts`. The plan names them as steps for a person.
+    Decision: a person committed these files; they are on `main`.
 
 ## Open questions
 

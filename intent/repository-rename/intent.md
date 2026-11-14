@@ -1,6 +1,6 @@
 # Intent: Follow the repository rename to next-friday-create-app
 
-Author: Joe Takara (Developer Productivity). Status: accepted.
+Author: Joe Takara (Developer Productivity). Status: done.
 
 ## Problem
 

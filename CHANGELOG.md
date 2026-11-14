@@ -1,5 +1,12 @@
 # @next-friday/create-app
 
+## 9.11.0
+
+### Minor Changes
+
+- da4d4c0: The `sdlc` plugin adds a correction to the project's agent instructions when a person corrects the same mistake twice. Its `build` and `fix` playbooks take the engineer's acceptance of a plan in the session, and put `plan.md` in one pull request with the code and one changeset for the whole change; `pnpm plan:check` no longer asks for a pull request that holds only the plan. Before pushing or handing over a patch, the agent runs each CI check it can run on the changed files and says which it cannot.
+- 4ed3db8: A generated project holds the `sdlc` plugin's eval cases under `plugins/sdlc/claude-code/evals/`, and `SETUP.md` step 8 describes the `Plugin evals` workflow, which runs them on a pull request that changes the plugin or `.agents/` once `CLAUDE_CI_ENABLED` is `true`, with the pass threshold and cost ceiling in the repository variables `EVAL_PASS_THRESHOLD` and `EVAL_MAX_COST_USD`.
+
 ## 9.10.0
 
 ### Minor Changes

@@ -22,7 +22,7 @@ Delivery 2. Edited by the agent:
 
 - `plugins/sdlc/source/skills/setup-sdlc/SKILL.md` (changed): the three roles, the rule in each tool's home directory, and how to choose the session's model.
 - `plugins/sdlc/source/skills/sdlc-mode/SKILL.md` (changed): starting a subagent on a role's model in each tool, and the fallback with no rule.
-- `plugins/sdlc/source/skills/sdlc-mode/playbooks/build.md`, `fix.md`, `review.md` (changed): the `explore` subagent, the `verifier` on the `explore` model, and the `advise` subagent at the three moments.
+- `plugins/sdlc/source/skills/sdlc-mode/playbooks/build.md`, `fix.md` (changed): the `explore` subagent, the `verifier` on the `explore` model, and the `advise` subagent at the three moments.
 - `templates/base/SETUP.md` (changed): the advisor tool sentence.
 - `plugins/sdlc/adapters/claude-code/evals/` (changed): the `setup-sdlc` cases' graders read the new rule's path and three roles.
 - `plugins/sdlc/adapters/` and `templates/base/plugins/sdlc/` (rendered).
@@ -85,6 +85,8 @@ Delivery 4:
 - Step 4 needs a host the session does not reach. The spec's decision removes the numbers when the host is declined.
 - Step 14: a workflow that calls a model costs money on each pull request it runs on. It runs only with `CLAUDE_CI_ENABLED` set, only on a pull request that changes `plugins/sdlc/` or `.agents/`, and under `EVAL_MAX_COST_USD`.
 - Steps 5 and 14 wait for a person's commit. Each pull request stays a draft until that commit is on its branch.
+- Delivery 2. Departure from the first plan: the plugin's source may not name an agent tool or its folders (`plugins/sdlc/adapters/vendor-names.json`), and requirement 9 needs each tool's home-directory path. `scripts/sync-plugin.ts` therefore replaces tool words such as `{{rules-file}}` in each skill with the text in `plugins/sdlc/adapters/tool-words.json` for that tool. An eval run's home directory is unreadable and unwritable ("your home directory and Claude Code configuration are unreadable", the plugin eval documentation), so no case can read or write the rule. `setup-sdlc` therefore shows the rule for the person to save when it cannot write it, and takes the rule's lines from the request when it cannot read it; `writes-the-models-file` grades the rule shown in the reply, `second-run-changes-nothing` gives the rule's lines in the request, and `verifier-runs-on-the-chosen-model` now checks requirement 13, the fallback to the session's model, in place of a model read from a project file.
+- Delivery 2. The `advise` and `explore` subagents of `fix.md` take the plan and the cause in place of `spec.md`, because a fix has no spec. `scripts/sync-plugin.ts` fails a rendered skill that keeps a tool word the tool's map lacks.
 - Options not taken: one pull request for all four deliveries, because three `minor` changesets and a `patch` would ship as one version and a person's two commits would hold the whole; Claude Code's advisor tool as the only way to advise, because it works on two providers only and not in Cursor; a project file for the model choice, because the spec's decision keeps it per person.
 
 ## Proof

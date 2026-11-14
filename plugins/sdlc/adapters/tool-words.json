@@ -1,0 +1,18 @@
+{
+  "claude-code": {
+    "{{rules-file}}": "`~/.claude/rules/sdlc-models.md`",
+    "{{rules-header}}": "Write no front matter: the agent tool loads every Markdown file of that folder into each new session.",
+    "{{model-switch}}": "the `/model` command, such as `/model sonnet`",
+    "{{subagent-model}}": "the `model` and `effort` fields of the subagent call; `model` takes `opus`, `sonnet`, `haiku`, or `fable`, so write a role's model in that form",
+    "{{advisor}}": " This agent tool also has an advisor tool: `/advisor opus` lets the session ask Opus by itself at the same moments, on the Anthropic API and Claude Platform on AWS only, and it is experimental. Say so in the reply.",
+    "{{role-format}}": "Write each role's model as `opus`, `sonnet`, `haiku`, or `fable`, then its effort."
+  },
+  "cursor": {
+    "{{rules-file}}": "`~/.cursor/rules/sdlc-models.mdc`",
+    "{{rules-header}}": "Start it with front matter that holds `description: SDLC models per role` and `alwaysApply: true`, so that the agent tool applies it in every session.",
+    "{{model-switch}}": "the model picker of the chat",
+    "{{subagent-model}}": "the `model` of the `Task` call, which takes the model slug the role line names; the effort is part of that slug",
+    "{{advisor}}": "",
+    "{{role-format}}": "Write each role's model as the model slug the session lists, with the effort the budget gives inside the slug where the model has slugs for each effort; the lines below show the shape with short names."
+  }
+}

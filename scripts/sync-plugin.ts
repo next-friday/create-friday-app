@@ -55,6 +55,7 @@ const sourceRoot = path.join(pluginRoot, "source");
 const adaptersRoot = path.join(pluginRoot, "adapters");
 const vendorNamesPath = path.join(adaptersRoot, "vendor-names.json");
 const subagentConfigPath = path.join(adaptersRoot, "agents.json");
+const toolWordsPath = path.join(adaptersRoot, "tool-words.json");
 const hookConfigPath = path.join(adaptersRoot, "hooks.json");
 const hooksDirectory = path.join(sourceRoot, "hooks");
 const hookCasesSuffix = ".cases.json";
@@ -618,6 +619,35 @@ function renderTemplateCopy(adapterFiles: Map<string, string>): Map<string, stri
 }
 
 /**
+ * Replace each tool word of the source with the text one agent tool needs, such as a path in the person's home directory.
+ * @param text Source text.
+ * @param words Each tool word, such as `{{rules-file}}`, and its text for one agent tool.
+ * @returns The text with every tool word replaced.
+ */
+function renderToolWords(text: string, words: Record<string, string>): string {
+  let rendered = text;
+
+  for (const [word, value] of Object.entries(words)) {
+    rendered = rendered.split(word).join(value);
+  }
+
+  return rendered;
+}
+
+/**
+ * Find tool words a render left in place, because the tool's map in `tool-words.json` lacks them.
+ * @param filePath Path of the rendered file.
+ * @param text Rendered text.
+ * @returns One problem for each tool word left in the text.
+ */
+function findToolWords(filePath: string, text: string): string[] {
+  return Array.from(
+    text.matchAll(/\{\{[a-z]+(?:-[a-z]+)*\}\}/gu),
+    ([word]) => `${filePath}: holds the tool word ${word}; add it to ${toolWordsPath}`,
+  );
+}
+
+/**
  * Render every adapter from the source.
  * @returns The expected content of each adapter file, by path from the repository root.
  */
@@ -636,6 +666,11 @@ function renderAdapters(): Map<string, string> {
     HookConfig[]
   >;
 
+  const toolWords = JSON.parse(readFileSync(toolWordsPath, "utf8")) as Record<
+    string,
+    Record<string, string>
+  >;
+
   for (const adapter of adapters) {
     const adapterRoot = path.join(adaptersRoot, adapter.directory);
 
@@ -644,11 +679,12 @@ function renderAdapters(): Map<string, string> {
       `${JSON.stringify(adapter.manifest, undefined, 2)}\n`,
     );
 
+    const words = toolWords[adapter.directory] ?? {};
+
     for (const file of listFiles(skillsDirectory, false)) {
-      expected.set(
-        path.join(adapterRoot, "skills", file),
-        readFileSync(path.join(skillsDirectory, file), "utf8"),
-      );
+      const text = readFileSync(path.join(skillsDirectory, file), "utf8");
+
+      expected.set(path.join(adapterRoot, "skills", file), renderToolWords(text, words));
     }
 
     const hooks = hooksConfig[adapter.directory];
@@ -782,6 +818,20 @@ const selfTestCases: SelfTestCase[] = [
     name: "an absolute link fails",
     expected: [`${path.join(pluginRoot, "a.md")}: /etc/passwd leaves ${pluginRoot}/`],
     problems: findEscapingReferences(path.join(pluginRoot, "a.md"), "[x](/etc/passwd)"),
+  },
+  {
+    name: "a tool word is replaced with its text for the tool",
+    expected: ["see ~/rules"],
+    problems: [
+      renderToolWords("see {{rules-file}}", {
+        "{{rules-file}}": "~/rules",
+      }),
+    ],
+  },
+  {
+    name: "a tool word that the tool's map lacks fails",
+    expected: [`a.md: holds the tool word {{model-switch}}; add it to ${toolWordsPath}`],
+    problems: findToolWords("a.md", renderToolWords("use {{model-switch}}", {})),
   },
   {
     name: "a listed name fails in any case and an unlisted one passes",
@@ -994,6 +1044,9 @@ if (selfTestFailures.length > 0) {
 
     const problems = [
       ...staleFiles.map(file => `${file}: is stale; run \`pnpm plugin:sync\``),
+      ...[...expected]
+        .filter(([file]) => file.includes(`${path.sep}skills${path.sep}`))
+        .flatMap(([file, content]) => findToolWords(file, content)),
       ...listFiles(pluginRoot, true)
         .filter(file => textExtensions.has(path.extname(file)))
         .map(file => path.join(pluginRoot, file))

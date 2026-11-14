@@ -594,6 +594,15 @@ describe("create interruptions and edge cases", () => {
   });
 
   it("validates the name typed into the prompt", async () => {
+    const directory = path.join(cwd, "prompt-taken");
+
+    mkdirSync(path.join(directory, "my-app"), {
+      recursive: true,
+    });
+
+    writeFileSync(path.join(directory, "my-app", "notes.txt"), "keep");
+    vi.spyOn(process, "cwd").mockReturnValue(directory);
+
     vi.mocked(text).mockImplementation(async options => {
       const {validate} = options;
 
@@ -602,8 +611,9 @@ describe("create interruptions and edge cases", () => {
       }
 
       expect(validate("Bad Name")).toMatch(/^Use lowercase letters/);
-      expect(validate("")).toBeUndefined();
-      expect(validate(undefined)).toBeUndefined();
+      expect(validate("")).toMatch(/my-app already exists/u);
+      expect(validate(undefined)).toMatch(/my-app already exists/u);
+      expect(validate("free-api")).toBeUndefined();
 
       return "typed-api";
     });

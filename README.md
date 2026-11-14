@@ -44,7 +44,7 @@ Every stack is built from [`templates/base`](templates/base), which holds the sh
 ## Options
 
 ```text
-pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turborepo] [--deploy none|railway]
+pnpm create @next-friday/app [name] [--stack nodejs|nestjs|nextjs|payload|turborepo] [--deploy none|railway] [--yes]
 ```
 
 | Option           | Description                                                                               |

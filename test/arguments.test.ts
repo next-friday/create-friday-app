@@ -11,8 +11,7 @@ describe("usage", () => {
 
   it("lists --yes and the defaults it takes", () => {
     expect(usage).toContain("-y, --yes");
-    expect(usage).toContain("my-app");
-    expect(usage).toContain("nextjs");
+    expect(usage).toContain("the name my-app and the stack nextjs");
   });
 
   it("lists every deploy target and names the default", () => {

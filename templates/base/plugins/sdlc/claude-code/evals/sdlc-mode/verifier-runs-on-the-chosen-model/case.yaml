@@ -1,0 +1,23 @@
+schema_version: "1.1"
+name: verifier-runs-on-the-chosen-model
+expected_outcome: |
+  The run's home directory is closed, so no rule of models can be read. Asked what the build playbook starts the verifier subagent on, the agent reads the playbook, answers the `explore` model, says that with no rule the subagent starts on the session's own model, and writes nothing.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-names-the-explore-role
+    type: regex
+    pattern: '\bexplore\b'
+    flags: i
+  - name: build-playbook-is-read
+    type: tool_used
+    tool: Read
+    input_match: 'playbooks/build\.md'
+    min: 1
+    arm: both
+  - name: no-file-created
+    type: regex
+    target: files
+    pattern: '^(?!\.git/config\.worktree$|\.git/objects/info/alternates$).+$'
+    flags: m
+    match: not_contains

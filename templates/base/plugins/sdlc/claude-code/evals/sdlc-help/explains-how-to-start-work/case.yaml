@@ -1,0 +1,31 @@
+schema_version: "1.1"
+name: explains-how-to-start-work
+expected_outcome: |
+  The agent explains how to start work, gives one message the person can send as is, and lists the files the answer came from. It starts no work.
+graders:
+  - name: reply-names-the-command
+    type: regex
+    pattern: "/sdlc:sdlc-mode"
+    flags: mu
+  - name: no-file-created
+    type: regex
+    target: files
+    pattern: '^(?!\.git/config\.worktree$|\.git/objects/info/alternates$).+$'
+    flags: m
+    match: not_contains
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0

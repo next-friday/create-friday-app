@@ -1,0 +1,1 @@
+The branch `feat/app-version`, which the session did not create, is pushed. Its diff against the default branch contains one bug: `src/version/version.controller.ts` returns a hardcoded version and an extra field, against `intent/app-version/spec.md`. When the session has a pull request host, an open pull request holds that diff.

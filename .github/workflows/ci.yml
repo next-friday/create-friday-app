@@ -319,6 +319,7 @@ jobs:
         uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
         with:
           inputs: ci-${{ matrix.stack }}/.github
+          config: ci-${{ matrix.stack }}/.github/zizmor.yml
           persona: pedantic
           advanced-security: false
       - name: Verify the project

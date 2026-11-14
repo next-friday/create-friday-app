@@ -44,3 +44,4 @@ id_ed25519*
 /.claude/worktrees/
 
 /dist
+/plugins/sdlc/claude-code/evals/results

@@ -1,0 +1,39 @@
+schema_version: "1.1"
+name: spec-for-unmerged-intent-stops
+expected_outcome: |
+  The intent intent/dark-mode/intent.md exists only on the branch docs/dark-mode-intent. The agent says in a few lines that the intent is not merged yet, names that branch, and stops. It writes no spec and makes no commit.
+context:
+  scaffold_script: scaffold.sh
+graders:
+  - name: reply-names-the-branch
+    type: regex
+    pattern: "docs/dark-mode-intent"
+    flags: mu
+  - name: no-file-created
+    type: regex
+    target: files
+    pattern: '^(?!\.git/config\.worktree$|\.git/objects/info/alternates$).+$'
+    flags: m
+    match: not_contains
+  - name: no-file-written
+    type: tool_used
+    tool: Write
+    min: 0
+    max: 0
+  - name: no-file-edited
+    type: tool_used
+    tool: Edit
+    min: 0
+    max: 0
+  - name: no-commit-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\b[^"]*\bcommit\b'
+    min: 0
+    max: 0
+  - name: no-branch-command
+    type: tool_used
+    tool: Bash
+    input_match: '\bgit\s+(?:checkout\s+-[bB]|switch\s+-[cC]|branch\s+(?!-{1,2}(?:a|r|v|vv|l|list|show-current|contains|merged|no-merged|all|remotes)\b)[\w-]|worktree\s+add)'
+    min: 0
+    max: 0

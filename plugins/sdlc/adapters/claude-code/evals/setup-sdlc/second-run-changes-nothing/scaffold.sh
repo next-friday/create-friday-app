@@ -38,14 +38,5 @@ On GitHub, open https://github.com/acme/orders-service/settings/rules and protec
 
 **Check:** the ruleset is listed on that page.
 SETUP
-mkdir -p "$HOME/.claude/rules"
-cat > "$HOME/.claude/rules/sdlc-models.md" << 'MODELS'
-# SDLC models
-
-budget: medium (high)
-main: sonnet high
-explore: haiku high
-advise: opus high
-MODELS
 git add -A
 git commit -q -m "chore: add project"

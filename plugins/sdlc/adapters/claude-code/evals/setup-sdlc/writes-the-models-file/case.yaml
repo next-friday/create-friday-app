@@ -1,15 +1,13 @@
 schema_version: "1.1"
 name: writes-the-models-file
 expected_outcome: |
-  The request states the budget `medium`, so the agent asks no question. It writes `~/.claude/rules/sdlc-models.md` in the fixed shape with the default model of each of the three roles and the effort `high`, writes no models file in the project, reports the project description step as done and the branch protection step as one a person does on GitHub, with what the ruleset needs, and does not touch other files.
+  The request states the budget `medium`, so the agent asks no question. The run's home directory is closed to it, so it shows `~/.claude/rules/sdlc-models.md` in the fixed shape, with the default model of each of the three roles and the effort `high`, for the person to save, writes no models file in the project, reports the project description step as done and the branch protection step as one a person does on GitHub, with what the ruleset needs, and does not touch other files.
 context:
   scaffold_script: scaffold.sh
 graders:
-  - name: rule-is-written-with-the-defaults-at-the-medium-effort
-    type: tool_used
-    tool: Write
-    input_match: 'rules/sdlc-models\.md[\s\S]*budget: medium \(high\)[\s\S]*main: (?:claude-)?sonnet(?:-\d+)* high[\s\S]*explore: (?:claude-)?haiku(?:-\d+)* high[\s\S]*advise: (?:claude-)?opus(?:-\d+)* high'
-    min: 1
+  - name: reply-gives-the-rule-with-the-defaults-at-the-medium-effort
+    type: regex
+    pattern: 'rules/sdlc-models\.md[\s\S]*budget: medium \(high\)\s*\n\s*main: (?:claude-)?sonnet\S* high\s*\n\s*explore: (?:claude-)?haiku\S* high\s*\n\s*advise: (?:claude-)?opus\S* high'
   - name: no-models-file-in-the-project
     type: regex
     target: files

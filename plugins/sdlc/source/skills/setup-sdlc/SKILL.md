@@ -9,7 +9,7 @@ disable-model-invocation: true
 Do these steps in order. Run again with the same answers, the skill writes the same file and redoes no step that is done.
 
 1. **List the models the session offers:** the models it can run or start a subagent on, spelled as the session spells them. When it can list none, ask the person to paste the names and wait. Write no model the session does not offer.
-2. **Read {{rules-file}}** when it exists: the rule in the person's home directory that the agent tool loads in every session. Its `budget:` line is the current budget, and a role line whose model is on the list keeps that model. A line for a role that is not in step 3 is from an older version: drop it.
+2. **Read {{rules-file}}** when it exists: the rule in the person's home directory that the agent tool loads in every session. Its `budget:` line is the current budget, and a role line whose model is on the list keeps that model. A line for a role that is not in step 3 is from an older version: drop it. When the session cannot read the rule, take the lines the request gives as its content, and otherwise start from the defaults.
 3. **Choose each role's model.** A role without a kept model gets its default. A default the session does not offer becomes the offered model of the same family, the newest when there are several. When the family has none, ask about that role in the question of step 4.
 
    | Role      | Default  | Does                                                                                                      |
@@ -37,6 +37,8 @@ Do these steps in order. Run again with the same answers, the skill writes the s
    explore: haiku high
    advise: opus high
    ```
+
+   When the session cannot write the rule, show the whole rule and its path in the reply, and say that the person saves it there; write it nowhere else.
 
    A session cannot change its own model, so say how to choose the `main` model for the next session: {{model-switch}}.{{advisor}}
 

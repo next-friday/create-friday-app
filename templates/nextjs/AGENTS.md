@@ -24,6 +24,8 @@ Run all three before reporting any task complete, and paste the output. `pnpm ve
 
 The `verifier` subagent starts the app with `pnpm dev`. It exercises the changed behavior and the two nearest neighboring flows.
 
+After a change to a page, open that page with the `playwright` MCP server from `.mcp.json`, take a screenshot, look at it, and compare it with the approved mock when there is one; repeat until it matches.
+
 ## Architecture
 
 - Routes live in `app/`. `app/health/route.ts` serves `/health`.

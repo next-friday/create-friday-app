@@ -28,7 +28,7 @@ type HookCase = {
   argument?: string;
   changedFiles?: string[];
   committed?: boolean;
-  expected: "block" | "pass";
+  expected: string;
   filesBeforeTurn?: string[];
   input: Record<string, unknown>;
   name: string;

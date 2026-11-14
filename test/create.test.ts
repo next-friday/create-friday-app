@@ -469,6 +469,16 @@ describe("create with defaults", () => {
     expect(process.exitCode).toBe(0);
   });
 
+  it("reports an invalid name given with --yes as it is, with no hint to pass a name", async () => {
+    const errors = captureErrors();
+
+    setTerminal(false);
+    await create(["Bad Name", "--yes"]);
+    expect(errors.join("")).toMatch(/^Use lowercase letters/u);
+    expect(errors.join("")).not.toMatch(/Pass a project name/u);
+    expect(process.exitCode).toBe(1);
+  });
+
   it("stops before writing a file when --yes meets a my-app directory that holds files", async () => {
     const directory = path.join(cwd, "yes-taken");
     const errors = captureErrors();

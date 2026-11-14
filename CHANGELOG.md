@@ -1,5 +1,17 @@
 # @next-friday/create-app
 
+## 9.10.0
+
+### Minor Changes
+
+- 75f1a52: The CLI is easier to start. Pressing Enter at the prompts creates `my-app` from the Next.js stack, each prompt says in a full sentence what the choice gives, and each stack's choice says what the project holds. `--yes`, or `-y`, takes those defaults and asks nothing, with or without a terminal; a name or `--stack` given with it wins. It stops before writing a file when a `my-app` directory with files already exists.
+
+## 9.9.0
+
+### Minor Changes
+
+- 2b1b029: The `sdlc` plugin routes work by model. `/sdlc:setup-sdlc` now sets three roles, `main`, `explore`, and `advise` (defaults Sonnet, Haiku, and Opus), and writes them into a rule in the person's home directory that the agent tool loads in every session, in place of `.agents/sdlc-models.md`. The playbooks start a subagent on the `explore` model to read files and to run the `verifier`, and one on the `advise` model when a plan is written, when the same check fails twice, and before work is reported done. Run `/sdlc:setup-sdlc` again to write the new rule; an existing `.agents/sdlc-models.md` is no longer read.
+
 ## 9.8.1
 
 ### Patch Changes

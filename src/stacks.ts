@@ -2,41 +2,42 @@ export const stacks = [
   {
     id: "nodejs",
     label: "Node.js",
-    hint: "HTTP service without a framework",
+    hint: "A Node.js HTTP service with no framework, tests, and a Dockerfile",
     developmentScript: "start:dev",
     requiresDatabase: false,
   },
   {
     id: "nestjs",
     label: "NestJS",
-    hint: "HTTP API",
+    hint: "A NestJS HTTP API with tests and a Dockerfile",
     developmentScript: "start:dev",
     requiresDatabase: false,
   },
   {
     id: "nextjs",
     label: "Next.js",
-    hint: "Web app",
+    hint: "A Next.js web app with React, Tailwind CSS, and end-to-end tests",
     developmentScript: "dev",
     requiresDatabase: false,
   },
   {
     id: "payload",
     label: "Payload",
-    hint: "Headless CMS on Next.js and PostgreSQL",
+    hint: "A Payload CMS on Next.js that needs a PostgreSQL database",
     developmentScript: "dev",
     requiresDatabase: true,
   },
   {
     id: "turborepo",
     label: "Turborepo",
-    hint: "Next.js app and Payload backoffice",
+    hint: "A Turborepo with a Next.js app and a Payload backoffice that needs PostgreSQL",
     developmentScript: "dev",
     requiresDatabase: true,
   },
 ] as const;
 
 export type StackId = (typeof stacks)[number]["id"];
+export const defaultStackId: StackId = "nextjs";
 
 export const stackById = Object.fromEntries(stacks.map(stack => [stack.id, stack])) as Record<
   StackId,

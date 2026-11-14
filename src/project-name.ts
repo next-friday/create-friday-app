@@ -6,6 +6,8 @@ const maxPackageNameLength = 214;
 const reservedNames = new Set(["favicon.ico", "node_modules"]);
 const windowsReservedPattern = /^(?:con|prn|aux|nul|com\d|lpt\d)(?:\.|$)|\.$/;
 
+export const defaultProjectName = "my-app";
+
 /**
  * Name the package after the project directory, so `.` uses the current directory's name.
  * @param name - Project name from the command line or prompt.

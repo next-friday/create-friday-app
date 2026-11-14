@@ -1,6 +1,6 @@
 # Spec: Follow the repository rename to next-friday-create-app
 
-From `intent/repository-rename/intent.md`. Status: accepted.
+From `intent/repository-rename/intent.md`. Status: done.
 
 ## Requirements
 
